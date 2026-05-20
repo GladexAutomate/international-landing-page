@@ -4,12 +4,19 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+      fontFamily: {
+        condensed: ['var(--font-condensed)', 'sans-serif'],
+        body: ['var(--font-body)', 'sans-serif'],
+      },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+        'gladex-orange': '#FF6B00',
+        'deep-space': '#080808',
+        'chrome': '#A0A0A0',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -85,5 +92,18 @@ module.exports = {
   		}
   	}
   },
+  safelist: [
+    'text-gladex-orange',
+    'bg-gladex-orange',
+    'border-gladex-orange',
+    'font-condensed',
+    'font-body',
+    'text-chrome',
+    'glass-panel',
+    'focus-ring',
+    'grain-overlay',
+    'animate-scroll-bounce',
+    'animate-pulse-glow',
+  ],
   plugins: [require("tailwindcss-animate")],
 }
