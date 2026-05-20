@@ -65,7 +65,8 @@ function DestinationCard({ dest, index, isDark, onClick }) {
       <img
         src={dest.cardImage || dest.heroImage}
         alt={dest.name}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2"
+        style={{ transformOrigin: "center center" }}
         loading="lazy"
       />
 

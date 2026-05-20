@@ -11,8 +11,8 @@ export const destinations = [
     promoLabel: "BEST SELLER",
     packageType: "GROUP TOUR",
     startingPrice: 37999,
-    heroImage: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1518683013372-ece8e6f7c9d4?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1a7ba7179_KOREA.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1a7ba7179_KOREA.png",
     videoUrl: null,
     packages: [
       {
@@ -67,8 +67,8 @@ export const destinations = [
     promoLabel: "FREE CITY TOUR",
     packageType: "FREE & EASY",
     startingPrice: 24999,
-    heroImage: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
     videoUrl: null,
     packages: [
       {
@@ -175,8 +175,8 @@ export const destinations = [
     promoLabel: "2 PACKAGES",
     packageType: "FREE & EASY",
     startingPrice: 26999,
-    heroImage: "https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1531259683007-016a7b628fc3?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
     videoUrl: null,
     packages: [
       {
@@ -311,8 +311,8 @@ export const destinations = [
     promoLabel: "POPULAR",
     packageType: "GROUP TOUR",
     startingPrice: 22499,
-    heroImage: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
     videoUrl: null,
     packages: [
       {
@@ -606,8 +606,8 @@ export const destinations = [
     promoLabel: "GETAWAY",
     packageType: "GROUP TOUR",
     startingPrice: 21999,
-    heroImage: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/ac83b2d2d_CHIAMAIGETAWAY.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/ac83b2d2d_CHIAMAIGETAWAY.png",
     videoUrl: null,
     packages: [
       {
@@ -659,8 +659,8 @@ export const destinations = [
     promoLabel: "LUXURY",
     packageType: "FREE & EASY",
     startingPrice: 49999,
-    heroImage: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/0c2084a4c_DUBAI.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/0c2084a4c_DUBAI.png",
     videoUrl: null,
     packages: [
       {
@@ -711,8 +711,8 @@ export const destinations = [
     promoLabel: "NATURE",
     packageType: "NATURE TOUR",
     startingPrice: 19999,
-    heroImage: "https://images.unsplash.com/photo-1596422846543-75c6fc197f11?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1596422846543-75c6fc197f11?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/6b6d37b1a_MALAYSIA.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/6b6d37b1a_MALAYSIA.png",
     videoUrl: null,
     packages: [
       {
@@ -880,8 +880,8 @@ export const destinations = [
     promoLabel: "CASINO CITY",
     packageType: "FREE & EASY",
     startingPrice: 23499,
-    heroImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/eb748ba68_MACAU.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/eb748ba68_MACAU.png",
     videoUrl: null,
     packages: [
       {
@@ -933,8 +933,8 @@ export const destinations = [
     promoLabel: "EPIC",
     packageType: "GROUP TOUR",
     startingPrice: 66999,
-    heroImage: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1469521669194-babb45599def?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/b4378a0bc_NEWZEALAND.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/b4378a0bc_NEWZEALAND.png",
     videoUrl: null,
     packages: [
       {
@@ -990,8 +990,8 @@ export const destinations = [
     promoLabel: "MUST SEE",
     packageType: "FREE & EASY",
     startingPrice: 59999,
-    heroImage: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/011d9d868_JAPAN.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/011d9d868_JAPAN.png",
     videoUrl: null,
     packages: [
       {
@@ -1050,8 +1050,8 @@ export const destinations = [
     promoLabel: "ISLAND ESCAPE",
     packageType: "GROUP TOUR",
     startingPrice: 50499,
-    heroImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/3cb24dd77_JEJU-KOREA.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/3cb24dd77_JEJU-KOREA.png",
     videoUrl: null,
     packages: [
       {
@@ -1106,8 +1106,8 @@ export const destinations = [
     promoLabel: "TRENDING",
     packageType: "FREE & EASY",
     startingPrice: 27999,
-    heroImage: "https://images.unsplash.com/photo-1470004914212-05527e49370b?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1470004914212-05527e49370b?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/3316132ae_TAIPEI.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/3316132ae_TAIPEI.png",
     videoUrl: null,
     packages: [
       {
@@ -1212,8 +1212,8 @@ export const destinations = [
     promoLabel: "CULTURAL",
     packageType: "FREE & EASY",
     startingPrice: 21999,
-    heroImage: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/2abbe67e3_VIETNAM-HANOI.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/2abbe67e3_VIETNAM-HANOI.png",
     videoUrl: null,
     packages: [
       {
@@ -1265,8 +1265,8 @@ export const destinations = [
     promoLabel: "ISLAND",
     packageType: "FREE & EASY",
     startingPrice: 23999,
-    heroImage: "https://images.unsplash.com/photo-1553961777-16e27eaf11a7?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1553961777-16e27eaf11a7?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/c3b501d54_VIETNAM-PHU-QUOC.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/c3b501d54_VIETNAM-PHU-QUOC.png",
     videoUrl: null,
     packages: [
       {
@@ -1319,8 +1319,8 @@ export const destinations = [
     promoLabel: "CITY BREAK",
     packageType: "FREE & EASY",
     startingPrice: 18999,
-    heroImage: "https://images.unsplash.com/photo-1596422846543-75c6fc197f11?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1567225477277-c8162b56a7f2?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/e22b0e37b_KUALALUMPUR.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/e22b0e37b_KUALALUMPUR.png",
     videoUrl: null,
     packages: [
       {
@@ -1374,8 +1374,8 @@ export const destinations = [
     promoLabel: "MULTI-CITY",
     packageType: "GROUP TOUR",
     startingPrice: 28499,
-    heroImage: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/8d649c200_Tri-City.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/8d649c200_Tri-City.png",
     videoUrl: null,
     packages: [
       {
@@ -1474,8 +1474,8 @@ export const destinations = [
     promoLabel: "TWIN DEST.",
     packageType: "GROUP TOUR",
     startingPrice: 21899,
-    heroImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/22848d9a6_TwinCity.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/22848d9a6_TwinCity.png",
     videoUrl: null,
     packages: [
       {
@@ -1576,8 +1576,8 @@ export const destinations = [
     promoLabel: "GRAND TOUR",
     packageType: "GROUP TOUR",
     startingPrice: 27399,
-    heroImage: "https://images.unsplash.com/photo-1552065751-c3aa10aa7314?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1552065751-c3aa10aa7314?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/8b2806427_Indochina.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/8b2806427_Indochina.png",
     videoUrl: null,
     packages: [
       {
@@ -1661,8 +1661,8 @@ export const destinations = [
     promoLabel: "HERITAGE",
     packageType: "FREE & EASY",
     startingPrice: 7699,
-    heroImage: "https://images.unsplash.com/photo-1539650116574-75c0c6f7f2c8?w=1600&q=80",
-    cardImage: "https://images.unsplash.com/photo-1539650116574-75c0c6f7f2c8?w=800&q=80",
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/c13692d34_CAMBODIA.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/c13692d34_CAMBODIA.png",
     videoUrl: null,
     packages: [
       {
