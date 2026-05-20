@@ -1,46 +1,45 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Play, MapPin, ChevronDown, ChevronUp, Plane, Hotel, Coffee, Map, Users, Briefcase, Bus, Ticket } from "lucide-react";
+import {
+  ArrowLeft, Play, MapPin, ChevronDown, ChevronUp,
+  Plane, Hotel, Coffee, Map, Users, Briefcase, Bus, Ticket,
+  AlertTriangle, CheckCircle, XCircle, Info, ExternalLink, Tag
+} from "lucide-react";
 import { useState } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
+const ORANGE = "#FF8C00";
 
-const highlights = [
-  { icon: Plane, label: "Roundtrip Airfare" },
-  { icon: Hotel, label: "Hotel Accommodation" },
-  { icon: Coffee, label: "Daily Breakfast" },
-  { icon: Map, label: "Guided Tours" },
-  { icon: Users, label: "English Guide" },
-  { icon: Briefcase, label: "7kg Baggage" },
-  { icon: Bus, label: "Airport Transfers" },
-  { icon: Ticket, label: "Entrance Fees" },
-];
+function SectionLabel({ text }) {
+  return (
+    <div className="flex items-center justify-center gap-2 mb-3">
+      <div className="h-px w-8" style={{ backgroundColor: ORANGE }} />
+      <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: ORANGE }}>{text}</span>
+      <div className="h-px w-8" style={{ backgroundColor: ORANGE }} />
+    </div>
+  );
+}
 
-function AccordionItem({ title, children, accent }) {
+function AccordionItem({ title, children, accent = false }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="border rounded-xl overflow-hidden mb-3" style={{ borderColor: "#E5E5E5" }}>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left"
+        className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors"
         style={{ backgroundColor: open ? "#FFF8F0" : "#FFFFFF" }}
       >
-        <span className="font-body font-semibold text-sm" style={{ color: accent && open ? "#FF8C00" : "#1A1A1A" }}>
-          {title}
-        </span>
-        {open ? <ChevronUp className="w-4 h-4" style={{ color: "#FF8C00" }} /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+        <span className="font-body font-semibold text-sm" style={{ color: accent && open ? ORANGE : "#1A1A1A" }}>{title}</span>
+        {open ? <ChevronUp className="w-4 h-4" style={{ color: ORANGE }} /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
       </button>
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }} className="overflow-hidden"
           >
             <div className="px-5 py-4 text-sm font-body text-gray-600 leading-relaxed border-t" style={{ borderColor: "#F0E8DC" }}>
               {children}
@@ -52,355 +51,480 @@ function AccordionItem({ title, children, accent }) {
   );
 }
 
-function PreviewContent() {
-  const { slug } = useParams();
-  const navigate = useNavigate();
-  const { isDark } = useTheme();
-  const dest = getDestinationBySlug(slug);
-
-  if (!dest) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F5F5F5" }}>
-        <div className="text-center">
-          <p className="font-condensed text-2xl font-bold text-gray-400 mb-4">Destination not found</p>
-          <button onClick={() => navigate("/")} className="font-body text-sm text-[#FF8C00] underline">← Back to Home</button>
-        </div>
-      </div>
-    );
-  }
-
-  const pkg = dest.packages?.[0];
-
+function HotelRatesTable({ category }) {
+  const rates = category.rates;
+  const entries = Object.entries(rates).filter(([k]) => k !== "downpayment");
+  const labels = {
+    twin: "Twin", triple: "Triple", quad: "Quad", solo: "Solo",
+    childNoBed: "Child No Bed", singleSupplement: "Single Supp.",
+    "2pax": "2 Pax", "3pax": "3 Pax", "4pax": "4 Pax", "5pax": "5 Pax",
+    "6pax": "6 Pax", "7pax": "7 Pax", "8pax": "8 Pax", "9pax": "9 Pax",
+  };
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F5F5F5" }}>
-      <ThemeToggle />
-
-      {/* Top Nav */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-5 lg:px-10 h-16 flex items-center justify-between shadow-sm">
-        <button onClick={() => navigate("/")} className="flex items-center gap-3 group">
-          <img src={LOGO_URL} alt="Gladex" className="h-9 w-auto object-contain" />
-        </button>
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 font-body text-sm text-gray-500 hover:text-[#FF8C00] transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          All Destinations
-        </button>
-      </div>
-
-      {/* Hero */}
-      <div className="relative overflow-hidden" style={{ height: "60vh", minHeight: 340 }}>
-        <img
-          src={dest.heroImage}
-          alt={dest.name}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
-        <div className="absolute bottom-8 left-0 right-0 text-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="h-px w-8 bg-[#FF8C00]" />
-              <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: "#FF8C00" }}>
-                Official Travel Preview
-              </span>
-              <div className="h-px w-8 bg-[#FF8C00]" />
-            </div>
-            <h1 className="font-condensed font-black text-white text-4xl lg:text-6xl tracking-wide mb-2">
-              Experience {dest.name}
-            </h1>
-            <div className="flex items-center justify-center gap-1.5">
-              <MapPin className="w-4 h-4" style={{ color: "#FF8C00" }} />
-              <span className="font-body text-white/80 text-sm">{dest.country}</span>
-            </div>
-            <p className="font-body text-white/70 text-sm mt-2 max-w-md mx-auto">{dest.tagline}</p>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Video Preview Section */}
-      <div className="bg-black py-14 px-4 lg:px-10">
-        <div className="max-w-3xl mx-auto text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="h-px w-8 bg-[#FF8C00]" />
-            <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: "#FF8C00" }}>
-              Official Travel Preview
-            </span>
-            <div className="h-px w-8 bg-[#FF8C00]" />
-          </div>
-          <h2 className="font-condensed font-black text-white text-3xl lg:text-4xl mb-2">
-            Experience {dest.name}
-          </h2>
-          <p className="font-body text-gray-400 text-sm max-w-sm mx-auto">
-            Watch our exclusive cinematic preview and feel the destination before you arrive.
-          </p>
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          {dest.videoUrl ? (
-            <div className="rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
-              <video src={dest.videoUrl} controls className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <VideoPlaceholder name={dest.name} />
-          )}
-        </div>
-      </div>
-
-      {/* Package Highlights */}
-      <div className="py-14 px-4 lg:px-10 bg-white">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="h-px w-8 bg-[#FF8C00]" />
-              <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: "#FF8C00" }}>
-                What's Included
-              </span>
-              <div className="h-px w-8 bg-[#FF8C00]" />
-            </div>
-            <h2 className="font-condensed font-black text-3xl lg:text-4xl text-gray-900">Package Highlights</h2>
-            <p className="font-body text-sm text-gray-500 mt-2">Everything you need for a seamless, unforgettable journey.</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {highlights.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex flex-col items-center gap-2 p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
-                <Icon className="w-6 h-6" style={{ color: "#FF8C00" }} />
-                <span className="font-body text-xs font-semibold text-center text-gray-700">{label}</span>
-              </div>
+    <div className="mt-2 overflow-x-auto">
+      <table className="w-full text-xs font-body">
+        <thead>
+          <tr style={{ backgroundColor: "#FFF5E9" }}>
+            {entries.map(([k]) => (
+              <th key={k} className="px-3 py-2 text-left font-semibold" style={{ color: ORANGE }}>{labels[k] || k}</th>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Package Rates */}
-      {pkg && (
-        <div className="py-14 px-4 lg:px-10 bg-black">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <div className="h-px w-8 bg-[#FF8C00]" />
-                <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: "#FF8C00" }}>
-                  Investment
-                </span>
-                <div className="h-px w-8 bg-[#FF8C00]" />
-              </div>
-              <h2 className="font-condensed font-black text-3xl lg:text-4xl text-white">Package Rates</h2>
-              <p className="font-body text-sm text-gray-400 mt-2">Transparent pricing. No hidden fees.</p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { label: "Adult Rate", value: `PHP ${pkg.rates.adult?.toLocaleString()}`, note: "Per person, twin sharing", accent: false },
-                { label: "Child Rate", value: pkg.rates.childNoBed ? `PHP ${pkg.rates.childNoBed?.toLocaleString()}` : "On Request", note: "Subject to availability", accent: false },
-                { label: "Single Supplement", value: `PHP ${pkg.rates.singleSupplement?.toLocaleString()}`, note: "Solo traveler add-on", accent: false },
-                { label: "Downpayment", value: `PHP ${pkg.rates.downpayment?.toLocaleString()}`, note: "To confirm your booking", accent: true },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex flex-col gap-1 p-5 rounded-2xl border text-center"
-                  style={{
-                    backgroundColor: item.accent ? "#FF8C00" : "transparent",
-                    borderColor: item.accent ? "#FF8C00" : "rgba(255,255,255,0.1)",
-                  }}
-                >
-                  <span className="font-body text-xs font-semibold" style={{ color: item.accent ? "#fff" : "#A0A0A0" }}>{item.label}</span>
-                  <span className="font-condensed font-black text-xl" style={{ color: item.accent ? "#fff" : "#FFFFFF" }}>{item.value}</span>
-                  <span className="font-body text-[10px]" style={{ color: item.accent ? "rgba(255,255,255,0.8)" : "#666" }}>{item.note}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-center font-body text-xs text-gray-500 mt-4">
-              * Rates are subject to change without prior notice. Contact us for the latest pricing.
-            </p>
-          </div>
-        </div>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-t border-gray-100">
+            {entries.map(([k, v]) => (
+              <td key={k} className="px-3 py-2 font-semibold text-gray-800">
+                {typeof v === "number" ? `PHP ${v.toLocaleString()}` : v}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+      {category.peakSurcharge && (
+        <p className="mt-1 text-xs text-amber-600 flex items-start gap-1 px-1">
+          <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" /> {category.peakSurcharge}
+        </p>
       )}
-
-      {/* Itinerary */}
-      {pkg?.highlights?.length > 0 && (
-        <div className="py-14 px-4 lg:px-10 bg-white">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <div className="h-px w-8 bg-[#FF8C00]" />
-                <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: "#FF8C00" }}>
-                  Day by Day
-                </span>
-                <div className="h-px w-8 bg-[#FF8C00]" />
-              </div>
-              <h2 className="font-condensed font-black text-3xl lg:text-4xl text-gray-900">Your {dest.name} Itinerary</h2>
-              <p className="font-body text-sm text-gray-500 mt-2">A carefully crafted journey from arrival to departure.</p>
-            </div>
-            <div className="relative">
-              <div className="absolute left-9 top-0 bottom-0 w-0.5" style={{ backgroundColor: "#FF8C00", opacity: 0.3 }} />
-              <div className="space-y-4">
-                {pkg.highlights.map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.06 }}
-                    className="flex gap-5"
-                  >
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-condensed font-black text-sm text-white z-10"
-                      style={{ backgroundColor: "#FF8C00" }}
-                    >
-                      D{i + 1}
-                    </div>
-                    <div className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-                      <div className="font-body font-semibold text-sm text-gray-900">{item}</div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+      {rates.downpayment && (
+        <p className="mt-1 text-xs font-semibold px-1" style={{ color: ORANGE }}>
+          Downpayment: PHP {rates.downpayment.toLocaleString()}
+        </p>
       )}
-
-      {/* Inclusions & Exclusions */}
-      {pkg?.inclusions?.length > 0 && (
-        <div className="py-14 px-4 lg:px-10" style={{ backgroundColor: "#F5F5F5" }}>
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <div className="h-px w-8 bg-[#FF8C00]" />
-                <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: "#FF8C00" }}>
-                  Package Details
-                </span>
-                <div className="h-px w-8 bg-[#FF8C00]" />
-              </div>
-              <h2 className="font-condensed font-black text-3xl lg:text-4xl text-gray-900">Inclusions & Exclusions</h2>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-6">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center">
-                    <span className="text-green-600 text-xs font-bold">✓</span>
-                  </div>
-                  <span className="font-body font-bold text-sm text-gray-900">Included</span>
-                </div>
-                <ul className="space-y-2">
-                  {pkg.inclusions.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-600">
-                      <span className="text-green-500 mt-0.5">✓</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
-                    <span className="text-red-500 text-xs font-bold">✗</span>
-                  </div>
-                  <span className="font-body font-bold text-sm text-gray-900">Not Included</span>
-                </div>
-                <ul className="space-y-2">
-                  {["Philippine travel tax", "Tips and gratuities", "Travel insurance", "Extra baggage fees", "Optional tours", "Personal expenses", "Visa fees (if applicable)"].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-600">
-                      <span className="text-red-400 mt-0.5">✗</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Requirements & Notes */}
-      {pkg && (
-        <div className="py-14 px-4 lg:px-10 bg-white">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-[#FF8C00]">⚠</span>
-                <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase" style={{ color: "#FF8C00" }}>
-                  Important
-                </span>
-              </div>
-              <h2 className="font-condensed font-black text-3xl lg:text-4xl text-gray-900">Requirements & Notes</h2>
-            </div>
-            {pkg.visaInfo && (
-              <AccordionItem title="Visa Requirements">
-                {pkg.visaInfo}
-              </AccordionItem>
-            )}
-            {pkg.termsAndConditions && (
-              <AccordionItem title="Payment Terms">
-                {pkg.termsAndConditions}
-              </AccordionItem>
-            )}
-            {pkg.importantNotices?.length > 0 && (
-              <AccordionItem title="Travel Reminders">
-                <ul className="space-y-1">
-                  {pkg.importantNotices.map((n, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span style={{ color: "#FF8C00" }}>•</span> {n}
-                    </li>
-                  ))}
-                </ul>
-              </AccordionItem>
-            )}
-            <AccordionItem title="Important Notices" accent>
-              Please ensure all travel documents are valid at least 6 months beyond your travel dates. Gladex Travel and Tours Corp. reserves the right to make itinerary adjustments due to weather conditions or local holidays.
-            </AccordionItem>
-            <AccordionItem title="Terms & Conditions">
-              All rates are per person based on twin sharing unless stated otherwise. Downpayment is required to confirm your booking. Full payment is due 30 days before departure. Cancellation fees apply based on the number of days before departure.
-            </AccordionItem>
-          </div>
-        </div>
-      )}
-
-      {/* CTA Footer */}
-      <div className="py-16 px-4 text-center" style={{ backgroundColor: "#F5F5F5", borderTop: "1px solid #E5E5E5" }}>
-        <p className="font-body text-[10px] font-bold tracking-[0.4em] uppercase mb-3" style={{ color: "#FF8C00" }}>— Ready to Travel? —</p>
-        <h2 className="font-condensed font-black text-3xl lg:text-4xl text-gray-900 mb-1">
-          Explore More Destinations
-        </h2>
-        <p className="font-body text-sm text-gray-500 mb-6">Discover our full collection of international travel experiences.</p>
-        <button
-          onClick={() => navigate("/")}
-          className="inline-flex items-center gap-2 font-body font-bold text-sm px-8 py-3.5 rounded-full text-white transition-all duration-200 hover:opacity-90"
-          style={{ backgroundColor: "#FF8C00" }}
-        >
-          ← Back to All Destinations
-        </button>
-      </div>
     </div>
   );
 }
 
 function VideoPlaceholder({ name }) {
   return (
-    <div
-      className="rounded-2xl flex flex-col items-center justify-center border"
-      style={{
-        aspectRatio: "16/9",
-        backgroundColor: "#111",
-        borderColor: "rgba(255,255,255,0.1)",
-      }}
-    >
-      <div
-        className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
-        style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
-      >
+    <div className="rounded-2xl flex flex-col items-center justify-center border" style={{ aspectRatio: "16/9", backgroundColor: "#111", borderColor: "rgba(255,255,255,0.1)" }}>
+      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5" style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}>
         <Play className="w-7 h-7 text-white/50" />
       </div>
       <p className="font-condensed font-bold text-white text-lg mb-2">Official Travel Preview Coming Soon</p>
-      <p className="font-body text-gray-500 text-sm text-center max-w-xs">
-        We're preparing an exclusive cinematic preview<br />of {name}. Stay tuned.
-      </p>
-      <div
-        className="mt-6 px-6 py-2.5 rounded-full border font-body text-xs font-bold tracking-widest uppercase"
-        style={{ borderColor: "#FF8C00", color: "#FF8C00" }}
-      >
+      <p className="font-body text-gray-500 text-sm text-center max-w-xs">We're preparing an exclusive cinematic preview of {name}. Stay tuned.</p>
+      <div className="mt-6 px-6 py-2.5 rounded-full border font-body text-xs font-bold tracking-widest uppercase" style={{ borderColor: ORANGE, color: ORANGE }}>
         + STAY TUNED
+      </div>
+    </div>
+  );
+}
+
+function BadgePill({ label }) {
+  const colors = {
+    "FREE & EASY": { bg: "#E8F5E9", text: "#2E7D32" },
+    "GROUP TOUR": { bg: "#E3F2FD", text: "#1565C0" },
+    "NATURE TOUR": { bg: "#E8F5E9", text: "#2E7D32" },
+    "ISLAND TOUR": { bg: "#E0F7FA", text: "#00695C" },
+    "LUXURY PACKAGE": { bg: "#FFF3E0", text: "#E65100" },
+    "MULTI-CITY": { bg: "#F3E5F5", text: "#6A1B9A" },
+  };
+  const c = colors[label] || { bg: "#F5F5F5", text: "#555" };
+  return (
+    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase font-body" style={{ backgroundColor: c.bg, color: c.text }}>
+      {label}
+    </span>
+  );
+}
+
+function PreviewContent() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const dest = getDestinationBySlug(slug);
+  const [activePackageIdx, setActivePackageIdx] = useState(0);
+
+  if (!dest) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <p className="font-condensed text-2xl font-bold text-gray-400 mb-4">Destination not found</p>
+          <button onClick={() => navigate("/")} className="font-body text-sm underline" style={{ color: ORANGE }}>← Back to Home</button>
+        </div>
+      </div>
+    );
+  }
+
+  const pkg = dest.packages?.[activePackageIdx] || dest.packages?.[0];
+  const highlightIcons = [Plane, Hotel, Coffee, Map, Users, Briefcase, Bus, Ticket];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <ThemeToggle />
+
+      {/* Navbar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-5 lg:px-10 h-16 flex items-center justify-between shadow-sm">
+        <img src={LOGO_URL} alt="Gladex" className="h-9 w-auto object-contain cursor-pointer" onClick={() => navigate("/")} />
+        <div className="flex items-center gap-4">
+          {dest.packageType && <BadgePill label={dest.packageType} />}
+          <button onClick={() => navigate("/")} className="flex items-center gap-2 font-body text-sm text-gray-500 hover:text-orange-500 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> All Destinations
+          </button>
+        </div>
+      </div>
+
+      {/* Hero */}
+      <div className="relative overflow-hidden" style={{ height: "60vh", minHeight: 340 }}>
+        <img src={dest.heroImage} alt={dest.name} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+        <div className="absolute bottom-8 left-0 right-0 text-center px-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+            <SectionLabel text="Official Travel Preview" />
+            <h1 className="font-condensed font-black text-white text-4xl lg:text-6xl tracking-wide mb-2">Experience {dest.name}</h1>
+            <div className="flex items-center justify-center gap-1.5 mb-2">
+              <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
+              <span className="font-body text-white/80 text-sm">{dest.country}</span>
+            </div>
+            <p className="font-body text-white/70 text-sm max-w-md mx-auto">{dest.tagline}</p>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Package Tabs (if multiple packages) */}
+      {dest.packages?.length > 1 && (
+        <div className="bg-white border-b border-gray-200 px-5 lg:px-10 py-3 flex gap-2 flex-wrap">
+          {dest.packages.map((p, i) => (
+            <button key={i} onClick={() => setActivePackageIdx(i)}
+              className="px-4 py-2 rounded-full font-body text-xs font-semibold transition-all"
+              style={{ backgroundColor: i === activePackageIdx ? ORANGE : "#F5F5F5", color: i === activePackageIdx ? "#fff" : "#555" }}
+            >
+              {p.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!pkg ? (
+        <div className="py-20 text-center">
+          <p className="font-body text-gray-400">Package details coming soon.</p>
+        </div>
+      ) : (
+        <>
+          {/* Package Overview */}
+          <div className="bg-white py-8 px-5 lg:px-10 border-b border-gray-100">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex flex-wrap gap-4 items-start justify-between">
+                <div>
+                  <h2 className="font-condensed font-black text-2xl lg:text-3xl text-gray-900 mb-1">{pkg.name}</h2>
+                  <div className="flex flex-wrap gap-3 text-sm text-gray-500 font-body">
+                    <span>📅 {pkg.duration}</span>
+                    {pkg.minimumPax && <span>👥 Minimum {pkg.minimumPax} pax required</span>}
+                    {pkg.seasonType && <span className="font-semibold" style={{ color: ORANGE }}>🏷️ {pkg.seasonType}</span>}
+                    {pkg.code && <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{pkg.code}</span>}
+                  </div>
+                </div>
+                {pkg.travelDates?.length > 0 && (
+                  <div className="text-right">
+                    <p className="font-body text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1">Travel Dates</p>
+                    {pkg.travelDates.map((d, i) => (
+                      <p key={i} className="font-body text-xs text-gray-700">{d}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Video Preview */}
+          <div className="bg-black py-14 px-4 lg:px-10">
+            <div className="max-w-3xl mx-auto text-center mb-8">
+              <SectionLabel text="Official Travel Preview" />
+              <h2 className="font-condensed font-black text-white text-3xl lg:text-4xl mb-2">Experience {dest.name}</h2>
+              <p className="font-body text-gray-400 text-sm max-w-sm mx-auto">Watch our exclusive cinematic preview and feel the destination before you arrive.</p>
+            </div>
+            <div className="max-w-3xl mx-auto">
+              {dest.videoUrl ? (
+                <div className="rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
+                  <video src={dest.videoUrl} controls className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <VideoPlaceholder name={dest.name} />
+              )}
+            </div>
+          </div>
+
+          {/* Hotel Categories & Rates */}
+          {pkg.hotelCategories?.length > 0 && (
+            <div className="py-12 px-5 lg:px-10 bg-white">
+              <div className="max-w-4xl mx-auto">
+                <SectionLabel text="Rooms & Rates" />
+                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-2">Hotel Categories & Rates</h2>
+                <p className="text-center font-body text-sm text-gray-500 mb-8">Select your preferred accommodation category.</p>
+                <div className="space-y-4">
+                  {pkg.hotelCategories.map((cat, i) => (
+                    <div key={i} className="border border-gray-200 rounded-2xl overflow-hidden">
+                      <div className="px-5 py-3 font-body font-bold text-sm text-white flex items-center gap-2" style={{ backgroundColor: ORANGE }}>
+                        <Hotel className="w-4 h-4" /> {cat.category}
+                      </div>
+                      <div className="px-5 pt-3 pb-2">
+                        {cat.hotels && (
+                          <div className="mb-2">
+                            {cat.hotels.map((h, j) => (
+                              <p key={j} className="font-body text-xs text-gray-500 leading-relaxed">• {h}</p>
+                            ))}
+                          </div>
+                        )}
+                        <HotelRatesTable category={cat} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-4 text-center font-body text-xs text-gray-400">* All rates are per person. Subject to availability and change without prior notice. Hotel is subject to availability — similar category will be substituted if needed.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Season Surcharges */}
+          {pkg.seasonSurcharges?.length > 0 && (
+            <div className="py-8 px-5 lg:px-10" style={{ backgroundColor: "#FFF8F0" }}>
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />
+                  <h3 className="font-condensed font-black text-xl text-gray-900">Seasonal / Peak Surcharges</h3>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {pkg.seasonSurcharges.map((s, i) => (
+                    <div key={i} className="bg-white border rounded-xl p-4" style={{ borderColor: "#FFD699" }}>
+                      <p className="font-body font-bold text-sm text-gray-800 mb-1">{s.label}</p>
+                      <p className="font-condensed font-black text-lg" style={{ color: ORANGE }}>{s.amount}</p>
+                      {s.dates?.map((d, j) => <p key={j} className="font-body text-xs text-gray-500">• {d}</p>)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Package Highlights Grid */}
+          {pkg.highlights?.length > 0 && (
+            <div className="py-12 px-5 lg:px-10 bg-white border-t border-gray-100">
+              <div className="max-w-4xl mx-auto">
+                <SectionLabel text="What's Included" />
+                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-2">Package Highlights</h2>
+                <p className="text-center font-body text-sm text-gray-500 mb-8">Everything you need for a seamless, unforgettable journey.</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {pkg.highlights.map((h, i) => {
+                    const Icon = highlightIcons[i % highlightIcons.length];
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-gray-100 bg-gray-50 text-center hover:shadow-md transition-shadow">
+                        <Icon className="w-5 h-5" style={{ color: ORANGE }} />
+                        <span className="font-body text-xs font-semibold text-gray-700 leading-snug">{h}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Inclusions & Exclusions */}
+          {(pkg.inclusions?.length > 0 || pkg.exclusions?.length > 0) && (
+            <div className="py-12 px-5 lg:px-10" style={{ backgroundColor: "#F5F5F5" }}>
+              <div className="max-w-4xl mx-auto">
+                <SectionLabel text="Package Details" />
+                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-8">Inclusions & Exclusions</h2>
+                <div className="grid sm:grid-cols-2 gap-6">
+                  {pkg.inclusions?.length > 0 && (
+                    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="font-body font-bold text-sm text-gray-900">Included ✅</span>
+                      </div>
+                      <ul className="space-y-2">
+                        {pkg.inclusions.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-600">
+                            <span className="text-green-500 mt-0.5 shrink-0">✓</span> {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {pkg.exclusions?.length > 0 && (
+                    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <XCircle className="w-5 h-5 text-red-400" />
+                        <span className="font-body font-bold text-sm text-gray-900">Not Included ❌</span>
+                      </div>
+                      <ul className="space-y-2">
+                        {pkg.exclusions.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-600">
+                            <span className="text-red-400 mt-0.5 shrink-0">✗</span> {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Day-by-Day Itinerary */}
+          {pkg.itinerary?.length > 0 && (
+            <div className="py-12 px-5 lg:px-10 bg-white">
+              <div className="max-w-4xl mx-auto">
+                <SectionLabel text="Day by Day" />
+                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-2">Your {dest.name} Itinerary</h2>
+                <p className="text-center font-body text-sm text-gray-500 mb-10">A carefully crafted journey from arrival to departure.</p>
+                <div className="relative">
+                  <div className="absolute left-5 top-0 bottom-0 w-0.5" style={{ backgroundColor: ORANGE, opacity: 0.25 }} />
+                  <div className="space-y-4">
+                    {pkg.itinerary.map((day, i) => (
+                      <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="flex gap-4">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-condensed font-black text-sm text-white z-10" style={{ backgroundColor: ORANGE }}>
+                          D{day.day}
+                        </div>
+                        <div className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+                          <div className="font-body font-bold text-sm text-gray-900 mb-2">DAY {day.day} — {day.title}</div>
+                          <ul className="space-y-1">
+                            {day.activities.map((a, j) => (
+                              <li key={j} className="font-body text-xs text-gray-600 flex items-start gap-1.5">
+                                <span style={{ color: ORANGE }} className="mt-0.5 shrink-0">›</span> {a}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Optional Tours */}
+          {pkg.optionalTours?.length > 0 && (
+            <div className="py-12 px-5 lg:px-10" style={{ backgroundColor: "#F5F5F5" }}>
+              <div className="max-w-4xl mx-auto">
+                <SectionLabel text="Optional Add-Ons" />
+                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-8">Optional Tours</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {pkg.optionalTours.map((tour, i) => (
+                    <div key={i} className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-2 text-sm font-body text-gray-700">
+                      <Tag className="w-3.5 h-3.5 shrink-0" style={{ color: ORANGE }} /> {tour}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Requirements & Notices */}
+          <div className="py-12 px-5 lg:px-10 bg-white">
+            <div className="max-w-4xl mx-auto">
+              <SectionLabel text="Important" />
+              <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-8">Requirements & Notes</h2>
+
+              {/* Warnings */}
+              {pkg.importantNotices?.length > 0 && (
+                <div className="mb-6 rounded-2xl border p-5" style={{ backgroundColor: "#FFF8F0", borderColor: "#FFD699" }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />
+                    <span className="font-body font-bold text-sm text-gray-900">Important Notices</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {pkg.importantNotices.map((n, i) => (
+                      <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-700">
+                        <span style={{ color: ORANGE }} className="mt-0.5 shrink-0">•</span> {n}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {pkg.visaInfo && (
+                <AccordionItem title="Visa Requirements" accent>
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ORANGE }} />
+                    <span>{pkg.visaInfo}</span>
+                  </div>
+                </AccordionItem>
+              )}
+
+              {pkg.requirements?.length > 0 && (
+                <AccordionItem title="Travel Requirements">
+                  <ul className="space-y-1">
+                    {pkg.requirements.map((r, i) => <li key={i} className="flex items-start gap-2"><span style={{ color: ORANGE }}>•</span> {r}</li>)}
+                  </ul>
+                </AccordionItem>
+              )}
+
+              {pkg.termsAndConditions && (
+                <AccordionItem title="Terms & Conditions">
+                  {pkg.termsAndConditions}
+                </AccordionItem>
+              )}
+
+              {pkg.fuelSurcharge && (
+                <AccordionItem title="⛽ Fuel Surcharge Notice" accent>
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
+                    <span>{pkg.fuelSurcharge}</span>
+                  </div>
+                </AccordionItem>
+              )}
+
+              {pkg.insuranceNote && (
+                <AccordionItem title="🛡️ Travel Insurance">
+                  {pkg.insuranceNote}
+                </AccordionItem>
+              )}
+
+              {pkg.shoppingDisclaimer && (
+                <AccordionItem title="🛍️ Shopping Stop Disclaimer">
+                  {pkg.shoppingDisclaimer}
+                </AccordionItem>
+              )}
+
+              {pkg.remarks && (
+                <AccordionItem title="📋 Remarks & Hotel Notes">
+                  {pkg.remarks}
+                </AccordionItem>
+              )}
+            </div>
+          </div>
+
+          {/* Links */}
+          {pkg.links?.length > 0 && (
+            <div className="py-8 px-5 lg:px-10" style={{ backgroundColor: "#F5F5F5" }}>
+              <div className="max-w-4xl mx-auto">
+                <h3 className="font-condensed font-black text-xl text-gray-900 mb-4">Important Links & Registration</h3>
+                <div className="flex flex-wrap gap-3">
+                  {pkg.links.map((link, i) => (
+                    <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border font-body text-sm font-semibold transition-all hover:opacity-80"
+                      style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: "#FFF8F0" }}
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Global Warning */}
+          <div className="py-6 px-5 lg:px-10 bg-black">
+            <div className="max-w-4xl mx-auto text-center">
+              <p className="font-body text-xs text-gray-400">
+                ⚠️ <strong className="text-white">PERSONAL TRANSACTIONS NOT ALLOWED.</strong> All bookings must go through official Gladex Travel channels only. •
+                Passport validity: minimum 6 months. • Rates subject to change without prior notice. • Hotel subject to availability — similar category substitution may apply. •
+                Unused services are non-refundable.
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* CTA */}
+      <div className="py-16 px-4 text-center bg-gray-50 border-t border-gray-200">
+        <p className="font-body text-[10px] font-bold tracking-[0.4em] uppercase mb-3" style={{ color: ORANGE }}>— Ready to Explore? —</p>
+        <h2 className="font-condensed font-black text-3xl lg:text-4xl text-gray-900 mb-1">Discover More Destinations</h2>
+        <p className="font-body text-sm text-gray-500 mb-6">Browse our full collection of international travel experiences.</p>
+        <button onClick={() => navigate("/")}
+          className="inline-flex items-center gap-2 font-body font-bold text-sm px-8 py-3.5 rounded-full text-white transition-all duration-200 hover:opacity-90"
+          style={{ backgroundColor: ORANGE }}
+        >
+          ← Back to All Destinations
+        </button>
       </div>
     </div>
   );
