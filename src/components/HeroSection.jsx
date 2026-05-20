@@ -78,7 +78,7 @@ export default function HeroSection() {
           className="font-body text-white/75 text-sm lg:text-base max-w-lg"
           style={{ letterSpacing: "0.15em", lineHeight: 1.7 }}
         >
-          DISCOVER PREMIUM INTERNATIONAL DESTINATIONS<br />WITH CINEMATIC TRAVEL EXPERIENCES
+          DISCOVER PREMIUM INTERNATIONAL DESTINATIONS<br />
         </motion.p>
 
         {/* Navigation hint */}
