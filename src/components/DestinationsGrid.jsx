@@ -78,24 +78,25 @@ function DestinationCard({ dest, index, isDark, onClick }) {
         style={{ background: "linear-gradient(to top, rgba(255,140,0,0.25), transparent 60%)" }}
       />
 
+      {/* Play button */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-75 group-hover:scale-100"
+          style={{ backgroundColor: "rgba(255,140,0,0.9)", boxShadow: "0 0 20px rgba(255,140,0,0.6)" }}
+        >
+          <Play className="w-4 h-4 text-white ml-0.5" />
+        </div>
+      </div>
+
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 p-3">
         <div className="font-condensed font-bold text-white text-sm leading-tight tracking-wide">{dest.name}</div>
-
-        {/* Watch Preview button */}
-        <motion.div
-          className="mt-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300"
+        <div
+          className="font-body text-[10px] font-semibold tracking-widest uppercase mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+          style={{ color: "#FF8C00" }}
         >
-          <div
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-body text-xs font-bold shadow-lg hover:scale-105 transition-transform duration-200"
-            style={{ backgroundColor: "rgba(255,255,255,0.95)", color: "#1A1A1A" }}
-          >
-            <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "#FF8C00" }}>
-              <Play className="w-2 h-2 text-white ml-0.5" />
-            </div>
-            Watch Preview
-          </div>
-        </motion.div>
+          VIEW PREVIEW
+        </div>
       </div>
     </motion.div>
   );

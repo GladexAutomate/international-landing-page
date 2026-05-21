@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Play, MapPin, ChevronDown, ChevronUp,
   Plane, Hotel, Coffee, Map, Users, Briefcase, Bus, Ticket,
-  AlertTriangle, CheckCircle, XCircle, Info, Tag
+  AlertTriangle, CheckCircle, XCircle, Info, ExternalLink, Tag
 } from "lucide-react";
 import { useState } from "react";
 import { getDestinationBySlug } from "../data/destinations";
@@ -481,6 +481,25 @@ function PreviewContent() {
               )}
             </div>
           </div>
+
+          {/* Links */}
+          {pkg.links?.length > 0 && (
+            <div className="py-8 px-5 lg:px-10" style={{ backgroundColor: "#F5F5F5" }}>
+              <div className="max-w-4xl mx-auto">
+                <h3 className="font-condensed font-black text-xl text-gray-900 mb-4">Important Links & Registration</h3>
+                <div className="flex flex-wrap gap-3">
+                  {pkg.links.map((link, i) => (
+                    <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border font-body text-sm font-semibold transition-all hover:opacity-80"
+                      style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: "#FFF8F0" }}
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Global Warning */}
           <div className="py-6 px-5 lg:px-10 bg-black">
