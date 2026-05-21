@@ -72,20 +72,23 @@ export default function HeroSection() {
         ))}
       </div>
 
-      {/* Logo - Upper Left */}
-     {/* Logo - Upper Left */}
+{/* Logo - Upper Left */}
 <motion.a
   href="https://voyage-view-go.base44.app"
   initial={{ opacity: 0, y: -20 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ delay: 0.3, duration: 0.7 }}
-  className="absolute top-6 left-6 z-20 cursor-pointer hover:scale-105 transition-all duration-300"
+  whileHover={{
+    scale: 1.06,
+    y: -2,
+  }}
+  className="absolute top-6 left-6 z-20 cursor-pointer"
   title="Back to Main Page"
 >
   <img
     src="https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png"
     alt="Gladex Travel and Tours Corp."
-    className="h-14 w-auto object-contain"
+    className="h-14 w-auto object-contain transition-all duration-300"
     style={{
       filter: "drop-shadow(0 0 16px rgba(255,140,0,0.5))",
     }}
