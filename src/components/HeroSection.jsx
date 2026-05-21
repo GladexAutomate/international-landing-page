@@ -2,20 +2,35 @@ import { motion } from "framer-motion";
 import { useTheme } from "../lib/ThemeContext";
 
 const panels = [
-  { img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&q=85", label: "THAILAND" },
-  { img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=85", label: "BALI" },
-  { img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=85", label: "DUBAI" },
-  { img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=85", label: "JAPAN" },
-  { img: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600&q=85", label: "SINGAPORE" },
+  {
+    img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&q=85",
+    label: "THAILAND",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=85",
+    label: "BALI",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&q=85",
+    label: "DUBAI",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=85",
+    label: "JAPAN",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600&q=85",
+    label: "SINGAPORE",
+  },
 ];
 
 export default function HeroSection() {
   const { isDark } = useTheme();
 
   const scrollToDestinations = () => {
-    document.querySelector("#destinations")?.scrollIntoView({
-      behavior: "smooth",
-    });
+    document
+      .querySelector("#destinations")
+      ?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -57,12 +72,12 @@ export default function HeroSection() {
         ))}
       </div>
 
-      {/* Logo - Upper Right */}
+      {/* Logo - Upper Left */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.7 }}
-        className="absolute top-4 right-4 lg:top-6 lg:right-8 z-20"
+        className="absolute top-4 left-4 lg:top-6 lg:left-8 z-20"
       >
         <img
           src="https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png"
