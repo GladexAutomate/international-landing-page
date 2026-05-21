@@ -73,21 +73,24 @@ export default function HeroSection() {
       </div>
 
       {/* Logo - Upper Left */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.7 }}
-        className="absolute top-4 left-4 lg:top-6 lg:left-8 z-20"
-      >
-        <img
-          src="https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png"
-          alt="Gladex Travel and Tours Corp."
-          className="h-12 lg:h-14 w-auto object-contain"
-          style={{
-            filter: "drop-shadow(0 0 16px rgba(255,140,0,0.5))",
-          }}
-        />
-      </motion.div>
+     {/* Logo - Upper Left */}
+<motion.a
+  href="https://voyage-view-go.base44.app"
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.3, duration: 0.7 }}
+  className="absolute top-6 left-6 z-20 cursor-pointer hover:scale-105 transition-all duration-300"
+  title="Back to Main Page"
+>
+  <img
+    src="https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png"
+    alt="Gladex Travel and Tours Corp."
+    className="h-14 w-auto object-contain"
+    style={{
+      filter: "drop-shadow(0 0 16px rgba(255,140,0,0.5))",
+    }}
+  />
+</motion.a>
 
       {/* Center Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-4 text-center">
