@@ -69,7 +69,7 @@ export const destinations = [
     startingPrice: 24999,
     heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
     cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
-   videoUrl: "https://drive.google.com/uc?export=download&id=1THzQAagycyXm8UYNztawslG7G_2Ak_J3",
+   videoUrl: "https://drive.google.com/file/d/1THzQAagycyXm8UYNztawslG7G_2Ak_J3/view?fbclid=IwY2xjawR-FghleHRuA2FlbQIxMABicmlkETF6OG9GdUcwT1pGdFJxUGduc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHlVd6hqNHhS6WUiNQc5P9K46yQIpb6DbZBbQuXa2XWloP1N_sUSCBZpN6As6_aem_hwuAVHGh76ScCMgDM3tswQ",
     packages: [
       {
         code: "GDX-SBBK1B2",
