@@ -70,7 +70,7 @@ export const destinations = [
   heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
   cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/1e8258a62_THAILAND.png",
 
-  videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+  videoUrl: "https://media.base44.com/videos/public/6a0d6ad01d34ead888ecdd6f/73c2d3d54_BANGKOK.mp4",
 
   packages: [
       {
