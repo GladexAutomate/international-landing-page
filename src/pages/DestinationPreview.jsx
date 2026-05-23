@@ -224,22 +224,152 @@ function PreviewContent() {
           </div>
 
           {/* Video Preview */}
-          <div className="bg-black py-14 px-4 lg:px-10">
-            <div className="max-w-3xl mx-auto text-center mb-8">
-              <SectionLabel text="Official Travel Preview" />
-              <h2 className="font-condensed font-black text-white text-3xl lg:text-4xl mb-2">Experience {dest.name}</h2>
-              <p className="font-body text-gray-400 text-sm max-w-sm mx-auto">Watch our exclusive cinematic preview and feel the destination before you arrive.</p>
-            </div>
-            <div className="max-w-3xl mx-auto">
-              {dest.videoUrl ? (
-                <div className="rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
-                  <video src={dest.videoUrl} controls className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <VideoPlaceholder name={dest.name} />
-              )}
+<div className="bg-black py-16 px-4 lg:px-10 relative overflow-hidden">
+  {/* Background glow */}
+  <div
+    className="absolute inset-0 opacity-20"
+    style={{
+      background:
+        "radial-gradient(circle at center, rgba(255,140,0,0.18) 0%, transparent 70%)",
+    }}
+  />
+
+  <div className="max-w-4xl mx-auto text-center mb-10 relative z-10">
+    <SectionLabel text="Official Travel Preview" />
+
+    <h2 className="font-condensed font-black text-white text-3xl lg:text-5xl mb-3 tracking-wide">
+      Experience {dest.name}
+    </h2>
+
+    <p className="font-body text-gray-400 text-sm lg:text-base max-w-xl mx-auto leading-relaxed">
+      Watch our exclusive cinematic travel preview and explore the beauty,
+      culture, and unforgettable moments waiting for you in {dest.name}.
+    </p>
+  </div>
+
+  <div className="max-w-5xl mx-auto relative z-10">
+    {dest.videoUrl ? (
+      <motion.div
+        whileHover={{ scale: 1.015 }}
+        transition={{ duration: 0.35 }}
+        className="group relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
+        }}
+      >
+        {/* Video */}
+        <video
+          src={dest.videoUrl}
+          controls
+          poster={dest.heroImage}
+          className="w-full object-cover"
+          style={{
+            aspectRatio: "16/9",
+            backgroundColor: "#000",
+          }}
+        />
+
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+        {/* Top Gradient */}
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
+
+        {/* Bottom Gradient */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+
+        {/* Floating Label */}
+        <div className="absolute top-5 left-5">
+          <div
+            className="px-4 py-2 rounded-full text-[10px] font-bold tracking-[0.3em] uppercase backdrop-blur-md border"
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              borderColor: "rgba(255,255,255,0.15)",
+              color: "#fff",
+            }}
+          >
+            Travel Preview
+          </div>
+        </div>
+
+        {/* Cinematic Hover Text */}
+        <div className="absolute bottom-6 left-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-6 group-hover:translate-y-0 pointer-events-none">
+          <h3 className="font-condensed text-white text-2xl font-black mb-2">
+            Discover {dest.name}
+          </h3>
+
+          <p className="text-white/70 text-sm max-w-md">
+            Feel the atmosphere, culture, luxury, and adventure before your
+            journey even begins.
+          </p>
+        </div>
+      </motion.div>
+    ) : (
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        transition={{ duration: 0.3 }}
+        className="relative rounded-3xl overflow-hidden border border-white/10 bg-[#111]"
+        style={{
+          aspectRatio: "16/9",
+        }}
+      >
+        {/* Background image */}
+        <img
+          src={dest.heroImage}
+          alt={dest.name}
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+        />
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
+
+        {/* Content */}
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+          {/* Animated play button */}
+          <div className="relative mb-6">
+            <div
+              className="absolute inset-0 rounded-full animate-ping"
+              style={{
+                background: "rgba(255,140,0,0.2)",
+              }}
+            />
+
+            <div
+              className="relative w-20 h-20 rounded-full flex items-center justify-center"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.15)",
+              }}
+            >
+              <Play className="w-8 h-8 text-white/70 ml-1" />
             </div>
           </div>
+
+          <h3 className="font-condensed font-black text-white text-2xl mb-3">
+            Official Travel Preview Coming Soon
+          </h3>
+
+          <p className="font-body text-gray-400 text-sm max-w-md leading-relaxed mb-7">
+            We’re currently editing the cinematic preview video for{" "}
+            {dest.name}. Stay tuned for the full travel experience showcase.
+          </p>
+
+          <div
+            className="px-7 py-3 rounded-full border text-xs font-bold tracking-[0.25em] uppercase"
+            style={{
+              borderColor: ORANGE,
+              color: ORANGE,
+              background: "rgba(255,140,0,0.05)",
+            }}
+          >
+            + Stay Tuned
+          </div>
+        </div>
+      </motion.div>
+    )}
+  </div>
+</div>
 
           {/* Hotel Categories & Rates */}
           {pkg.hotelCategories?.length > 0 && (
