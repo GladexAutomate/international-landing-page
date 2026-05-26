@@ -260,7 +260,7 @@ function PreviewContent() {
       >
         {/* Video */}
         <video
-          src={dest.videoUrl}
+          src={"https://drive.google.com/file/d/1YHVy_JC75c8yYT9kuUByFEYkeicRPLfj/previewdest.videoUrl"}
           controls
           poster={dest.heroImage}
           className="w-full object-cover"
