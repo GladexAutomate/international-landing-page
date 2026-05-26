@@ -261,7 +261,7 @@ export const destinations = [
     cardImage: "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=800&q=80",
 
     // VIDEO URL HERE — paste Da Nang video URL below
-    videoUrl: "", // PASTE_DANANG_VIDEO_URL_HERE
+    videoUrl: "https://drive.google.com/file/d/1yeltD8t0ibNSt5ATW6efk1HGDoSmB1Y7/preview", // PASTE_DANANG_VIDEO_URL_HERE
     packages: [
       {
         code: "GDX-UOV15B2",
