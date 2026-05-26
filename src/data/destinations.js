@@ -180,7 +180,7 @@ export const destinations = [
     heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
     cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
     // VIDEO URL HERE — paste Hong Kong video URL below
-    videoUrl: "https://drive.google.com/file/d/1YHVy_JC75c8yYT9kuUByFEYkeicRPLfj/view", // PASTE_HONGKONG_VIDEO_URL_HERE
+    videoUrl: "https://drive.google.com/file/d/1YHVy_JC75c8yYT9kuUByFEYkeicRPLfj/preview", // PASTE_HONGKONG_VIDEO_URL_HERE
 
     packages: [
       {
