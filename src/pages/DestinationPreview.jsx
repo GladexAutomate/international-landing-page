@@ -258,17 +258,18 @@ function PreviewContent() {
             "linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
         }}
       >
-        {/* Video */}
-        <video
-          src={"https://drive.google.com/file/d/1YHVy_JC75c8yYT9kuUByFEYkeicRPLfj/previewdest.videoUrl"}
-          controls
-          poster={}
-          className="w-full object-cover"
-          style={{
-            aspectRatio: "16/9",
-            backgroundColor: "#000",
-          }}
-        />
+       {/* Video */}
+<iframe
+  src={dest.videoUrl}
+  className="w-full"
+  allow="autoplay"
+  allowFullScreen
+  style={{
+    aspectRatio: "16/9",
+    backgroundColor: "#000",
+    border: "none",
+  }}
+/>
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
