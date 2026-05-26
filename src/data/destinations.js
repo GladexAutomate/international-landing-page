@@ -179,7 +179,9 @@ export const destinations = [
     startingPrice: 26999,
     heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
     cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
-    videoUrl: null,
+    // VIDEO URL HERE — paste Hong Kong video URL below
+    videoUrl: "", // PASTE_HONGKONG_VIDEO_URL_HERE
+
     packages: [
       {
         code: "GDX-CNHK1B2",
@@ -257,7 +259,9 @@ export const destinations = [
     startingPrice: 22999,
     heroImage: "https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?w=1600&q=80",
     cardImage: "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=800&q=80",
-    videoUrl: null,
+
+    // VIDEO URL HERE — paste Da Nang video URL below
+    videoUrl: "", // PASTE_DANANG_VIDEO_URL_HERE
     packages: [
       {
         code: "GDX-UOV15B2",
