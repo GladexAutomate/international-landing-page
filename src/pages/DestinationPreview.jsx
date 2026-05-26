@@ -262,7 +262,7 @@ function PreviewContent() {
         <video
           src={"https://drive.google.com/file/d/1YHVy_JC75c8yYT9kuUByFEYkeicRPLfj/previewdest.videoUrl"}
           controls
-          poster={dest.heroImage}
+          poster={}
           className="w-full object-cover"
           style={{
             aspectRatio: "16/9",
