@@ -63,7 +63,7 @@ export default function HeroSection() {
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/40" />
 
-            <div className="absolute bottom-6 left-0 right-0 text-center">
+            <div className="absolute bottom-12 left-0 right-0 text-center">
               <span className="font-body text-[9px] font-semibold tracking-[0.25em] text-white/60 uppercase">
                 {panel.label}
               </span>
@@ -149,7 +149,7 @@ export default function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.1 }}
         onClick={scrollToDestinations}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 focus:outline-none"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 focus:outline-none"
         aria-label="Scroll down"
       >
         <div className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center pt-1.5">
