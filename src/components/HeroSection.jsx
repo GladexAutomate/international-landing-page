@@ -164,9 +164,7 @@ export default function HeroSection() {
           />
         </div>
 
-        <span className="font-body text-[9px] tracking-[0.35em] text-white/50 uppercase">
-          Scroll
-        </span>
+        
       </motion.button>
     </section>
   );
