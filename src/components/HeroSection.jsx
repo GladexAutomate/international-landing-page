@@ -143,29 +143,44 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.1 }}
-        onClick={scrollToDestinations}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 focus:outline-none"
-        aria-label="Scroll down"
-      >
-        <div className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center pt-1.5">
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{
-              duration: 1.6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="w-1 h-2.5 rounded-full bg-white/60"
-          />
-        </div>
+     {/* Scroll Indicator */}
+<motion.button
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 1.1 }}
+  onClick={scrollToDestinations}
+  className="absolute left-1/2 top-[78%] -translate-x-1/2 z-20 flex flex-col items-center gap-3 focus:outline-none"
+  aria-label="Scroll down"
+>
+  {/* Mouse */}
+  <div
+    className="w-6 h-10 rounded-full border-2 border-white/40 flex items-start justify-center pt-1.5"
+    style={{
+      backdropFilter: "blur(4px)",
+    }}
+  >
+    <motion.div
+      animate={{ y: [0, 10, 0] }}
+      transition={{
+        duration: 1.6,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      className="w-1 h-2.5 rounded-full bg-white/70"
+    />
+  </div>
 
-        
-      </motion.button>
+  {/* Text */}
+  <span
+    className="font-body text-[10px] font-semibold uppercase tracking-[0.45em]"
+    style={{
+      color: "rgba(255,255,255,0.72)",
+      textShadow: "0 2px 8px rgba(0,0,0,0.6)",
+    }}
+  >
+    Scroll
+  </span>
+</motion.button>
     </section>
   );
 }
