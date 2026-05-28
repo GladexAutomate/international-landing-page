@@ -162,12 +162,6 @@ function PreviewContent() {
   }}
   onClick={() => navigate("/")}
 />
-        <div className="flex items-center gap-4">
-          {dest.packageType && <BadgePill label={dest.packageType} />}
-          <button onClick={() => navigate("/")} className="flex items-center gap-2 font-body text-sm text-gray-500 hover:text-orange-500 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> All Destinations
-          </button>
-        </div>
       </div>
 
       {/* Hero */}
