@@ -152,7 +152,16 @@ function PreviewContent() {
 
       {/* Navbar */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-5 lg:px-10 h-16 flex items-center justify-between shadow-sm">
-        <img src={LOGO_URL} alt="Gladex" className="h-9 w-auto object-contain cursor-pointer" onClick={() => navigate("/")} />
+        <img
+  src={LOGO_URL}
+  alt="Gladex"
+  className="h-14 w-auto object-contain cursor-pointer transition-all duration-300 hover:scale-105"
+  style={{
+    filter:
+      "drop-shadow(0 0 16px rgba(255,140,0,0.5))",
+  }}
+  onClick={() => navigate("/")}
+/>
         <div className="flex items-center gap-4">
           {dest.packageType && <BadgePill label={dest.packageType} />}
           <button onClick={() => navigate("/")} className="flex items-center gap-2 font-body text-sm text-gray-500 hover:text-orange-500 transition-colors">
