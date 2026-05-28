@@ -82,7 +82,7 @@ export default function HeroSection() {
     scale: 1.06,
     y: -2,
   }}
-  className="absolute top-6 left-6 z-20 cursor-pointer"
+  className="fixed top-6 left-6 z-50 cursor-pointer"
   title="Back to Main Page"
 >
   <img
@@ -90,7 +90,8 @@ export default function HeroSection() {
     alt="Gladex Travel and Tours Corp."
     className="h-14 w-auto object-contain transition-all duration-300"
     style={{
-      filter: "drop-shadow(0 0 16px rgba(255,140,0,0.5))",
+      filter:
+        "drop-shadow(0 0 16px rgba(255,140,0,0.5))",
     }}
   />
 </motion.a>
