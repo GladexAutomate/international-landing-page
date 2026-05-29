@@ -25,15 +25,22 @@ function SectionLabel({ text }) {
 
 function AccordionItem({ title, children, accent = false }) {
   const [open, setOpen] = useState(false);
+  const { isDark } = useTheme();
+  const bgCard = isDark ? "#1A1A1A" : "#FFFFFF";
+  const bgOpen = isDark ? "#1C1500" : "#FFF8F0";
+  const borderColor = isDark ? "#2A2A2A" : "#E5E5E5";
+  const borderOpen = isDark ? "#3A2800" : "#F0E8DC";
+  const textColor = isDark ? "#CCCCCC" : "#444444";
+
   return (
-    <div className="border rounded-xl overflow-hidden mb-3" style={{ borderColor: "#E5E5E5" }}>
+    <div className="rounded-xl overflow-hidden mb-3 border transition-colors duration-300" style={{ borderColor }}>
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors"
-        style={{ backgroundColor: open ? "#FFF8F0" : "#FFFFFF" }}
+        style={{ backgroundColor: open ? bgOpen : bgCard }}
       >
-        <span className="font-body font-semibold text-sm" style={{ color: accent && open ? ORANGE : "#1A1A1A" }}>{title}</span>
-        {open ? <ChevronUp className="w-4 h-4" style={{ color: ORANGE }} /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+        <span className="font-body font-semibold text-sm" style={{ color: accent && open ? ORANGE : isDark ? "#FFFFFF" : "#1A1A1A" }}>{title}</span>
+        {open ? <ChevronUp className="w-4 h-4" style={{ color: ORANGE }} /> : <ChevronDown className="w-4 h-4" style={{ color: isDark ? "#666" : "#aaa" }} />}
       </button>
       <AnimatePresence>
         {open && (
@@ -41,7 +48,7 @@ function AccordionItem({ title, children, accent = false }) {
             initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }} className="overflow-hidden"
           >
-            <div className="px-5 py-4 text-sm font-body text-gray-600 leading-relaxed border-t" style={{ borderColor: "#F0E8DC" }}>
+            <div className="px-5 py-4 text-sm font-body leading-relaxed border-t transition-colors duration-300" style={{ borderColor: borderOpen, color: textColor, backgroundColor: bgCard }}>
               {children}
             </div>
           </motion.div>
@@ -129,8 +136,19 @@ function BadgePill({ label }) {
 function PreviewContent() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { isDark } = useTheme();
   const dest = getDestinationBySlug(slug);
   const [activePackageIdx, setActivePackageIdx] = useState(0);
+
+  // Theme-aware colors
+  const bg = isDark ? "#111111" : "#F5F5F5";
+  const bgCard = isDark ? "#1A1A1A" : "#FFFFFF";
+  const bgAlt = isDark ? "#161616" : "#F0F0F0";
+  const border = isDark ? "#2A2A2A" : "#E5E5E5";
+  const textPrimary = isDark ? "#FFFFFF" : "#111111";
+  const textSecondary = isDark ? "#A0A0A0" : "#555555";
+  const navBg = isDark ? "#0D0D0D" : "#FFFFFF";
+  const navBorder = isDark ? "#222222" : "#E5E5E5";
 
   if (!dest) {
     return (
@@ -147,11 +165,11 @@ function PreviewContent() {
   const highlightIcons = [Plane, Hotel, Coffee, Map, Users, Briefcase, Bus, Ticket];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
       <ThemeToggle />
 
       {/* Navbar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-5 lg:px-10 h-16 flex items-center justify-between shadow-sm">
+      <div className="sticky top-0 z-50 border-b px-5 lg:px-10 h-16 flex items-center justify-between shadow-sm transition-colors duration-300" style={{ backgroundColor: navBg, borderColor: navBorder }}>
         <img
   src={LOGO_URL}
   alt="Gladex"
@@ -183,11 +201,11 @@ function PreviewContent() {
 
       {/* Package Tabs (if multiple packages) */}
       {dest.packages?.length > 1 && (
-        <div className="bg-white border-b border-gray-200 px-5 lg:px-10 py-3 flex gap-2 flex-wrap">
+        <div className="border-b px-5 lg:px-10 py-3 flex gap-2 flex-wrap transition-colors duration-300" style={{ backgroundColor: navBg, borderColor: navBorder }}>
           {dest.packages.map((p, i) => (
             <button key={i} onClick={() => setActivePackageIdx(i)}
               className="px-4 py-2 rounded-full font-body text-xs font-semibold transition-all"
-              style={{ backgroundColor: i === activePackageIdx ? ORANGE : "#F5F5F5", color: i === activePackageIdx ? "#fff" : "#555" }}
+              style={{ backgroundColor: i === activePackageIdx ? ORANGE : isDark ? "#2A2A2A" : "#F5F5F5", color: i === activePackageIdx ? "#fff" : textSecondary }}
             >
               {p.name}
             </button>
@@ -202,23 +220,23 @@ function PreviewContent() {
       ) : (
         <>
           {/* Package Overview */}
-          <div className="bg-white py-8 px-5 lg:px-10 border-b border-gray-100">
+          <div className="py-8 px-5 lg:px-10 border-b transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
             <div className="max-w-4xl mx-auto">
               <div className="flex flex-wrap gap-4 items-start justify-between">
                 <div>
-                  <h2 className="font-condensed font-black text-2xl lg:text-3xl text-gray-900 mb-1">{pkg.name}</h2>
-                  <div className="flex flex-wrap gap-3 text-sm text-gray-500 font-body">
+                  <h2 className="font-condensed font-black text-2xl lg:text-3xl mb-1" style={{ color: textPrimary }}>{pkg.name}</h2>
+                  <div className="flex flex-wrap gap-3 text-sm font-body" style={{ color: textSecondary }}>
                     <span>📅 {pkg.duration}</span>
                     {pkg.minimumPax && <span>👥 Minimum {pkg.minimumPax} pax required</span>}
                     {pkg.seasonType && <span className="font-semibold" style={{ color: ORANGE }}>🏷️ {pkg.seasonType}</span>}
-                    {pkg.code && <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{pkg.code}</span>}
+                    {pkg.code && <span className="font-mono text-xs px-2 py-0.5 rounded" style={{ backgroundColor: isDark ? "#2A2A2A" : "#F0F0F0", color: textSecondary }}>{pkg.code}</span>}
                   </div>
                 </div>
                 {pkg.travelDates?.length > 0 && (
                   <div className="text-right">
-                    <p className="font-body text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1">Travel Dates</p>
+                    <p className="font-body text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: textSecondary }}>Travel Dates</p>
                     {pkg.travelDates.map((d, i) => (
-                      <p key={i} className="font-body text-xs text-gray-700">{d}</p>
+                      <p key={i} className="font-body text-xs" style={{ color: textSecondary }}>{d}</p>
                     ))}
                   </div>
                 )}
@@ -377,22 +395,22 @@ function PreviewContent() {
 
           {/* Hotel Categories & Rates */}
           {pkg.hotelCategories?.length > 0 && (
-            <div className="py-12 px-5 lg:px-10 bg-white">
+            <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgCard }}>
               <div className="max-w-4xl mx-auto">
                 <SectionLabel text="Rooms & Rates" />
-                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-2">Hotel Categories & Rates</h2>
-                <p className="text-center font-body text-sm text-gray-500 mb-8">Select your preferred accommodation category.</p>
+                <h2 className="font-condensed font-black text-3xl text-center mb-2" style={{ color: textPrimary }}>Hotel Categories & Rates</h2>
+                <p className="text-center font-body text-sm mb-8" style={{ color: textSecondary }}>Select your preferred accommodation category.</p>
                 <div className="space-y-4">
                   {pkg.hotelCategories.map((cat, i) => (
-                    <div key={i} className="border border-gray-200 rounded-2xl overflow-hidden">
+                    <div key={i} className="rounded-2xl overflow-hidden border" style={{ borderColor: border }}>
                       <div className="px-5 py-3 font-body font-bold text-sm text-white flex items-center gap-2" style={{ backgroundColor: ORANGE }}>
                         <Hotel className="w-4 h-4" /> {cat.category}
                       </div>
-                      <div className="px-5 pt-3 pb-2">
+                      <div className="px-5 pt-3 pb-2" style={{ backgroundColor: bgCard }}>
                         {cat.hotels && (
                           <div className="mb-2">
                             {cat.hotels.map((h, j) => (
-                              <p key={j} className="font-body text-xs text-gray-500 leading-relaxed">• {h}</p>
+                              <p key={j} className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>• {h}</p>
                             ))}
                           </div>
                         )}
@@ -401,25 +419,25 @@ function PreviewContent() {
                     </div>
                   ))}
                 </div>
-                <p className="mt-4 text-center font-body text-xs text-gray-400">* All rates are per person. Subject to availability and change without prior notice. Hotel is subject to availability — similar category will be substituted if needed.</p>
+                <p className="mt-4 text-center font-body text-xs" style={{ color: textSecondary }}>* All rates are per person. Subject to availability and change without prior notice. Hotel is subject to availability — similar category will be substituted if needed.</p>
               </div>
             </div>
           )}
 
           {/* Season Surcharges */}
           {pkg.seasonSurcharges?.length > 0 && (
-            <div className="py-8 px-5 lg:px-10" style={{ backgroundColor: "#FFF8F0" }}>
+            <div className="py-8 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: isDark ? "#1C1500" : "#FFF8F0" }}>
               <div className="max-w-4xl mx-auto">
                 <div className="flex items-center gap-2 mb-4">
                   <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />
-                  <h3 className="font-condensed font-black text-xl text-gray-900">Seasonal / Peak Surcharges</h3>
+                  <h3 className="font-condensed font-black text-xl" style={{ color: textPrimary }}>Seasonal / Peak Surcharges</h3>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {pkg.seasonSurcharges.map((s, i) => (
-                    <div key={i} className="bg-white border rounded-xl p-4" style={{ borderColor: "#FFD699" }}>
-                      <p className="font-body font-bold text-sm text-gray-800 mb-1">{s.label}</p>
+                    <div key={i} className="rounded-xl p-4 border" style={{ backgroundColor: bgCard, borderColor: isDark ? "#3A2800" : "#FFD699" }}>
+                      <p className="font-body font-bold text-sm mb-1" style={{ color: textPrimary }}>{s.label}</p>
                       <p className="font-condensed font-black text-lg" style={{ color: ORANGE }}>{s.amount}</p>
-                      {s.dates?.map((d, j) => <p key={j} className="font-body text-xs text-gray-500">• {d}</p>)}
+                      {s.dates?.map((d, j) => <p key={j} className="font-body text-xs" style={{ color: textSecondary }}>• {d}</p>)}
                     </div>
                   ))}
                 </div>
@@ -429,18 +447,18 @@ function PreviewContent() {
 
           {/* Package Highlights Grid */}
           {pkg.highlights?.length > 0 && (
-            <div className="py-12 px-5 lg:px-10 bg-white border-t border-gray-100">
+            <div className="py-12 px-5 lg:px-10 border-t transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
               <div className="max-w-4xl mx-auto">
                 <SectionLabel text="What's Included" />
-                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-2">Package Highlights</h2>
-                <p className="text-center font-body text-sm text-gray-500 mb-8">Everything you need for a seamless, unforgettable journey.</p>
+                <h2 className="font-condensed font-black text-3xl text-center mb-2" style={{ color: textPrimary }}>Package Highlights</h2>
+                <p className="text-center font-body text-sm mb-8" style={{ color: textSecondary }}>Everything you need for a seamless, unforgettable journey.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {pkg.highlights.map((h, i) => {
                     const Icon = highlightIcons[i % highlightIcons.length];
                     return (
-                      <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-gray-100 bg-gray-50 text-center hover:shadow-md transition-shadow">
+                      <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-2xl border text-center hover:shadow-md transition-shadow" style={{ backgroundColor: bgAlt, borderColor: border }}>
                         <Icon className="w-5 h-5" style={{ color: ORANGE }} />
-                        <span className="font-body text-xs font-semibold text-gray-700 leading-snug">{h}</span>
+                        <span className="font-body text-xs font-semibold leading-snug" style={{ color: textPrimary }}>{h}</span>
                       </div>
                     );
                   })}
@@ -451,20 +469,20 @@ function PreviewContent() {
 
           {/* Inclusions & Exclusions */}
           {(pkg.inclusions?.length > 0 || pkg.exclusions?.length > 0) && (
-            <div className="py-12 px-5 lg:px-10" style={{ backgroundColor: "#F5F5F5" }}>
+            <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgAlt }}>
               <div className="max-w-4xl mx-auto">
                 <SectionLabel text="Package Details" />
-                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-8">Inclusions & Exclusions</h2>
+                <h2 className="font-condensed font-black text-3xl text-center mb-8" style={{ color: textPrimary }}>Inclusions & Exclusions</h2>
                 <div className="grid sm:grid-cols-2 gap-6">
                   {pkg.inclusions?.length > 0 && (
-                    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                    <div className="rounded-2xl border p-6 transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
                       <div className="flex items-center gap-2 mb-4">
                         <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="font-body font-bold text-sm text-gray-900">Included ✅</span>
+                        <span className="font-body font-bold text-sm" style={{ color: textPrimary }}>Included ✅</span>
                       </div>
                       <ul className="space-y-2">
                         {pkg.inclusions.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-600">
+                          <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
                             <span className="text-green-500 mt-0.5 shrink-0">✓</span> {item}
                           </li>
                         ))}
@@ -472,14 +490,14 @@ function PreviewContent() {
                     </div>
                   )}
                   {pkg.exclusions?.length > 0 && (
-                    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+                    <div className="rounded-2xl border p-6 transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
                       <div className="flex items-center gap-2 mb-4">
                         <XCircle className="w-5 h-5 text-red-400" />
-                        <span className="font-body font-bold text-sm text-gray-900">Not Included ❌</span>
+                        <span className="font-body font-bold text-sm" style={{ color: textPrimary }}>Not Included ❌</span>
                       </div>
                       <ul className="space-y-2">
                         {pkg.exclusions.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-600">
+                          <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
                             <span className="text-red-400 mt-0.5 shrink-0">✗</span> {item}
                           </li>
                         ))}
@@ -493,11 +511,11 @@ function PreviewContent() {
 
           {/* Day-by-Day Itinerary */}
           {pkg.itinerary?.length > 0 && (
-            <div className="py-12 px-5 lg:px-10 bg-white">
+            <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgCard }}>
               <div className="max-w-4xl mx-auto">
                 <SectionLabel text="Day by Day" />
-                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-2">Your {dest.name} Itinerary</h2>
-                <p className="text-center font-body text-sm text-gray-500 mb-10">A carefully crafted journey from arrival to departure.</p>
+                <h2 className="font-condensed font-black text-3xl text-center mb-2" style={{ color: textPrimary }}>Your {dest.name} Itinerary</h2>
+                <p className="text-center font-body text-sm mb-10" style={{ color: textSecondary }}>A carefully crafted journey from arrival to departure.</p>
                 <div className="relative">
                   <div className="absolute left-5 top-0 bottom-0 w-0.5" style={{ backgroundColor: ORANGE, opacity: 0.25 }} />
                   <div className="space-y-4">
@@ -506,11 +524,11 @@ function PreviewContent() {
                         <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-condensed font-black text-sm text-white z-10" style={{ backgroundColor: ORANGE }}>
                           D{day.day}
                         </div>
-                        <div className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-                          <div className="font-body font-bold text-sm text-gray-900 mb-2">DAY {day.day} — {day.title}</div>
+                        <div className="flex-1 rounded-2xl border p-4 shadow-sm transition-colors duration-300" style={{ backgroundColor: bgAlt, borderColor: border }}>
+                          <div className="font-body font-bold text-sm mb-2" style={{ color: textPrimary }}>DAY {day.day} — {day.title}</div>
                           <ul className="space-y-1">
                             {day.activities.map((a, j) => (
-                              <li key={j} className="font-body text-xs text-gray-600 flex items-start gap-1.5">
+                              <li key={j} className="font-body text-xs flex items-start gap-1.5" style={{ color: textSecondary }}>
                                 <span style={{ color: ORANGE }} className="mt-0.5 shrink-0">›</span> {a}
                               </li>
                             ))}
@@ -526,13 +544,13 @@ function PreviewContent() {
 
           {/* Optional Tours */}
           {pkg.optionalTours?.length > 0 && (
-            <div className="py-12 px-5 lg:px-10" style={{ backgroundColor: "#F5F5F5" }}>
+            <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgAlt }}>
               <div className="max-w-4xl mx-auto">
                 <SectionLabel text="Optional Add-Ons" />
-                <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-8">Optional Tours</h2>
+                <h2 className="font-condensed font-black text-3xl text-center mb-8" style={{ color: textPrimary }}>Optional Tours</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {pkg.optionalTours.map((tour, i) => (
-                    <div key={i} className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-2 text-sm font-body text-gray-700">
+                    <div key={i} className="rounded-xl border p-3 flex items-center gap-2 text-sm font-body transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border, color: textPrimary }}>
                       <Tag className="w-3.5 h-3.5 shrink-0" style={{ color: ORANGE }} /> {tour}
                     </div>
                   ))}
@@ -542,21 +560,21 @@ function PreviewContent() {
           )}
 
           {/* Requirements & Notices */}
-          <div className="py-12 px-5 lg:px-10 bg-white">
+          <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgCard }}>
             <div className="max-w-4xl mx-auto">
               <SectionLabel text="Important" />
-              <h2 className="font-condensed font-black text-3xl text-center text-gray-900 mb-8">Requirements & Notes</h2>
+              <h2 className="font-condensed font-black text-3xl text-center mb-8" style={{ color: textPrimary }}>Requirements & Notes</h2>
 
               {/* Warnings */}
               {pkg.importantNotices?.length > 0 && (
-                <div className="mb-6 rounded-2xl border p-5" style={{ backgroundColor: "#FFF8F0", borderColor: "#FFD699" }}>
+                <div className="mb-6 rounded-2xl border p-5 transition-colors duration-300" style={{ backgroundColor: isDark ? "#1C1500" : "#FFF8F0", borderColor: isDark ? "#3A2800" : "#FFD699" }}>
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />
-                    <span className="font-body font-bold text-sm text-gray-900">Important Notices</span>
+                    <span className="font-body font-bold text-sm" style={{ color: textPrimary }}>Important Notices</span>
                   </div>
                   <ul className="space-y-2">
                     {pkg.importantNotices.map((n, i) => (
-                      <li key={i} className="flex items-start gap-2 font-body text-sm text-gray-700">
+                      <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
                         <span style={{ color: ORANGE }} className="mt-0.5 shrink-0">•</span> {n}
                       </li>
                     ))}
@@ -630,10 +648,10 @@ function PreviewContent() {
       )}
 
       {/* CTA */}
-      <div className="py-16 px-4 text-center bg-gray-50 border-t border-gray-200">
+      <div className="py-16 px-4 text-center border-t transition-colors duration-300" style={{ backgroundColor: bgAlt, borderColor: border }}>
         <p className="font-body text-[10px] font-bold tracking-[0.4em] uppercase mb-3" style={{ color: ORANGE }}>— Ready to Explore? —</p>
-        <h2 className="font-condensed font-black text-3xl lg:text-4xl text-gray-900 mb-1">Discover More Destinations</h2>
-        <p className="font-body text-sm text-gray-500 mb-6">Browse our full collection of international travel experiences.</p>
+        <h2 className="font-condensed font-black text-3xl lg:text-4xl mb-1" style={{ color: textPrimary }}>Discover More Destinations</h2>
+        <p className="font-body text-sm mb-6" style={{ color: textSecondary }}>Browse our full collection of international travel experiences.</p>
         <button onClick={() => navigate("/")}
           className="inline-flex items-center gap-2 font-body font-bold text-sm px-8 py-3.5 rounded-full text-white transition-all duration-200 hover:opacity-90"
           style={{ backgroundColor: ORANGE }}
