@@ -165,11 +165,22 @@ function PreviewContent() {
   const highlightIcons = [Plane, Hotel, Coffee, Map, Users, Briefcase, Bus, Ticket];
 
   return (
-    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
-      <ThemeToggle />
+  <div
+    className="min-h-screen transition-colors duration-300"
+    style={{ backgroundColor: bg }}
+  >
+    <ThemeToggle />
+
+   
 
       {/* Navbar */}
-      <div className="sticky top-0 z-50 border-b px-5 lg:px-10 h-16 flex items-center justify-between shadow-sm transition-colors duration-300" style={{ backgroundColor: navBg, borderColor: navBorder }}>
+     <div
+  className="sticky top-0 z-40 border-b px-5 lg:px-10 h-16 flex items-center justify-between shadow-sm transition-colors duration-300"
+  style={{
+    backgroundColor: navBg,
+    borderColor: navBorder,
+  }}
+>
         <img
   src={LOGO_URL}
   alt="Gladex"
