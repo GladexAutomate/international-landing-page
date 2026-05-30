@@ -240,20 +240,9 @@ function PreviewContent() {
             style={{
               background:
               "radial-gradient(circle at center, rgba(255,140,0,0.18) 0%, transparent 70%)"
-            }} />
-          
-
+            }} />       
   <div className="max-w-4xl mx-auto text-center mb-10 relative z-10">
-    <SectionLabel text="Official Travel Preview" />
-
-    
-
-            
-
-    
-
-
-            
+    <SectionLabel text="Official Travel Preview" />         
   </div>
 
   <div className="max-w-5xl mx-auto relative z-10">
@@ -381,34 +370,214 @@ function PreviewContent() {
   </div>
 </div>
 
+{/* ========================================================= */}
+          {/* START: KLOOK THINGS TO DO SECTION                         */}
+          {/* ========================================================= */}
+          <div className="py-12 px-4 lg:px-10 transition-colors duration-300 font-body" style={{ backgroundColor: isDark ? "#111111" : "#FFFFFF" }}>
+            <div className="max-w-6xl mx-auto">
+              
+              {/* Header Title & Summary */}
+              <div className="mb-6">
+                <h2 className="text-2xl lg:text-3xl font-bold font-condensed tracking-wide mb-1" style={{ color: textPrimary }}>
+                  Things to do in Boracay
+                </h2>
+                <div className="flex items-center gap-2 text-xs lg:text-sm">
+                  <span className="text-amber-500 font-bold">★ 4.9</span>
+                  <span style={{ color: textSecondary }}>(22K+ reviews) • 1M+ booked</span>
+                </div>
+              </div>
+
+              {/* Navigation Tabs (Simulated Overview/Things to do/Hotels) */}
+              <div className="flex border-b mb-6 text-sm font-semibold" style={{ borderColor: border }}>
+                <button className="px-4 py-2" style={{ color: textSecondary }}>Overview</button>
+                <button className="px-4 py-2 border-b-2" style={{ borderColor: ORANGE, color: ORANGE }}>Things to do</button>
+                <button className="px-4 py-2" style={{ color: textSecondary }}>Hotels</button>
+              </div>
+
+              {/* Filter Pills Row */}
+              <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {["Tours", "Massages", "Snorkeling", "Cruises"].map((filter, idx) => (
+                    <button key={idx} className="px-3 py-1.5 rounded-md border text-xs font-medium hover:opacity-80 transition-all flex items-center gap-1"
+                      style={{ backgroundColor: bgAlt, borderColor: border, color: textPrimary }}>
+                      <span>{["🥾", "💆", "🤿", "⛵"][idx]}</span> {filter}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Sorting Select Option */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span style={{ color: textSecondary }}>Sort by:</span>
+                  <select className="border rounded px-2 py-1 bg-transparent text-xs font-semibold focus:outline-none" style={{ borderColor: border, color: textPrimary }}>
+                    <option>Klook recommended</option>
+                    <option>Price: low to high</option>
+                    <option>Price: high to low</option>
+                  </select>
+                </div>
+              </div>
+
+              <p className="text-xs mb-4 font-semibold" style={{ color: textSecondary }}>56 results found</p>
+
+              {/* Activities Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-16">
+                {[
+                  { title: "Boracay Tour Package (Island Hopping)", type: "Tours", price: "900", rating: "4.6", booked: "100K+", img: "https://images.unsplash.com/photo-1540206395-68808572332f?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow" },
+                  { title: "Boracay Sunset Paraw Sailing", type: "Water activities", price: "938", rating: "4.6", booked: "30K+", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80", tag: "Book now for today" },
+                  { title: "Sunset Party Cruise in Boracay", type: "Cruises", price: "760", rating: "4.7", booked: "10K+", img: "https://images.unsplash.com/photo-1505080856163-267d49b30624?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow" },
+                  { title: "Boracay Parasailing", type: "Outdoor & sports activities", price: "2,019", rating: "4.8", booked: "40K+", img: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=400&q=80", tag: "Book now for today" },
+                  { title: "Boracay Party Yacht Experience", type: "Water activities", price: "1,250", rating: "4.8", booked: "3+ booked", img: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow" },
+                  { title: "Station X Experience at Hue Hotel Boracay", type: "Tours", price: "899", rating: "4.8", booked: "5K+", img: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow" },
+                  { title: "Boracay ATV and Buggy Car Adventure", type: "Outdoor & sports activities", price: "875", rating: "4.4", booked: "10K+", img: "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=400&q=80", tag: "Book now for today" },
+                  { title: "Boracay Jet Ski Experience", type: "Water activities", price: "2,590", rating: "4.7", booked: "6K+", img: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
+                  { title: "Boracay Diamond Sunset Cruise", type: "Water activities", price: "1,550", rating: "4.4", booked: "7K+", img: "https://images.unsplash.com/photo-1540206395-68808572332f?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow" },
+                  { title: "Boracay Helmet Dive Experience", type: "Water activities", price: "1,000", rating: "4.7", booked: "40K+", img: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80", tag: "Book now for today" },
+                  { title: "Boracay Helicopter Experience", type: "Tours", price: "6,688", rating: "4.8", booked: "5K+", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow" },
+                  { title: "Boracay Land Tour", type: "Tours", price: "984", rating: "4.8", booked: "1K+", img: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow" },
+                ].map((item, idx) => (
+                  <motion.div key={idx} whileHover={{ y: -4 }} className="rounded-xl overflow-hidden border shadow-sm flex flex-col relative group"
+                    style={{ backgroundColor: bgCard, borderColor: border }}>
+                    
+                    {/* Image and Choices Badges */}
+                    <div className="relative aspect-video w-full overflow-hidden bg-gray-200">
+                      <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      {item.choice && (
+                        <span className="absolute top-2 left-2 text-[10px] font-bold text-white px-2 py-0.5 rounded-sm" style={{ backgroundColor: ORANGE }}>
+                          Klook's choice
+                        </span>
+                      )}
+                      <button className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors">
+                        ♥
+                      </button>
+                    </div>
+
+                    {/* Content Details */}
+                    <div className="p-3 flex-1 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-semibold tracking-wide uppercase block mb-1" style={{ color: textSecondary }}>
+                          {item.type}
+                        </span>
+                        <h3 className="text-xs font-bold font-body line-clamp-2 leading-snug mb-1" style={{ color: textPrimary }}>
+                          {item.title}
+                        </h3>
+
+                        {/* Booking Status Dynamic Tags */}
+                        <div className="flex flex-wrap gap-1 my-1.5">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-sm font-medium bg-gray-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                            {item.tag}
+                          </span>
+                          {idx % 2 === 0 && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-sm font-medium bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400">
+                              English guided
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        {/* Rating block */}
+                        <div className="flex items-center gap-1 text-[11px] mb-2">
+                          <span className="text-amber-500 font-bold">★ {item.rating}</span>
+                          <span style={{ color: textSecondary }}>• {item.booked} booked</span>
+                        </div>
+
+                        {/* Pricing section */}
+                        <div className="text-xs font-bold" style={{ color: textPrimary }}>
+                          From <span className="text-sm font-black" style={{ color: ORANGE }}>₱ {item.price}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Review Testimonials Block */}
+              <div className="mb-16">
+                <h3 className="text-lg font-bold font-condensed mb-4" style={{ color: textPrimary }}>
+                  What people say about top experiences
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { user: "MarieAnn ******", date: "9 Mar", comment: "Highly recommend 🤩 very friendly staff will assist you throughout your activities and flexible itinerary." },
+                    { user: "JoshuaAndrew *********", date: "9 Mar", comment: "Very friendly Staff Especially to Miss Noimie who assist us to 3 Activities. Affordable. Good Job. Keep it up." },
+                    { user: "Maegan ****", date: "8 Mar", comment: "Family friendly party yacht. Kids enjoyed the trip and loved how they have plenty of activities on board. The team can improve on snacks." }
+                  ].map((rev, idx) => (
+                    <div key={idx} className="p-4 rounded-xl border text-xs" style={{ backgroundColor: bgCard, borderColor: border }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-zinc-300 dark:bg-zinc-700 flex items-center justify-center font-bold text-[10px]">
+                            {rev.user[0]}
+                          </div>
+                          <span className="font-bold" style={{ color: textPrimary }}>{rev.user}</span>
+                        </div>
+                        <span style={{ color: textSecondary }}>{rev.date}</span>
+                      </div>
+                      <p className="leading-relaxed mb-3" style={{ color: textSecondary }}>{rev.comment}</p>
+                      <div className="flex gap-1 overflow-hidden rounded">
+                        <div className="w-12 h-10 bg-zinc-200 dark:bg-zinc-800 shrink-0" />
+                        <div className="w-12 h-10 bg-zinc-200 dark:bg-zinc-800 shrink-0" />
+                        <div className="w-12 h-10 bg-zinc-200 dark:bg-zinc-800 shrink-0" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Popular Nearby Locations Horizontal Scroll */}
+              <div className="mb-16">
+                <h3 className="text-lg font-bold font-condensed mb-4" style={{ color: textPrimary }}>
+                  Popular places near Boracay
+                </h3>
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
+                  {["Station 1", "CityMall Boracay", "D'Mall Boracay", "Station 2"].map((place, idx) => (
+                    <div key={idx} className="min-w-[220px] max-w-[240px] flex-1 aspect-video rounded-xl overflow-hidden relative group shrink-0 shadow-sm border" style={{ borderColor: border }}>
+                      <img src="https://images.unsplash.com/photo-1540206395-68808572332f?auto=format&fit=crop&w=300&q=80" alt={place} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                      <div className="absolute bottom-3 left-3 text-white">
+                        <h4 className="text-xs font-bold">{place}</h4>
+                        <span className="text-[9px] opacity-80">👥 998K+ visitors</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tag Navigation Clusters */}
+              <div className="space-y-6 pt-6 border-t" style={{ borderColor: border }}>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: textPrimary }}>Top attractions in Boracay</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {["Station 2", "Station 1", "D'Mall Boracay", "Station 3", "CityMall Boracay"].map((item, idx) => (
+                      <span key={idx} className="px-3 py-1 text-xs rounded-md border font-medium cursor-pointer hover:opacity-80 transition-all flex items-center gap-1.5"
+                        style={{ backgroundColor: bgCard, borderColor: border, color: textPrimary }}>
+                        <span className="text-[10px] text-amber-600 font-bold">{idx + 1}</span> {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: textPrimary }}>Top destinations in Philippines</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {["Manila", "Cebu City", "Pasay", "Paranaque", "Makati", "Tagaytay", "El Nido", "Baguio", "Quezon City", "Panglao", "Laguna", "Puerto Princesa", "Coron"].map((item, idx) => (
+                      <span key={idx} className="px-3 py-1 text-xs rounded-md border font-medium cursor-pointer hover:opacity-80 transition-all"
+                        style={{ backgroundColor: bgCard, borderColor: border, color: textPrimary }}>
+                        <span className="text-[10px] opacity-50 mr-1">{idx + 1}</span> {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          {/* ========================================================= */}
+          {/* END: KLOOK THINGS TO DO SECTION                           */}
+          {/* ========================================================= */}
+          
           {/* Hotel Categories & Rates */}
           {pkg.hotelCategories?.length > 0 &&
         <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgCard }}>
-              
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          
             </div>
         }
 
@@ -435,68 +604,10 @@ function PreviewContent() {
 
           {/* Package Highlights Grid */}
           {pkg.highlights?.length > 0 &&
-        <div className="py-12 px-5 lg:px-10 border-t transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
-              
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          
+        <div className="py-12 px-5 lg:px-10 border-t transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>   
             </div>
         }
-
-          {/* Inclusions & Exclusions */}
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
+    
           {/* Day-by-Day Itinerary */}
           {pkg.itinerary?.length > 0 &&
         <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgCard }}>
