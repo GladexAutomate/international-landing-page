@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Home from './pages/Home';
 import DestinationDetail from './pages/DestinationDetail';
 import DestinationPreview from './pages/DestinationPreview';
+import TourPackagePage from './pages/TourPackagePage';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -37,6 +38,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="/destination/:slug" element={<DestinationPreview />} />
       <Route path="/preview/:slug" element={<DestinationPreview />} />
+      <Route path="/tour-packages/:slug" element={<TourPackagePage />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

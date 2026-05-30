@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapPin, ArrowLeft, Star } from "lucide-react";
 import { Heart, ThumbsUp, Check, X } from "lucide-react";
@@ -156,6 +157,8 @@ function ActivityDetailView({ activityId, activityData, onClose, isDark, textPri
 
 export default function ThingsToDoSection({ isDark, textPrimary, textSecondary, border, bgCard, bgAlt, activitiesData }) {
   const [selectedActivity, setSelectedActivity] = useState(null);
+  const navigate = useNavigate();
+  const { slug } = useParams();
 
   const data = activitiesData || {
     cityName: "Activities",
@@ -192,14 +195,25 @@ export default function ThingsToDoSection({ isDark, textPrimary, textSecondary, 
   return (
     <>
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl lg:text-3xl font-bold font-condensed tracking-wide mb-1" style={{ color: textPrimary }}>
-          Things to do in {data.cityName}
-        </h2>
-        <div className="flex items-center gap-2 text-xs lg:text-sm">
-          <span className="text-amber-500 font-bold">★ {data.rating}</span>
-          <span style={{ color: textSecondary }}>({data.reviewCount} reviews) • {data.totalBooked} booked</span>
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl lg:text-3xl font-bold font-condensed tracking-wide mb-1" style={{ color: textPrimary }}>
+            Things to do in {data.cityName}
+          </h2>
+          <div className="flex items-center gap-2 text-xs lg:text-sm">
+            <span className="text-amber-500 font-bold">★ {data.rating}</span>
+            <span style={{ color: textSecondary }}>({data.reviewCount} reviews) • {data.totalBooked} booked</span>
+          </div>
         </div>
+        {slug && (
+          <button
+            onClick={() => navigate(`/tour-packages/${slug}`)}
+            className="shrink-0 px-4 py-2 rounded-full text-xs font-bold tracking-wide text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "#FF8C00" }}
+          >
+            View Full Package →
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
@@ -239,7 +253,7 @@ export default function ThingsToDoSection({ isDark, textPrimary, textSecondary, 
             <motion.div
               key={idx}
               whileHover={{ y: -4 }}
-              onClick={() => setSelectedActivity(item.id)}
+              onClick={() => slug ? navigate(`/tour-packages/${slug}`) : setSelectedActivity(item.id)}
               className="rounded-xl overflow-hidden border shadow-sm flex flex-col relative group cursor-pointer"
               style={{ backgroundColor: bgCard, borderColor: border }}
             >
