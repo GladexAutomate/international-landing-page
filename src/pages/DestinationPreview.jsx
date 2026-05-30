@@ -436,7 +436,7 @@ function PreviewContent() {
           {/* Package Highlights Grid */}
           {pkg.highlights?.length > 0 &&
         <div className="py-12 px-5 lg:px-10 border-t transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
-              <div className="max-w-4xl mx-auto">
+              <div className="max-w-4xl mx-auto hidden">
                 <SectionLabel text="What's Included" />
                 <h2 className="font-condensed font-black text-3xl text-center mb-2" style={{ color: textPrimary }}>Package Highlights</h2>
                 <p className="text-center font-body text-sm mb-8" style={{ color: textSecondary }}>Everything you need for a seamless, unforgettable journey.</p>
