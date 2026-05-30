@@ -9,6 +9,7 @@ import { getDestinationBySlug } from "../data/destinations";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import ThingsToDoSection from "../components/ThingsToDoSection";
+import { getActivitiesForDestination } from "../data/activitiesData";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const ORANGE = "#FF8C00";
@@ -163,6 +164,7 @@ function PreviewContent() {
 
   const pkg = dest.packages?.[activePackageIdx] || dest.packages?.[0];
   const highlightIcons = [Plane, Hotel, Coffee, Map, Users, Briefcase, Bus, Ticket];
+  const activitiesData = getActivitiesForDestination(slug);
 
   return (
     <div
@@ -380,6 +382,7 @@ function PreviewContent() {
                 border={border}
                 bgCard={bgCard}
                 bgAlt={bgAlt}
+                activitiesData={activitiesData}
               />
             </div>
           </div>
