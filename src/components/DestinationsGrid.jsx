@@ -95,7 +95,8 @@ function DestinationCard({ dest, index, isDark, onClick }) {
           className="font-body text-[10px] font-semibold tracking-widest uppercase mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
           style={{ color: "#FF8C00" }}
         >
-          VIEW PREVIEW
+          VIEW BRIEFING
+          
         </div>
       </div>
     </motion.div>
