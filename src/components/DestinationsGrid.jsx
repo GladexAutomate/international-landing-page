@@ -29,7 +29,7 @@ export default function DestinationsGrid() {
             className="font-condensed font-black text-3xl lg:text-5xl"
             style={{ color: headingColor, letterSpacing: "0.03em" }}
           >
-            Where Do You Want To Go?
+            VIDEO BRIEFING
           </h2>
         </motion.div>
 
