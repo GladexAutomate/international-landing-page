@@ -1,22 +1,18 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  MapPin, Star, ChevronRight, AlertTriangle,
-  Check, ExternalLink, ArrowLeft, Info, ChevronLeft
-} from "lucide-react";
+import { MapPin, Star, ChevronRight, AlertTriangle, Check, ExternalLink, ArrowLeft, Info, ChevronLeft } from "lucide-react";
 import { getDestinationBySlug, destinations } from "../data/destinations";
 import { getTourPackageMeta, getRelatedDestinations } from "../data/tourPackagesData";
 import { getDestinationContent } from "../data/destinationContent";
 import PhotoGalleryBlock from "../components/tourPackage/PhotoGalleryBlock";
-import PackageHighlightCard from "../components/tourPackage/PackageHighlightCard";
 import ReviewsSection from "../components/tourPackage/ReviewsSection";
 import WhatToBringSection from "../components/tourPackage/WhatToBringSection";
 import YouMightAlsoLike from "../components/tourPackage/YouMightAlsoLike";
 import HelpCenter from "../components/tourPackage/HelpCenter";
 import ExploreMoreSection from "../components/tourPackage/ExploreMoreSection";
 import PackageFAQ from "../components/tourPackage/PackageFAQ";
-import DestinationInfoCard from "../components/tourPackage/DestinationInfoCard";
+import DestinationGuideSection from "../components/tourPackage/DestinationGuideSection";
 
 const ORANGE = "#FF8C00";
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
@@ -26,6 +22,72 @@ function SectionHeader({ title }) {
     <div className="flex items-center gap-3 mb-4">
       <div className="w-1 h-6 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
       <h2 className="text-xl font-black font-condensed tracking-wide text-gray-900">{title}</h2>
+    </div>
+  );
+}
+
+// Sidebar card — info only, no pricing/booking
+function BriefingInfoCard({ destination, meta, pkg }) {
+  return (
+    <div className="rounded-2xl border shadow-lg p-5 space-y-4" style={{ backgroundColor: "#FFFFFF", borderColor: "#E5E5E5" }}>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Travel Briefing</p>
+        <h3 className="text-lg font-black font-condensed text-gray-900">{destination?.name}</h3>
+        <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+          <MapPin className="w-3 h-3" style={{ color: ORANGE }} />
+          {destination?.country}
+        </p>
+      </div>
+
+      <div className="pt-3 border-t space-y-2" style={{ borderColor: "#F0F0F0" }}>
+        <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Quick Reference</p>
+        {[
+          { icon: "✈️", label: "Confirm arrival transfer with guide" },
+          { icon: "🏨", label: "Hotel check-in from 2:00 PM" },
+          { icon: "📋", label: "Join tour group 10 min early" },
+          { icon: "📄", label: "Carry passport copy at all times" },
+          { icon: "📞", label: "Save emergency contact on phone" },
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs text-gray-600">
+            <span>{item.icon}</span>
+            <span>{item.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {pkg?.inclusions?.length > 0 && (
+        <div className="pt-3 border-t" style={{ borderColor: "#F0F0F0" }}>
+          <p className="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Your Trip Includes</p>
+          <ul className="space-y-1.5">
+            {pkg.inclusions.slice(0, 6).map((item, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs">
+                <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                <span className="text-gray-600">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Destination tags — info only */}
+      {meta?.goodToKnow?.length > 0 && (
+        <div className="pt-3 border-t" style={{ borderColor: "#F0F0F0" }}>
+          <p className="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Good to Know</p>
+          <ul className="space-y-1">
+            {meta.goodToKnow.slice(0, 4).map((tip, i) => (
+              <li key={i} className="text-xs text-gray-500 flex items-start gap-1.5">
+                <span style={{ color: ORANGE }}>›</span> {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="pt-3 border-t flex items-center gap-2" style={{ borderColor: "#F0F0F0" }}>
+        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+        <span className="text-xs font-bold text-gray-700">4.8/5</span>
+        <span className="text-xs text-gray-400">• {(meta?.operatorReviews || 10000).toLocaleString()}+ travelers served</span>
+      </div>
     </div>
   );
 }
@@ -45,7 +107,7 @@ export default function TourPackagePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-2xl font-bold text-gray-400 mb-4 font-condensed">Destination not found</p>
-          <button onClick={() => navigate("/")} className="text-sm underline font-body" style={{ color: ORANGE }}>
+          <button onClick={() => navigate("/")} className="text-sm underline" style={{ color: ORANGE }}>
             ← Back to Home
           </button>
         </div>
@@ -56,7 +118,6 @@ export default function TourPackagePage() {
   const pkg = dest.packages?.[activePkgIdx] || dest.packages?.[0];
   const gallery = meta?.gallery || [dest.heroImage];
 
-  // Build main gallery images with captions from first gallery block or fallback
   const mainGalleryImages = content.galleryBlocks?.[0]?.images?.length
     ? content.galleryBlocks[0].images
     : gallery.map((url, i) => ({ url, caption: `${dest.name} — Photo ${i + 1}` }));
@@ -104,16 +165,10 @@ export default function TourPackagePage() {
           {dest.name} — Travel Briefing Guide
         </h1>
 
-        {/* Tags + Rating */}
+        {/* Info tags — no booking/pricing tags */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
-          <div className="flex flex-wrap gap-1.5">
-            {(meta?.tags || ["English", "Confirmed Travelers", "Travel Guide"]).map((tag, i) => (
-              <span key={i} className="text-xs px-2.5 py-1 rounded-full border font-medium text-gray-600" style={{ borderColor: "#D0D0D0" }}>
-                {tag}
-              </span>
-            ))}
-          </div>
           <div className="flex items-center gap-1.5 text-sm">
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             <span className="font-black text-amber-500">4.8/5</span>
             <span className="text-gray-400 text-xs">{(meta?.operatorReviews || 10000).toLocaleString()} travelers</span>
           </div>
@@ -121,9 +176,15 @@ export default function TourPackagePage() {
             <MapPin className="w-3.5 h-3.5" style={{ color: ORANGE }} />
             <span>{dest.country}</span>
           </div>
+          <span className="text-xs px-2.5 py-1 rounded-full border font-medium text-gray-600" style={{ borderColor: "#D0D0D0" }}>
+            ✈️ Confirmed Travelers Only
+          </span>
+          <span className="text-xs px-2.5 py-1 rounded-full border font-medium text-gray-600" style={{ borderColor: "#D0D0D0" }}>
+            📋 Briefing Portal
+          </span>
         </div>
 
-        {/* Package Tabs (if multiple) */}
+        {/* Package Tabs (if multiple) — for multi-city only */}
         {dest.packages?.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {dest.packages.map((p, i) => (
@@ -143,23 +204,17 @@ export default function TourPackagePage() {
           </div>
         )}
 
-        {/* ── SECTION 1: PICTURE GALLERY (TOP) ── */}
+        {/* ── SECTION 1: PHOTO GALLERY ── */}
         <div className="mb-10">
           <PhotoGalleryBlock images={mainGalleryImages} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* ── LEFT: Main Content ── */}
+          {/* ── MAIN CONTENT ── */}
           <div className="lg:col-span-2 space-y-12">
 
-            {/* ── SECTION 2: PACKAGE HIGHLIGHT / BOOK THIS PACKAGE ── */}
-            <div>
-              <SectionHeader title="Book this Package" />
-              <PackageHighlightCard dest={dest} pkg={pkg} />
-            </div>
-
-            {/* ── SECTION 3: WHAT TO EXPECT ── */}
+            {/* ── WHAT TO EXPECT ── */}
             <div>
               <SectionHeader title={content.whatToExpectTitle || `What to Expect from ${dest.name} Tour`} />
               <div className="p-5 rounded-2xl border bg-gray-50 border-gray-100 mb-6">
@@ -182,14 +237,12 @@ export default function TourPackagePage() {
                 </ul>
               </div>
 
-              {/* Gallery blocks under What to Expect */}
+              {/* Gallery blocks */}
               {(content.galleryBlocks || []).map((block, bi) => (
                 <div key={bi} className={bi > 0 ? "mt-8" : ""}>
                   <PhotoGalleryBlock title={bi === 0 ? "Destination Highlights" : block.title} images={block.images} />
                 </div>
               ))}
-
-              {/* Second gallery block from additional gallery images (if no content blocks) */}
               {(!content.galleryBlocks || content.galleryBlocks.length === 0) && gallery.length > 1 && (
                 <PhotoGalleryBlock
                   title="Destination Photos"
@@ -198,20 +251,20 @@ export default function TourPackagePage() {
               )}
             </div>
 
-            {/* ── SECTION 4: REVIEWS ── */}
+            {/* ── REVIEWS CAROUSEL ── */}
             <ReviewsSection reviews={content.reviews || []} />
 
-            {/* ── SECTION 5: GOOD TO KNOW — WHAT TO BRING + SEASONS ── */}
-            <WhatToBringSection
-              items={content.whatToBring || []}
-              seasons={content.seasons || []}
-            />
+            {/* ── GOOD TO KNOW: WHAT TO BRING + SEASONS ── */}
+            <WhatToBringSection items={content.whatToBring || []} seasons={content.seasons || []} />
 
-            {/* ── SECTION 6: YOU MIGHT ALSO LIKE + TRENDING SIGHTS ── */}
+            {/* ── YOU MIGHT ALSO LIKE + TRENDING SIGHTS (image carousels) ── */}
             <YouMightAlsoLike
               activities={content.mightAlsoLike || pkg?.optionalTours || []}
               trendingSights={content.trendingSights || []}
             />
+
+            {/* ── DESTINATION GUIDE ── */}
+            <DestinationGuideSection dest={dest} />
 
             {/* ── ABOUT THE OPERATOR ── */}
             <div className="p-5 rounded-2xl border border-gray-100">
@@ -224,7 +277,7 @@ export default function TourPackagePage() {
                   <p className="font-bold text-gray-900 mb-1">Gladex Travel & Tours</p>
                   <p className="text-sm text-gray-600 mb-3 leading-relaxed">
                     Your trusted travel partner for international group and independent tours across Asia and beyond.
-                    We specialize in organizing seamless, affordable, and memorable travel experiences for Filipino travelers.
+                    We specialize in organizing seamless and memorable travel experiences for confirmed Filipino travelers.
                   </p>
                   <div className="flex flex-wrap items-center gap-5 text-sm text-gray-500">
                     <div className="flex items-center gap-1.5">
@@ -256,24 +309,22 @@ export default function TourPackagePage() {
                     </li>
                   ))}
                 </ul>
-                {pkg?.links?.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {pkg.links
-                      .filter(l => !l.label.toLowerCase().includes("book") && !l.label.toLowerCase().includes("messenger"))
-                      .map((link, i) => (
-                        <a
-                          key={i}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium hover:opacity-80 transition-all"
-                          style={{ borderColor: ORANGE, color: ORANGE }}
-                        >
-                          {link.label} <ExternalLink className="w-3 h-3" />
-                        </a>
-                      ))}
-                  </div>
-                )}
+                {pkg?.links?.filter(l =>
+                  !l.label.toLowerCase().includes("book") &&
+                  !l.label.toLowerCase().includes("messenger") &&
+                  !l.label.toLowerCase().includes("reserve")
+                ).map((link, i) => (
+                  <a
+                    key={i}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium hover:opacity-80 transition-all mr-2 mb-2"
+                    style={{ borderColor: ORANGE, color: ORANGE }}
+                  >
+                    {link.label} <ExternalLink className="w-3 h-3" />
+                  </a>
+                ))}
               </div>
             )}
 
@@ -288,7 +339,7 @@ export default function TourPackagePage() {
               </div>
             )}
 
-            {/* Important Notices */}
+            {/* Important Notices — reminders only, no pricing */}
             {pkg?.importantNotices?.length > 0 && (
               <div className="p-4 rounded-xl border" style={{ backgroundColor: "#FFF8F0", borderColor: "#FFD699" }}>
                 <div className="flex items-center gap-2 mb-3">
@@ -297,7 +348,7 @@ export default function TourPackagePage() {
                 </div>
                 <ul className="space-y-1.5">
                   {pkg.importantNotices
-                    .filter(n => !n.includes("PERSONAL TRANSACTIONS"))
+                    .filter(n => !n.includes("PERSONAL TRANSACTIONS") && !n.includes("price") && !n.includes("rate") && !n.includes("USD"))
                     .map((notice, i) => (
                       <li key={i} className="text-xs text-gray-600 flex items-start gap-1.5">
                         <span className="shrink-0 mt-0.5" style={{ color: ORANGE }}>›</span>
@@ -308,13 +359,13 @@ export default function TourPackagePage() {
               </div>
             )}
 
-            {/* ── SECTION 7: FAQs ── */}
+            {/* ── FAQs ── */}
             <PackageFAQ faqs={meta?.faqs || []} />
 
-            {/* ── SECTION 8: HELP CENTER ── */}
+            {/* ── HELP CENTER ── */}
             <HelpCenter />
 
-            {/* ── SECTION 9: EXPLORE MORE ── */}
+            {/* ── EXPLORE MORE ── */}
             <ExploreMoreSection destinations={related} />
 
             {/* Bottom Nav */}
@@ -324,22 +375,22 @@ export default function TourPackagePage() {
                 className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border transition-all hover:bg-gray-50 w-full sm:w-auto justify-center"
                 style={{ borderColor: "#E5E5E5", color: "#555" }}
               >
-                <ChevronLeft className="w-4 h-4" /> Back to Destinations
+                <ChevronLeft className="w-4 h-4" /> Back
               </button>
               <button
                 onClick={() => navigate("/")}
                 className="flex items-center gap-2 text-sm font-semibold px-6 py-2.5 rounded-xl text-white transition-all hover:opacity-90 w-full sm:w-auto justify-center"
                 style={{ backgroundColor: ORANGE }}
               >
-                View All Destinations
+                All Destinations
               </button>
             </div>
           </div>
 
-          {/* ── RIGHT: Sticky Info Card ── */}
+          {/* ── SIDEBAR ── */}
           <div className="lg:col-span-1">
             <div className="sticky top-20">
-              <DestinationInfoCard pkg={pkg} destination={dest} meta={meta} />
+              <BriefingInfoCard destination={dest} meta={meta} pkg={pkg} />
             </div>
           </div>
         </div>
