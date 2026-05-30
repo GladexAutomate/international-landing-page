@@ -457,7 +457,7 @@ function PreviewContent() {
 
           {/* Inclusions & Exclusions */}
           {(pkg.inclusions?.length > 0 || pkg.exclusions?.length > 0) &&
-        <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgAlt }}>
+        <div className="py-12 px-5 lg:px-10 transition-colors duration-300 hidden" style={{ backgroundColor: bgAlt }}>
               <div className="max-w-4xl mx-auto">
                 <SectionLabel text="Package Details" />
                 <h2 className="font-condensed font-black text-3xl text-center mb-8" style={{ color: textPrimary }}>Inclusions & Exclusions</h2>
