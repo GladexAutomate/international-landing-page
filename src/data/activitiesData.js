@@ -9,7 +9,7 @@ export const destinationActivities = {
   korea: {
     cityName: "Korea",
     rating: "4.8",
-    reviews: "18K+ reviews",
+    reviewCount: "18K+ reviews",
     totalBooked: "500K+",
     activities: [
       { id: "nami-island-day-trip", title: "Nami Island Day Trip from Seoul", type: "Nature Tours", price: "2,800", rating: "4.8", booked: "200K+", img: "https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow", choice: true },
@@ -36,7 +36,7 @@ export const destinationActivities = {
   japan: {
     cityName: "Japan",
     rating: "4.9",
-    reviews: "25K+ reviews",
+    reviewCount: "25K+ reviews",
     totalBooked: "800K+",
     activities: [
       { id: "universal-studios-japan", title: "Universal Studios Japan (USJ) Tickets", type: "Theme Parks", price: "4,200", rating: "4.9", booked: "500K+", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -63,7 +63,7 @@ export const destinationActivities = {
   singapore: {
     cityName: "Singapore",
     rating: "4.8",
-    reviews: "20K+ reviews",
+    reviewCount: "20K+ reviews",
     totalBooked: "600K+",
     activities: [
       { id: "universal-studios-singapore", title: "Universal Studios Singapore Tickets", type: "Theme Parks", price: "4,500", rating: "4.8", booked: "400K+", img: "https://images.unsplash.com/photo-1565967511849-76a60a516170?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -90,7 +90,7 @@ export const destinationActivities = {
   bangkok: {
     cityName: "Bangkok",
     rating: "4.7",
-    reviews: "22K+ reviews",
+    reviewCount: "22K+ reviews",
     totalBooked: "700K+",
     activities: [
       { id: "floating-market-tour", title: "Damnoen Saduak Floating Market Tour", type: "Cultural Tours", price: "2,200", rating: "4.7", booked: "300K+", img: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=400&q=80", tag: "Book now for tomorrow", choice: true },
@@ -117,7 +117,7 @@ export const destinationActivities = {
   "bangkok-pattaya": {
     cityName: "Bangkok & Pattaya",
     rating: "4.7",
-    reviews: "16K+ reviews",
+    reviewCount: "16K+ reviews",
     totalBooked: "450K+",
     activities: [
       { id: "pattaya-coral-island", title: "Pattaya Coral Island Day Trip", type: "Water Activities", price: "2,500", rating: "4.7", booked: "200K+", img: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -142,7 +142,7 @@ export const destinationActivities = {
   hongkong: {
     cityName: "Hong Kong",
     rating: "4.8",
-    reviews: "19K+ reviews",
+    reviewCount: "19K+ reviews",
     totalBooked: "550K+",
     activities: [
       { id: "disneyland-hong-kong", title: "Hong Kong Disneyland 1-Day Pass", type: "Theme Parks", price: "4,800", rating: "4.8", booked: "350K+", img: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -169,7 +169,7 @@ export const destinationActivities = {
   "danang-vietnam": {
     cityName: "Da Nang",
     rating: "4.7",
-    reviews: "12K+ reviews",
+    reviewCount: "12K+ reviews",
     totalBooked: "300K+",
     activities: [
       { id: "bana-hills-golden-bridge", title: "Ba Na Hills + Golden Bridge Day Tour", type: "Nature Tours", price: "2,800", rating: "4.9", booked: "250K+", img: "https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -194,7 +194,7 @@ export const destinationActivities = {
   dubai: {
     cityName: "Dubai",
     rating: "4.9",
-    reviews: "28K+ reviews",
+    reviewCount: "28K+ reviews",
     totalBooked: "900K+",
     activities: [
       { id: "burj-khalifa-at-the-top", title: "Burj Khalifa 'At the Top' Observation Deck", type: "Sightseeing", price: "4,500", rating: "4.8", booked: "500K+", img: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -221,7 +221,7 @@ export const destinationActivities = {
   taipei: {
     cityName: "Taipei",
     rating: "4.7",
-    reviews: "14K+ reviews",
+    reviewCount: "14K+ reviews",
     totalBooked: "380K+",
     activities: [
       { id: "taipei-101-observation-deck", title: "Taipei 101 Observation Deck Tickets", type: "Sightseeing", price: "1,800", rating: "4.8", booked: "300K+", img: "https://images.unsplash.com/photo-1470004914212-05527e49370b?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -246,7 +246,7 @@ export const destinationActivities = {
   bali: {
     cityName: "Bali",
     rating: "4.8",
-    reviews: "30K+ reviews",
+    reviewCount: "30K+ reviews",
     totalBooked: "1M+",
     activities: [
       { id: "bali-swing-experience", title: "Bali Swing + Instagrammable Spots Tour", type: "Adventure", price: "2,500", rating: "4.8", booked: "400K+", img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -271,7 +271,7 @@ export const destinationActivities = {
   "malaysia-kota-kinabalu": {
     cityName: "Kota Kinabalu",
     rating: "4.7",
-    reviews: "8K+ reviews",
+    reviewCount: "8K+ reviews",
     totalBooked: "150K+",
     activities: [
       { id: "kk-island-hopping-snorkel", title: "Tunku Abdul Rahman Islands Snorkeling", type: "Water Activities", price: "1,800", rating: "4.8", booked: "100K+", img: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=400&q=80", tag: "Book now for today", choice: true },
@@ -295,7 +295,7 @@ export const destinationActivities = {
   default: {
     cityName: "Destination",
     rating: "4.7",
-    reviews: "10K+ reviews",
+    reviewCount: "10K+ reviews",
     totalBooked: "100K+",
     activities: [
       { id: "city-tour-1", title: "Full Day City Tour", type: "City Tours", price: "1,500", rating: "4.7", booked: "50K+", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80", tag: "Book now for today" },

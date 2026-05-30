@@ -160,7 +160,7 @@ export default function ThingsToDoSection({ isDark, textPrimary, textSecondary, 
   const data = activitiesData || {
     cityName: "Activities",
     rating: "4.8",
-    reviews: "10K+",
+    reviewCount: "10K+",
     totalBooked: "100K+",
     activities: [],
     reviews: [],
@@ -198,7 +198,7 @@ export default function ThingsToDoSection({ isDark, textPrimary, textSecondary, 
         </h2>
         <div className="flex items-center gap-2 text-xs lg:text-sm">
           <span className="text-amber-500 font-bold">★ {data.rating}</span>
-          <span style={{ color: textSecondary }}>({data.reviews} reviews) • {data.totalBooked} booked</span>
+          <span style={{ color: textSecondary }}>({data.reviewCount} reviews) • {data.totalBooked} booked</span>
         </div>
       </div>
 
