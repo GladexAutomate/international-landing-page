@@ -230,30 +230,7 @@ function PreviewContent() {
         </div>
       ) : (
         <>
-          {/* Package Overview */}
-          <div className="py-8 px-5 lg:px-10 border-b transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
-            <div className="max-w-4xl mx-auto">
-              <div className="flex flex-wrap gap-4 items-start justify-between">
-                <div>
-                  <h2 className="font-condensed font-black text-2xl lg:text-3xl mb-1" style={{ color: textPrimary }}>{pkg.name}</h2>
-                  <div className="flex flex-wrap gap-3 text-sm font-body" style={{ color: textSecondary }}>
-                    <span>📅 {pkg.duration}</span>
-                    {pkg.minimumPax && <span>👥 Minimum {pkg.minimumPax} pax required</span>}
-                    {pkg.seasonType && <span className="font-semibold" style={{ color: ORANGE }}>🏷️ {pkg.seasonType}</span>}
-                    {pkg.code && <span className="font-mono text-xs px-2 py-0.5 rounded" style={{ backgroundColor: isDark ? "#2A2A2A" : "#F0F0F0", color: textSecondary }}>{pkg.code}</span>}
-                  </div>
-                </div>
-                {pkg.travelDates?.length > 0 && (
-                  <div className="text-right">
-                    <p className="font-body text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: textSecondary }}>Travel Dates</p>
-                    {pkg.travelDates.map((d, i) => (
-                      <p key={i} className="font-body text-xs" style={{ color: textSecondary }}>{d}</p>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+         \
 
           {/* Video Preview */}
 <div className="bg-black py-16 px-4 lg:px-10 relative overflow-hidden">
