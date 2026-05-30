@@ -637,9 +637,9 @@ function PreviewContent() {
 
       {/* CTA */}
       <div className="py-16 px-4 text-center border-t transition-colors duration-300" style={{ backgroundColor: bgAlt, borderColor: border }}>
-        <p className="font-body text-[10px] font-bold tracking-[0.4em] uppercase mb-3" style={{ color: ORANGE }}>— Ready to Explore? —</p>
-        <h2 className="font-condensed font-black text-3xl lg:text-4xl mb-1" style={{ color: textPrimary }}>Discover More Destinations</h2>
-        <p className="font-body text-sm mb-6" style={{ color: textSecondary }}>Browse our full collection of international travel experiences.</p>
+        <p className="font-body text-[10px] font-bold tracking-[0.4em] uppercase mb-3 hidden" style={{ color: ORANGE }}>— Ready to Explore? —</p>
+        <h2 className="font-condensed font-black text-3xl lg:text-4xl mb-1 hidden" style={{ color: textPrimary }}>Discover More Destinations</h2>
+        <p className="font-body text-sm mb-6 hidden" style={{ color: textSecondary }}>Browse our full collection of international travel experiences.</p>
         <button onClick={() => navigate("/")}
         className="inline-flex items-center gap-2 font-body font-bold text-sm px-8 py-3.5 rounded-full text-white transition-all duration-200 hover:opacity-90"
         style={{ backgroundColor: ORANGE }}>
