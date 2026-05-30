@@ -548,14 +548,14 @@ function PreviewContent() {
         }
 
           {/* Requirements & Notices */}
-          <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgCard }}>
+          <div className="py-12 px-5 lg:px-10 transition-colors duration-300 hidden" style={{ backgroundColor: bgCard }}>
             <div className="max-w-4xl mx-auto">
               <SectionLabel text="Important" />
-              <h2 className="font-condensed font-black text-3xl text-center mb-8" style={{ color: textPrimary }}>Requirements & Notes</h2>
+              <h2 className="font-condensed font-black text-3xl text-center mb-8 hidden" style={{ color: textPrimary }}>Requirements & Notes</h2>
 
               {/* Warnings */}
               {pkg.importantNotices?.length > 0 &&
-            <div className="mb-6 rounded-2xl border p-5 transition-colors duration-300" style={{ backgroundColor: isDark ? "#1C1500" : "#FFF8F0", borderColor: isDark ? "#3A2800" : "#FFD699" }}>
+            <div className="mb-6 rounded-2xl border p-5 transition-colors duration-300 hidden" style={{ backgroundColor: isDark ? "#1C1500" : "#FFF8F0", borderColor: isDark ? "#3A2800" : "#FFD699" }}>
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />
                     <span className="font-body font-bold text-sm" style={{ color: textPrimary }}>Important Notices</span>
