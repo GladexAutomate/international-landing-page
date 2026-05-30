@@ -16,7 +16,7 @@ const ORANGE = "#FF8C00";
 function SectionLabel({ text }) {
   return (
     <div className="flex items-center justify-center gap-2 mb-3">
-      <div className="h-px w-8" style={{ backgroundColor: ORANGE }} />
+      <div className="h-px w-8 hidden" style={{ backgroundColor: ORANGE }} />
       <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase hidden" style={{ color: ORANGE }}>{text}</span>
       <div className="h-px w-8 hidden" style={{ backgroundColor: ORANGE }} />
     </div>);
