@@ -16,9 +16,9 @@ const ORANGE = "#FF8C00";
 function SectionLabel({ text }) {
   return (
     <div className="flex items-center justify-center gap-2 mb-3">
-      <div className="h-px w-8 hidden" style={{ backgroundColor: ORANGE }} />
-      <span className="font-body text-[10px] font-bold tracking-[0.4em] uppercase hidden" style={{ color: ORANGE }}>{text}</span>
-      <div className="h-px w-8 hidden" style={{ backgroundColor: ORANGE }} />
+      
+      
+      
     </div>);
 
 }
@@ -246,14 +246,14 @@ function PreviewContent() {
   <div className="max-w-4xl mx-auto text-center mb-10 relative z-10">
     <SectionLabel text="Official Travel Preview" />
 
-    <h2 className="font-condensed font-black text-white text-3xl lg:text-5xl mb-3 tracking-wide hidden">
-      Experience {dest.name}
-    </h2>
+    
 
-    <p className="font-body text-gray-400 text-sm lg:text-base max-w-xl mx-auto leading-relaxed hidden">
-      Watch our exclusive cinematic travel preview and explore the beauty,
-      culture, and unforgettable moments waiting for you in {dest.name}.
-    </p>
+            
+
+    
+
+
+            
   </div>
 
   <div className="max-w-5xl mx-auto relative z-10">
@@ -384,31 +384,31 @@ function PreviewContent() {
           {/* Hotel Categories & Rates */}
           {pkg.hotelCategories?.length > 0 &&
         <div className="py-12 px-5 lg:px-10 transition-colors duration-300" style={{ backgroundColor: bgCard }}>
-              <div className="max-w-4xl mx-auto hidden">
-                <SectionLabel text="Rooms & Rates" />
-                <h2 className="font-condensed font-black text-3xl text-center mb-2" style={{ color: textPrimary }}>Hotel Categories & Rates</h2>
-                <p className="text-center font-body text-sm mb-8" style={{ color: textSecondary }}>Select your preferred accommodation category.</p>
-                <div className="space-y-4">
-                  {pkg.hotelCategories.map((cat, i) =>
-              <div key={i} className="rounded-2xl overflow-hidden border" style={{ borderColor: border }}>
-                      <div className="px-5 py-3 font-body font-bold text-sm text-white flex items-center gap-2" style={{ backgroundColor: ORANGE }}>
-                        <Hotel className="w-4 h-4" /> {cat.category}
-                      </div>
-                      <div className="px-5 pt-3 pb-2" style={{ backgroundColor: bgCard }}>
-                        {cat.hotels &&
-                  <div className="mb-2">
-                            {cat.hotels.map((h, j) =>
-                    <p key={j} className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>• {h}</p>
-                    )}
-                          </div>
-                  }
-                        <HotelRatesTable category={cat} />
-                      </div>
-                    </div>
-              )}
-                </div>
-                <p className="mt-4 text-center font-body text-xs" style={{ color: textSecondary }}>* All rates are per person. Subject to availability and change without prior notice. Hotel is subject to availability — similar category will be substituted if needed.</p>
-              </div>
+              
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
             </div>
         }
 
@@ -436,66 +436,66 @@ function PreviewContent() {
           {/* Package Highlights Grid */}
           {pkg.highlights?.length > 0 &&
         <div className="py-12 px-5 lg:px-10 border-t transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
-              <div className="max-w-4xl mx-auto hidden">
-                <SectionLabel text="What's Included" />
-                <h2 className="font-condensed font-black text-3xl text-center mb-2" style={{ color: textPrimary }}>Package Highlights</h2>
-                <p className="text-center font-body text-sm mb-8" style={{ color: textSecondary }}>Everything you need for a seamless, unforgettable journey.</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {pkg.highlights.map((h, i) => {
-                const Icon = highlightIcons[i % highlightIcons.length];
-                return (
-                  <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-2xl border text-center hover:shadow-md transition-shadow" style={{ backgroundColor: bgAlt, borderColor: border }}>
-                        <Icon className="w-5 h-5" style={{ color: ORANGE }} />
-                        <span className="font-body text-xs font-semibold leading-snug" style={{ color: textPrimary }}>{h}</span>
-                      </div>);
+              
 
-              })}
-                </div>
-              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
             </div>
         }
 
           {/* Inclusions & Exclusions */}
-          {(pkg.inclusions?.length > 0 || pkg.exclusions?.length > 0) &&
-        <div className="py-12 px-5 lg:px-10 transition-colors duration-300 hidden" style={{ backgroundColor: bgAlt }}>
-              <div className="max-w-4xl mx-auto">
-                <SectionLabel text="Package Details" />
-                <h2 className="font-condensed font-black text-3xl text-center mb-8" style={{ color: textPrimary }}>Inclusions & Exclusions</h2>
-                <div className="grid sm:grid-cols-2 gap-6">
-                  {pkg.inclusions?.length > 0 &&
-              <div className="rounded-2xl border p-6 transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
-                      <div className="flex items-center gap-2 mb-4">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="font-body font-bold text-sm" style={{ color: textPrimary }}>Included ✅</span>
-                      </div>
-                      <ul className="space-y-2">
-                        {pkg.inclusions.map((item, i) =>
-                  <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
-                            <span className="text-green-500 mt-0.5 shrink-0">✓</span> {item}
-                          </li>
-                  )}
-                      </ul>
-                    </div>
-              }
-                  {pkg.exclusions?.length > 0 &&
-              <div className="rounded-2xl border p-6 transition-colors duration-300" style={{ backgroundColor: bgCard, borderColor: border }}>
-                      <div className="flex items-center gap-2 mb-4">
-                        <XCircle className="w-5 h-5 text-red-400" />
-                        <span className="font-body font-bold text-sm" style={{ color: textPrimary }}>Not Included ❌</span>
-                      </div>
-                      <ul className="space-y-2">
-                        {pkg.exclusions.map((item, i) =>
-                  <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
-                            <span className="text-red-400 mt-0.5 shrink-0">✗</span> {item}
-                          </li>
-                  )}
-                      </ul>
-                    </div>
-              }
-                </div>
-              </div>
-            </div>
-        }
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
           {/* Day-by-Day Itinerary */}
           {pkg.itinerary?.length > 0 &&
@@ -548,98 +548,98 @@ function PreviewContent() {
         }
 
           {/* Requirements & Notices */}
-          <div className="py-12 px-5 lg:px-10 transition-colors duration-300 hidden" style={{ backgroundColor: bgCard }}>
-            <div className="max-w-4xl mx-auto">
-              <SectionLabel text="Important" />
-              <h2 className="font-condensed font-black text-3xl text-center mb-8 hidden" style={{ color: textPrimary }}>Requirements & Notes</h2>
+          
 
-              {/* Warnings */}
-              {pkg.importantNotices?.length > 0 &&
-            <div className="mb-6 rounded-2xl border p-5 transition-colors duration-300 hidden" style={{ backgroundColor: isDark ? "#1C1500" : "#FFF8F0", borderColor: isDark ? "#3A2800" : "#FFD699" }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />
-                    <span className="font-body font-bold text-sm" style={{ color: textPrimary }}>Important Notices</span>
-                  </div>
-                  <ul className="space-y-2">
-                    {pkg.importantNotices.map((n, i) =>
-                <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
-                        <span style={{ color: ORANGE }} className="mt-0.5 shrink-0">•</span> {n}
-                      </li>
-                )}
-                  </ul>
-                </div>
-            }
 
-              {pkg.visaInfo &&
-            <AccordionItem title="Visa Requirements" accent>
-                  <div className="flex items-start gap-2">
-                    <Info className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ORANGE }} />
-                    <span>{pkg.visaInfo}</span>
-                  </div>
-                </AccordionItem>
-            }
 
-              {pkg.requirements?.length > 0 &&
-            <AccordionItem title="Travel Requirements">
-                  <ul className="space-y-1">
-                    {pkg.requirements.map((r, i) => <li key={i} className="flex items-start gap-2"><span style={{ color: ORANGE }}>•</span> {r}</li>)}
-                  </ul>
-                </AccordionItem>
-            }
 
-              {pkg.termsAndConditions &&
-            <AccordionItem title="Terms & Conditions">
-                  {pkg.termsAndConditions}
-                </AccordionItem>
-            }
 
-              {pkg.fuelSurcharge &&
-            <AccordionItem title="⛽ Fuel Surcharge Notice" accent>
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
-                    <span>{pkg.fuelSurcharge}</span>
-                  </div>
-                </AccordionItem>
-            }
 
-              {pkg.insuranceNote &&
-            <AccordionItem title="🛡️ Travel Insurance">
-                  {pkg.insuranceNote}
-                </AccordionItem>
-            }
 
-              {pkg.shoppingDisclaimer &&
-            <AccordionItem title="🛍️ Shopping Stop Disclaimer">
-                  {pkg.shoppingDisclaimer}
-                </AccordionItem>
-            }
 
-              {pkg.remarks &&
-            <AccordionItem title="📋 Remarks & Hotel Notes">
-                  {pkg.remarks}
-                </AccordionItem>
-            }
-            </div>
-          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
           {/* Global Warning */}
-          <div className="py-6 px-5 lg:px-10 bg-black hidden">
-            <div className="max-w-4xl mx-auto text-center">
-              <p className="font-body text-xs text-gray-400 hidden">
-                ⚠️ <strong className="text-white">PERSONAL TRANSACTIONS NOT ALLOWED.</strong> All bookings must go through official Gladex Travel channels only. •
-                Passport validity: minimum 6 months. • Rates subject to change without prior notice. • Hotel subject to availability — similar category substitution may apply. •
-                Unused services are non-refundable.
-              </p>
-            </div>
-          </div>
+          
+
+
+
+
+
+
+
+        
         </>
       }
 
       {/* CTA */}
       <div className="py-16 px-4 text-center border-t transition-colors duration-300" style={{ backgroundColor: bgAlt, borderColor: border }}>
-        <p className="font-body text-[10px] font-bold tracking-[0.4em] uppercase mb-3 hidden" style={{ color: ORANGE }}>— Ready to Explore? —</p>
-        <h2 className="font-condensed font-black text-3xl lg:text-4xl mb-1 hidden" style={{ color: textPrimary }}>Discover More Destinations</h2>
-        <p className="font-body text-sm mb-6 hidden" style={{ color: textSecondary }}>Browse our full collection of international travel experiences.</p>
+        
+        
+        
         <button onClick={() => navigate("/")}
         className="inline-flex items-center gap-2 font-body font-bold text-sm px-8 py-3.5 rounded-full text-white transition-all duration-200 hover:opacity-90"
         style={{ backgroundColor: ORANGE }}>
