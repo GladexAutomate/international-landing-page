@@ -623,9 +623,9 @@ function PreviewContent() {
           </div>
 
           {/* Global Warning */}
-          <div className="py-6 px-5 lg:px-10 bg-black">
+          <div className="py-6 px-5 lg:px-10 bg-black hidden">
             <div className="max-w-4xl mx-auto text-center">
-              <p className="font-body text-xs text-gray-400">
+              <p className="font-body text-xs text-gray-400 hidden">
                 ⚠️ <strong className="text-white">PERSONAL TRANSACTIONS NOT ALLOWED.</strong> All bookings must go through official Gladex Travel channels only. •
                 Passport validity: minimum 6 months. • Rates subject to change without prior notice. • Hotel subject to availability — similar category substitution may apply. •
                 Unused services are non-refundable.
