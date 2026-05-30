@@ -63,7 +63,6 @@ function PreviewContent() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
         <div className="absolute bottom-8 left-0 right-0 text-center px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <p className="text-xs font-bold tracking-[0.3em] uppercase mb-2" style={{ color: ORANGE }}>Destination Briefing</p>
             <h1 className="font-condensed font-black text-white text-4xl lg:text-6xl tracking-wide mb-2">{dest.name}</h1>
             <div className="flex items-center justify-center gap-1.5 mb-2">
               <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
