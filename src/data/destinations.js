@@ -1,3 +1,5 @@
+import { getMediaForSlug } from "./mediaConfig.js";
+
 export const destinations = [
   // ============================================================
   // KOREA
@@ -1733,4 +1735,27 @@ export const destinations = [
   },
 ];
 
-export const getDestinationBySlug = (slug) => destinations.find((d) => d.slug === slug);
+export const getDestinations = () =>
+  destinations.map((dest) => {
+    const media = getMediaForSlug(dest.slug);
+    return {
+      ...dest,
+      heroImage: media.heroImage || dest.heroImage,
+      cardImage: media.cardImage || dest.cardImage,
+      videoUrl: "video" in media ? media.video : dest.videoUrl,
+    };
+  });
+
+export const getDestinationBySlug = (slug) => {
+  const dest = destinations.find((d) => d.slug === slug);
+  if (!dest) return null;
+  const media = getMediaForSlug(slug);
+  return {
+    ...dest,
+    // heroImage and cardImage: use mediaConfig value if present, fall back to destinations.js
+    heroImage: media.heroImage || dest.heroImage,
+    cardImage: media.cardImage || dest.cardImage,
+    // video: use mediaConfig value when the key exists (even if null), fall back otherwise
+    videoUrl: "video" in media ? media.video : dest.videoUrl,
+  };
+};

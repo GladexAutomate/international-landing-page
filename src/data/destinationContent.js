@@ -1,3 +1,5 @@
+import { getMediaForSlug } from "./mediaConfig.js";
+
 /**
  * Rich destination content for TourPackagePage sections:
  * - Photo galleries with descriptions (multiple blocks)
@@ -438,7 +440,7 @@ export const destinationContent = {
 };
 
 export const getDestinationContent = (slug) => {
-  return destinationContent[slug] || {
+  const content = destinationContent[slug] || {
     whatToExpectTitle: "What to Expect from This Tour",
     whatToExpect: defaultContent.whatToExpect,
     galleryBlocks: [],
@@ -448,4 +450,18 @@ export const getDestinationContent = (slug) => {
     trendingSights: [],
     mightAlsoLike: [],
   };
+
+  // If mediaConfig supplies gallery images for this destination, inject them
+  // into the first gallery block so future gallery updates only require
+  // editing mediaConfig.js.
+  const media = getMediaForSlug(slug);
+  if (media.gallery?.length) {
+    const mediaBlock = { title: "Destination Gallery", images: media.gallery };
+    return {
+      ...content,
+      galleryBlocks: [mediaBlock, ...(content.galleryBlocks?.slice(1) ?? [])],
+    };
+  }
+
+  return content;
 };

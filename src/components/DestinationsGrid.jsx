@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../lib/ThemeContext";
-import { destinations } from "../data/destinations";
+import { getDestinations } from "../data/destinations";
 
 export default function DestinationsGrid() {
   const { isDark } = useTheme();
@@ -35,7 +35,7 @@ export default function DestinationsGrid() {
 
         {/* Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {destinations.map((dest, i) => (
+          {getDestinations().map((dest, i) => (
             <DestinationCard
               key={dest.id}
               dest={dest}
@@ -50,6 +50,7 @@ export default function DestinationsGrid() {
   );
 }
 
+/** @param {{ dest: any, index: number, isDark: boolean, onClick: () => void }} props */
 function DestinationCard({ dest, index, isDark, onClick }) {
   return (
     <motion.div
