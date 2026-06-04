@@ -1,15 +1,14 @@
 // @ts-nocheck
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Search, Plus, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import ThingsToDoSection from "../components/ThingsToDoSection";
 import { getActivitiesForDestination } from "../data/activitiesData";
-import { supabase } from "@/lib/supabase";
 import {
   getToursByDestination,
   getInsurancePlans,
@@ -1422,8 +1421,6 @@ function CheckoutSection({ cart, total, theme }) {
   );
 }
 
-// ─── GDX BOOKING VERIFICATION FEATURE — Supabase: table "po_main" ───────────
-
 // ─── MAIN PAGE CONTENT ────────────────────────────────────────────────────────
 function PreviewContent() {
   const { slug } = useParams();
@@ -1453,24 +1450,6 @@ function PreviewContent() {
   };
 
   const activitiesData = getActivitiesForDestination(slug);
-
-  // TEMP DIAGNOSTIC — inspect actual gdx values in bookings_6fbdd6b2 (remove after use)
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase
-        .from("bookings_6fbdd6b2")
-        .select("gdx")
-        .limit(20);
-      console.log("[GDX SAMPLE VALUES]", data);
-      if (error) console.error("[GDX SAMPLE ERROR]", error);
-    })();
-  }, []);
-
-  // GDX Booking Verification — state
-  const [gdxInput, setGdxInput] = useState("");
-  const [foundBooking, setFoundBooking] = useState(null);
-  const [searchAttempted, setSearchAttempted] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
 
   // ── Cart state (full Cart model — src/types/addons.js) ───────────────────
   const [cart, setCart] = useState(() => createCart(slug));
@@ -1506,88 +1485,7 @@ function PreviewContent() {
   const removeInsurance = () =>
     setCart((prev) => ({ ...prev, insurance: null, ..._updateTotals(prev.tours, null) }));
 
-  // Keep gdxReference in sync when a booking is found
   const cartTotal = cart.total;
-
-  const GDX_PATTERN = /^[0-9]+$/;
-
-  const handleGdxSearch = async () => {
-    const query = gdxInput.trim().toUpperCase();
-
-    console.group("[GDX] Booking Verification");
-    console.log("[GDX] Input:", query);
-
-    // ── FORMAT VALIDATION ─────────────────────────────────────────────────────
-    const isValid = GDX_PATTERN.test(query);
-    console.log("[GDX] Valid:", isValid);
-
-    if (!isValid) {
-      console.log("[GDX] Invalid format:", query);
-      console.groupEnd();
-      setFoundBooking(null);
-      setSearchAttempted(true);
-      return;
-    }
-    // ── END VALIDATION ────────────────────────────────────────────────────────
-
-    setIsSearching(true);
-    setSearchAttempted(false);
-
-    try {
-      const { data, error } = await supabase
-        .from("bookings_6fbdd6b2")
-        .select("*")
-        .eq("gdx", query)
-        .single();
-
-      console.log("[GDX] Supabase response:", data);
-
-      console.log("[GDX] Full Record JSON:");
-      console.log(JSON.stringify(data, null, 2));
-
-      console.log("[GDX] Supabase error:", error);
-
-      if (data) {
-        const booking = {
-          // Booking Summary
-          gdx:               data.gdx              || query,
-          status:            data.status            || "Confirmed",
-          // Traveler Information
-          name:              data.lead_name         || data.facebook_name || null,
-          mobile:            data.mobile_1          || null,
-          email:             data.email_1           || null,
-          guests:            data.total_number_of_guests || null,
-          // Travel Information
-          destination:       data.destination       || null,
-          travel_date:       data.travel_date       || null,
-          arrival_date:      data.arrival_date      || null,
-          departure_date:    data.departure_date    || null,
-          hotel:             data.hotel_name        || null,
-          airline:           data.airline_details_1 || data.name_of_airline || null,
-          tour_details:      data.tour_details      || null,
-          // Payment Information
-          package_price:     data.total_package_price_srp || null,
-          amount_paid:       data.total_amount_paid || null,
-          payment_method:    data.paymnt_type       || null,
-          // Documents
-          voucher:           data.voucher           || null,
-          automated_voucher: data.automated_voucher || null,
-          attachements:      data.attachements      || null,
-          _raw: data,
-        };
-        setFoundBooking(booking);
-      } else {
-        setFoundBooking(null);
-      }
-    } catch (err) {
-      console.error("[GDX] Unexpected error:", err);
-      setFoundBooking(null);
-    } finally {
-      setIsSearching(false);
-      setSearchAttempted(true);
-      console.groupEnd();
-    }
-  };
 
   if (!dest) {
     return (
@@ -1605,15 +1503,6 @@ function PreviewContent() {
   // Section spacing constant
   const sectionGap = "py-10 lg:py-12";
 
-  // ── GDX Customer Portal helpers (used only by the booking card) ──────────────
-  const val = (v) =>
-    v !== null && v !== undefined && String(v).trim() !== "" ? String(v) : "Not Available";
-  const fmtCurrency = (v) => {
-    if (!v) return "Not Available";
-    const n = parseFloat(String(v).replace(/,/g, ""));
-    return isNaN(n) ? String(v) : `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-  const isUrl = (v) => typeof v === "string" && (v.startsWith("http://") || v.startsWith("https://"));
 
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
@@ -1648,246 +1537,6 @@ function PreviewContent() {
           </motion.div>
         </div>
       </div>
-
-      {/* ════════════════════════════════════════════════════════════════════════
-          GDX Booking Verification Feature
-          ════════════════════════════════════════════════════════════════════════ */}
-      <div
-        className="px-4 lg:px-10 py-8 transition-colors duration-300"
-        style={{ backgroundColor: bg, borderBottom: `1px solid ${border}` }}
-      >
-        <div className="max-w-4xl mx-auto">
-
-          {/* GDX Search Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
-            <div>
-              <p
-                className="font-body text-xs font-bold tracking-[0.3em] uppercase mb-1"
-                style={{ color: ORANGE }}
-              >
-                GDX Booking Verification
-              </p>
-              <p className="font-body text-sm" style={{ color: textSecondary }}>
-                Enter your GDX booking code to view your travel details
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <input
-                type="text"
-                value={gdxInput}
-                onChange={(e) => setGdxInput(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === "Enter" && handleGdxSearch()}
-                placeholder="GDX-XXXXX"
-                maxLength={20}
-                aria-label="GDX booking code"
-                className="flex-1 sm:w-52 font-body font-semibold text-base tracking-widest px-4 py-3 rounded-xl border focus:outline-none transition-all"
-                style={{
-                  backgroundColor: bgCard,
-                  borderColor: gdxInput ? ORANGE : border,
-                  color: textPrimary,
-                }}
-              />
-              <button
-                onClick={handleGdxSearch}
-                disabled={isSearching}
-                aria-label="Search booking"
-                className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95 shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ backgroundColor: ORANGE, color: "#080808" }}
-              >
-                <Search className="w-4 h-4" />
-                {isSearching ? "Searching…" : "Search"}
-              </button>
-            </div>
-          </div>
-
-          {/* GDX Booking Summary Card */}
-          {searchAttempted && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35 }}
-              className="mt-5"
-            >
-              {foundBooking ? (
-                <div
-                  className="rounded-2xl border-2 overflow-hidden"
-                  style={{ backgroundColor: bgCard, borderColor: ORANGE }}
-                >
-                  {/* ── Card Header ─────────────────────────────────────────── */}
-                  <div
-                    className="flex flex-wrap items-start justify-between gap-4 px-6 lg:px-8 pt-6 pb-5 border-b"
-                    style={{ borderColor: border }}
-                  >
-                    <div>
-                      <p className="font-body text-xs font-bold tracking-[0.3em] uppercase mb-1" style={{ color: ORANGE }}>
-                        Booking Verified
-                      </p>
-                      <h3 className="font-condensed font-black text-2xl lg:text-3xl tracking-wide leading-tight" style={{ color: textPrimary }}>
-                        {val(foundBooking.name)}
-                      </h3>
-                    </div>
-                    <span
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-body font-bold text-sm shrink-0"
-                      style={{ backgroundColor: isDark ? "#0D2010" : "#F0FFF4", color: "#22C55E", border: "1.5px solid #22C55E" }}
-                    >
-                      ✓ {val(foundBooking.status)}
-                    </span>
-                  </div>
-
-                  <div className="px-6 lg:px-8 py-6 space-y-8">
-
-                    {/* ── 1. Booking Summary ──────────────────────────────── */}
-                    <div>
-                      <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
-                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Booking Summary</p>
-                      </div>
-                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
-                        {[
-                          { label: "Booking Reference (GDX)", value: val(foundBooking.gdx) },
-                          { label: "Status",                  value: val(foundBooking.status) },
-                        ].map((f, i, arr) => (
-                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
-                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
-                            <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>{f.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* ── 2. Traveler Information ─────────────────────────── */}
-                    <div>
-                      <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
-                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Traveler Information</p>
-                      </div>
-                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
-                        {[
-                          { label: "Lead Guest",      value: val(foundBooking.name) },
-                          { label: "Contact Number",  value: val(foundBooking.mobile) },
-                          { label: "Email",           value: val(foundBooking.email) },
-                          { label: "Total Guests",    value: val(foundBooking.guests) },
-                        ].map((f, i, arr) => (
-                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
-                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
-                            <span className="font-body text-sm font-semibold text-right break-all" style={{ color: textPrimary }}>{f.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* ── 3. Travel Information ───────────────────────────── */}
-                    <div>
-                      <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
-                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Travel Information</p>
-                      </div>
-                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
-                        {[
-                          { label: "Destination",    value: val(foundBooking.destination) },
-                          { label: "Travel Date",    value: val(foundBooking.travel_date) },
-                          { label: "Arrival Date",   value: val(foundBooking.arrival_date) },
-                          { label: "Departure Date", value: val(foundBooking.departure_date) },
-                          { label: "Hotel",          value: val(foundBooking.hotel) },
-                          { label: "Airline",        value: val(foundBooking.airline) },
-                          { label: "Tour Details",   value: val(foundBooking.tour_details) },
-                        ].map((f, i, arr) => (
-                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
-                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
-                            <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>{f.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* ── 4. Payment Information ──────────────────────────── */}
-                    <div>
-                      <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
-                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Payment Information</p>
-                      </div>
-                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
-                        {[
-                          { label: "Package Price",   value: fmtCurrency(foundBooking.package_price) },
-                          { label: "Amount Paid",     value: fmtCurrency(foundBooking.amount_paid) },
-                          { label: "Payment Method",  value: val(foundBooking.payment_method) },
-                        ].map((f, i, arr) => (
-                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
-                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
-                            <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>{f.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* ── 5. Documents ────────────────────────────────────── */}
-                    <div>
-                      <div className="flex items-center gap-2.5 mb-4">
-                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
-                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Documents</p>
-                      </div>
-                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
-                        {[
-                          { label: "Voucher",           value: foundBooking.voucher },
-                          { label: "Automated Voucher", value: foundBooking.automated_voucher },
-                          { label: "Attachments",       value: foundBooking.attachements },
-                        ].map((f, i, arr) => (
-                          <div key={f.label} className="flex justify-between items-center gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
-                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
-                            {isUrl(f.value) ? (
-                              <a
-                                href={f.value}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-body text-sm font-semibold underline hover:opacity-75 transition-opacity"
-                                style={{ color: ORANGE }}
-                              >
-                                Download ↗
-                              </a>
-                            ) : (
-                              <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>
-                                {val(f.value)}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <p className="font-body text-sm text-center pb-2" style={{ color: textSecondary }}>
-                      Your booking is confirmed. Watch the official briefing video below to prepare for your trip.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="rounded-2xl border px-6 py-10 text-center"
-                  style={{ backgroundColor: bgCard, borderColor: border }}
-                >
-                  <p className="text-4xl mb-4">🔍</p>
-                  <p
-                    className="font-condensed font-black text-2xl mb-2"
-                    style={{ color: textPrimary }}
-                  >
-                    No Booking Found
-                  </p>
-                  <p className="font-body text-base" style={{ color: textSecondary }}>
-                    No booking found for&nbsp;
-                    <span className="font-bold" style={{ color: ORANGE }}>
-                      {gdxInput}
-                    </span>
-                    .
-                    <br />
-                    Please check your GDX code and try again.
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </div>
-      </div>
-      {/* ════════════════════════════════════════════════════════════════════════ */}
 
       {/* ── PORTRAIT VIDEO SECTION ── */}
       <div className="bg-black py-16 px-4 lg:px-10 relative overflow-hidden">

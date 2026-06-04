@@ -1,6 +1,7 @@
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import HeroSection from "../components/HeroSection";
+import GdxSearchSection from "../components/GdxSearchSection";
 import DestinationsGrid from "../components/DestinationsGrid";
 
 function HomeContent() {
@@ -12,6 +13,7 @@ function HomeContent() {
     >
       <ThemeToggle />
       <HeroSection />
+      <GdxSearchSection isDark={isDark} />
       <DestinationsGrid />
     </div>
   );
