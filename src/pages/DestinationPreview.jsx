@@ -1,14 +1,25 @@
 // @ts-nocheck
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard } from "lucide-react";
-import { useState } from "react";
+import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Search, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import ThingsToDoSection from "../components/ThingsToDoSection";
 import { getActivitiesForDestination } from "../data/activitiesData";
+import { supabase } from "@/lib/supabase";
+import {
+  getToursByDestination,
+  getInsurancePlans,
+  createCart,
+  createCartTourItem,
+  createCartInsuranceItem,
+  calculateCartTotal,
+  createOrder,
+  PAYMENT_METHODS,
+} from "../data/addons/index.js";
 
 // Briefing-specific components
 import BriefingSection from "../components/briefing/BriefingSection";
@@ -887,6 +898,532 @@ function ImportantNoticesSection({ pkg, theme }) {
   );
 }
 
+// ════════════════════════════════════════════════════════════════════════════════
+// ADD-ONS MODULE — Optional Tours · Travel Insurance · Cart · Checkout
+// Data sourced from src/data/addons/ — see that directory for API TODO markers.
+// ════════════════════════════════════════════════════════════════════════════════
+
+// ─── OPTIONAL TOURS SECTION ───────────────────────────────────────────────────
+// Data: src/data/addons/mockTours.js → getToursByDestination(slug)
+// TODO: Globaltix API Integration — replace mock data with live API in mockTours.js
+// TODO: LakbayHub API Integration — merge LakbayHub results in mockTours.js
+function OptionalToursSection({ tours, cartTourIds, onAdd, theme }) {
+  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  if (!tours || tours.length === 0) return null;
+
+  const SOURCE_LABEL = {
+    globaltix:     "Globaltix",
+    lakbayhub:     "LakbayHub",
+    gladex_manual: "Gladex",
+  };
+
+  const primaryImage = (tour) =>
+    tour.images?.find((i) => i.isPrimary)?.url || null;
+
+  return (
+    <BriefingSection label="Add to Your Trip" title="Optional Tours" theme={theme}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {tours.map((tour) => {
+          const inCart = cartTourIds.includes(tour.id);
+          const imgUrl = primaryImage(tour);
+          return (
+            <div
+              key={tour.id}
+              className="rounded-2xl border-2 overflow-hidden flex flex-col transition-all duration-200"
+              style={{ backgroundColor: bgCard, borderColor: inCart ? ORANGE : border }}
+            >
+              {/* Tour image */}
+              <div className="relative aspect-video overflow-hidden" style={{ backgroundColor: isDark ? "#1A1A1A" : "#F0F0F0" }}>
+                {imgUrl ? (
+                  <img src={imgUrl} alt={tour.name} className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-5xl">🗺️</div>
+                )}
+                {/* Provider source badge */}
+                <span
+                  className="absolute top-2 left-2 font-body text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-md"
+                  style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "#fff" }}
+                >
+                  {SOURCE_LABEL[tour.source] || tour.source}
+                </span>
+              </div>
+
+              <div className="p-4 flex flex-col flex-1">
+                {/* Category */}
+                {tour.category && (
+                  <p className="font-body text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: ORANGE }}>
+                    {tour.category}
+                  </p>
+                )}
+                <h4 className="font-condensed font-black text-lg leading-tight mb-1" style={{ color: textPrimary }}>
+                  {tour.name}
+                </h4>
+                <p className="font-body text-xs mb-1" style={{ color: textSecondary }}>⏱ {tour.duration}</p>
+                {tour.meetingPoint && (
+                  <p className="font-body text-xs mb-2 flex items-start gap-1" style={{ color: textSecondary }}>
+                    <MapPin className="w-3 h-3 shrink-0 mt-0.5" style={{ color: ORANGE }} />
+                    {tour.meetingPoint}
+                  </p>
+                )}
+                <p className="font-body text-sm leading-relaxed mb-3 flex-1" style={{ color: textSecondary }}>
+                  {tour.description}
+                </p>
+
+                {/* Inclusions */}
+                <div className="mb-3">
+                  <p className="font-body text-xs font-bold uppercase tracking-wide mb-2" style={{ color: textSecondary }}>
+                    Inclusions
+                  </p>
+                  <ul className="space-y-1">
+                    {tour.inclusions.map((inc, i) => (
+                      <li key={i} className="flex items-center gap-1.5 font-body text-xs" style={{ color: textSecondary }}>
+                        <Check className="w-3 h-3 shrink-0" style={{ color: "#22C55E" }} strokeWidth={2.5} />
+                        {inc}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Pricing options */}
+                {tour.bookingOptions?.length > 1 && (
+                  <div className="mb-3 space-y-1">
+                    {tour.bookingOptions.slice(0, 3).map((opt) => (
+                      <div key={opt.id} className="flex justify-between font-body text-xs" style={{ color: textSecondary }}>
+                        <span>{opt.label}</span>
+                        <span className="font-semibold">{opt.price === 0 ? "Free" : `₱${opt.price.toLocaleString()}`}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Footer row */}
+                <div className="flex items-center justify-between gap-3 pt-3 border-t" style={{ borderColor: border }}>
+                  <div>
+                    <span className="font-condensed font-black text-xl" style={{ color: ORANGE }}>
+                      ₱{tour.price.toLocaleString()}
+                    </span>
+                    <span className="font-body text-xs ml-1" style={{ color: textSecondary }}>/adult</span>
+                  </div>
+                  <button
+                    onClick={() => onAdd(tour)}
+                    disabled={inCart}
+                    className="inline-flex items-center gap-1.5 font-body font-bold text-xs px-4 py-2.5 rounded-xl transition-all active:scale-95 disabled:cursor-default"
+                    style={{
+                      backgroundColor: inCart ? "transparent" : ORANGE,
+                      color: inCart ? "#22C55E" : "#080808",
+                      border: inCart ? "1.5px solid #22C55E" : "none",
+                    }}
+                  >
+                    {inCart
+                      ? <><Check className="w-3.5 h-3.5" strokeWidth={3} /> Added</>
+                      : <><Plus className="w-3.5 h-3.5" /> Add To Trip</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </BriefingSection>
+  );
+}
+
+// ─── TRAVEL INSURANCE SECTION ─────────────────────────────────────────────────
+// Data: src/data/addons/mockInsurance.js → getInsurancePlans()
+// TODO: Starr Insurance API Integration — replace mock data in mockInsurance.js
+function TravelInsuranceSection({ plans, selectedInsurance, onSelect, theme }) {
+  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+
+  const PROVIDER_LABEL = {
+    starr:         "Starr Insurance",
+    gladex_manual: "Gladex",
+  };
+
+  return (
+    <BriefingSection label="Travel Protection" title="Travel Insurance" theme={theme}>
+      <div className="space-y-4">
+        {plans.map((plan) => {
+          const selected = selectedInsurance?.id === plan.id;
+          return (
+            <div
+              key={plan.id}
+              className="rounded-2xl border-2 p-5 transition-all duration-200 cursor-pointer"
+              style={{
+                backgroundColor: selected ? (isDark ? "#1A0A00" : "#FFF8F0") : bgCard,
+                borderColor: selected ? ORANGE : border,
+              }}
+              onClick={() => onSelect(plan)}
+            >
+              {/* Header row */}
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl mt-0.5 shrink-0">🛡️</span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      {plan.recommended && (
+                        <span className="font-body text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full" style={{ backgroundColor: ORANGE, color: "#080808" }}>
+                          Recommended
+                        </span>
+                      )}
+                      <span className="font-body text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded border" style={{ borderColor: border, color: textSecondary }}>
+                        {PROVIDER_LABEL[plan.provider] || plan.provider}
+                      </span>
+                    </div>
+                    <h4 className="font-condensed font-black text-lg leading-tight" style={{ color: textPrimary }}>
+                      {plan.name}
+                    </h4>
+                    {/* Plan code visible for transparency */}
+                    {plan.planCode && (
+                      <p className="font-body text-[10px] mt-0.5" style={{ color: textSecondary }}>
+                        Plan: {plan.planCode}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="text-right">
+                    <span className="font-condensed font-black text-2xl" style={{ color: ORANGE }}>
+                      ₱{plan.price.toLocaleString()}
+                    </span>
+                    <p className="font-body text-xs" style={{ color: textSecondary }}>/person</p>
+                  </div>
+                  <div
+                    className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                    style={{ borderColor: selected ? ORANGE : border, backgroundColor: selected ? ORANGE : "transparent" }}
+                  >
+                    {selected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Coverage list — from structured coverageLimits if available, else plain strings */}
+              {plan.coverageLimits?.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                  {plan.coverageLimits.map((limit, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <Check className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "#22C55E" }} />
+                      <div>
+                        <span className="font-body text-xs font-semibold block" style={{ color: textPrimary }}>{limit.type}</span>
+                        <span className="font-body text-xs" style={{ color: textSecondary }}>
+                          up to ₱{limit.limitAmount.toLocaleString()} — {limit.description}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                  {plan.coverage.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
+                      <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#22C55E" }} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Policy document link if available */}
+              {plan.documentUrl && (
+                <a href={plan.documentUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-body text-xs font-semibold mb-3 hover:opacity-75 transition-opacity"
+                  style={{ color: ORANGE }}>
+                  <ExternalLink className="w-3 h-3" /> Policy Document
+                </a>
+              )}
+
+              <button
+                onClick={(e) => { e.stopPropagation(); onSelect(plan); }}
+                className="w-full font-body font-bold text-sm py-3 rounded-xl transition-all active:scale-[0.99]"
+                style={{
+                  backgroundColor: selected ? "transparent" : ORANGE,
+                  color: selected ? ORANGE : "#080808",
+                  border: selected ? `1.5px solid ${ORANGE}` : "none",
+                }}
+              >
+                {selected ? "✓ Selected — Click to Remove" : "Add Insurance"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </BriefingSection>
+  );
+}
+
+// ─── CART SUMMARY SECTION ─────────────────────────────────────────────────────
+function CartSummarySection({ cart, total, onRemoveTour, onRemoveInsurance, theme }) {
+  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  const isEmpty = cart.tours.length === 0 && !cart.insurance;
+
+  return (
+    <BriefingSection label="Your Selection" title="Cart Summary" theme={theme}>
+      <div className="rounded-2xl border-2 overflow-hidden" style={{ borderColor: isEmpty ? border : ORANGE, backgroundColor: bgCard }}>
+        {isEmpty ? (
+          <div className="py-14 text-center">
+            <p className="text-5xl mb-4">🛒</p>
+            <p className="font-condensed font-black text-2xl mb-1" style={{ color: textPrimary }}>Your cart is empty</p>
+            <p className="font-body text-sm" style={{ color: textSecondary }}>
+              Add optional tours or travel insurance above to get started.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Tour items */}
+            {cart.tours.length > 0 && (
+              <div className="px-5 pt-5">
+                <p
+                  className="font-body text-xs font-bold uppercase tracking-widest mb-3"
+                  style={{ color: textSecondary }}
+                >
+                  Optional Tours ({cart.tours.length})
+                </p>
+                {cart.tours.map((item) => (
+                  <div
+                    key={item.cartItemId}
+                    className="flex items-center justify-between gap-4 py-3.5 border-b last:border-b-0"
+                    style={{ borderColor: border }}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-xl shrink-0">🗺️</span>
+                      <div className="min-w-0">
+                        <p className="font-body text-sm font-semibold truncate" style={{ color: textPrimary }}>
+                          {item.tour.name}
+                        </p>
+                        <p className="font-body text-xs" style={{ color: textSecondary }}>
+                          {item.tour.duration} · {item.participants.adults} adult{item.participants.adults !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="font-body text-sm font-bold" style={{ color: ORANGE }}>
+                        ₱{item.total.toLocaleString()}
+                      </span>
+                      <button
+                        onClick={() => onRemoveTour(item.cartItemId)}
+                        aria-label={`Remove ${item.tour.name}`}
+                        className="p-1.5 rounded-lg hover:opacity-70 transition-opacity"
+                        style={{ color: "#EF4444" }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Insurance item */}
+            {cart.insurance && (
+              <div className="px-5 pt-4">
+                <p
+                  className="font-body text-xs font-bold uppercase tracking-widest mb-3"
+                  style={{ color: textSecondary }}
+                >
+                  Travel Insurance
+                </p>
+                <div
+                  className="flex items-center justify-between gap-4 py-3.5 border-b"
+                  style={{ borderColor: border }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl shrink-0">🛡️</span>
+                    <p className="font-body text-sm font-semibold" style={{ color: textPrimary }}>
+                      {cart.insurance.plan?.name || cart.insurance.name}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="font-body text-sm font-bold" style={{ color: ORANGE }}>
+                      ₱{cart.insurance.total?.toLocaleString() || cart.insurance.price?.toLocaleString()}
+                    </span>
+                    <button
+                      onClick={onRemoveInsurance}
+                      aria-label="Remove insurance"
+                      className="p-1.5 rounded-lg hover:opacity-70 transition-opacity"
+                      style={{ color: "#EF4444" }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Running total */}
+            <div
+              className="px-5 py-4 flex items-center justify-between"
+              style={{ backgroundColor: isDark ? "#1A0A00" : "#FFF8F0" }}
+            >
+              <p className="font-condensed font-black text-lg" style={{ color: textPrimary }}>
+                Total Add-Ons
+              </p>
+              <p className="font-condensed font-black text-2xl" style={{ color: ORANGE }}>
+                ₱{total.toLocaleString()}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </BriefingSection>
+  );
+}
+
+// ─── CHECKOUT SECTION ─────────────────────────────────────────────────────────
+// Data: src/data/addons/index.js → createOrder(), PAYMENT_METHODS
+// TODO: Xendit Checkout Integration — replace onClick handler in this function
+function CheckoutSection({ cart, total, theme }) {
+  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  const [selectedMethod, setSelectedMethod]   = useState(null);
+  const [customer, setCustomer]               = useState({ name: "", email: "", phone: "" });
+  const [orderPlaced, setOrderPlaced]         = useState(null);  // holds last CheckoutOrder
+  const isEmpty    = cart.tours.length === 0 && !cart.insurance;
+  const hasCustomer = customer.name.trim() && customer.email.trim() && customer.phone.trim();
+  const canProceed = !isEmpty && selectedMethod !== null && hasCustomer;
+
+  return (
+    <BriefingSection label="Complete Your Order" title="Checkout" theme={theme}>
+      <div className="space-y-5">
+
+        {/* Customer details — required for Xendit invoice + Starr enrollment */}
+        <div className="rounded-xl border overflow-hidden" style={{ borderColor: border, backgroundColor: bgCard }}>
+          <div className="px-4 py-3 border-b" style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}>
+            <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>Your Details</p>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            {[
+              { key: "name",  label: "Full Name",     type: "text",  placeholder: "Maria Santos" },
+              { key: "email", label: "Email Address", type: "email", placeholder: "maria@example.com" },
+              { key: "phone", label: "Phone Number",  type: "tel",   placeholder: "09171234567" },
+            ].map((f) => (
+              <div key={f.key}>
+                <label className="font-body text-xs font-semibold block mb-1" style={{ color: textSecondary }}>{f.label}</label>
+                <input
+                  type={f.type}
+                  placeholder={f.placeholder}
+                  value={customer[f.key]}
+                  onChange={(e) => setCustomer((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                  className="w-full font-body text-sm px-3 py-2.5 rounded-lg border focus:outline-none transition-all"
+                  style={{ backgroundColor: isDark ? "#111" : "#F8F8F8", borderColor: border, color: textPrimary }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Payment method selector */}
+        <div>
+          <p className="font-body text-sm font-semibold mb-3" style={{ color: textSecondary }}>
+            Select Payment Method
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {PAYMENT_METHODS.map((method) => {
+              const selected = selectedMethod === method.id;
+              return (
+                <button
+                  key={method.id}
+                  onClick={() => setSelectedMethod(selected ? null : method.id)}
+                  className="flex flex-col items-center gap-2 py-4 px-3 rounded-xl border-2 font-body font-semibold text-sm transition-all active:scale-95"
+                  style={{
+                    backgroundColor: selected ? (isDark ? "#1A0A00" : "#FFF8F0") : bgCard,
+                    borderColor: selected ? ORANGE : border,
+                    color: selected ? ORANGE : textSecondary,
+                  }}
+                >
+                  <span className="text-2xl">{method.emoji}</span>
+                  {method.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Order summary card */}
+        <div
+          className="rounded-2xl border overflow-hidden"
+          style={{ borderColor: border, backgroundColor: bgCard }}
+        >
+          <div
+            className="px-5 py-3.5 border-b"
+            style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
+          >
+            <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>
+              Order Summary
+            </p>
+          </div>
+
+          <div className="px-5 py-4">
+            {isEmpty ? (
+              <p className="font-body text-sm text-center py-3" style={{ color: textSecondary }}>
+                No items selected
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {cart.tours.map((t) => (
+                  <div key={t.id} className="flex justify-between gap-4 font-body text-sm" style={{ color: textSecondary }}>
+                    <span className="truncate">{t.name}</span>
+                    <span className="shrink-0">₱{t.price.toLocaleString()}</span>
+                  </div>
+                ))}
+                {cart.insurance && (
+                  <div className="flex justify-between gap-4 font-body text-sm" style={{ color: textSecondary }}>
+                    <span>{cart.insurance.name}</span>
+                    <span className="shrink-0">₱{cart.insurance.price.toLocaleString()}</span>
+                  </div>
+                )}
+                <div
+                  className="flex justify-between gap-4 pt-3 border-t font-condensed font-black text-xl"
+                  style={{ borderColor: border, color: textPrimary }}
+                >
+                  <span>Total</span>
+                  <span style={{ color: ORANGE }}>₱{total.toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Proceed button */}
+        {/* TODO: Xendit Checkout Integration */}
+        <button
+          disabled={!canProceed}
+          className="w-full font-condensed font-black text-xl py-4 rounded-xl transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ backgroundColor: ORANGE, color: "#080808" }}
+          onClick={() => {
+            // Build the full CheckoutOrder using the Cart model + customer details
+            const order = createOrder(cart, customer, selectedMethod);
+            setOrderPlaced(order);
+            console.group("[CHECKOUT] Order created");
+            console.log("[CHECKOUT] Order ID:     ", order.orderId);
+            console.log("[CHECKOUT] Total:        ₱" + order.total.toLocaleString());
+            console.log("[CHECKOUT] Method:       ", order.paymentMethod);
+            console.log("[CHECKOUT] Customer:     ", order.customer);
+            console.log("[CHECKOUT] Line items:   ", order.lineItems);
+            console.log("[CHECKOUT] Full order:   ", order);
+            console.groupEnd();
+            // TODO: Xendit Checkout Integration
+            //   1. POST order to your Supabase orders table for persistence
+            //   2. Call Xendit API: POST /v2/invoices with orderId as externalId
+            //   3. Redirect to order.xendit.checkoutUrl for payment
+          }}
+        >
+          {isEmpty
+            ? "Add Items to Continue"
+            : !selectedMethod
+              ? "Select a Payment Method"
+              : `Proceed to Payment  •  ₱${total.toLocaleString()}`}
+        </button>
+
+        {!isEmpty && !selectedMethod && (
+          <p className="font-body text-xs text-center" style={{ color: textSecondary }}>
+            Please select a payment method above to continue.
+          </p>
+        )}
+      </div>
+    </BriefingSection>
+  );
+}
+
+// ─── GDX BOOKING VERIFICATION FEATURE — Supabase: table "po_main" ───────────
+
 // ─── MAIN PAGE CONTENT ────────────────────────────────────────────────────────
 function PreviewContent() {
   const { slug } = useParams();
@@ -917,6 +1454,141 @@ function PreviewContent() {
 
   const activitiesData = getActivitiesForDestination(slug);
 
+  // TEMP DIAGNOSTIC — inspect actual gdx values in bookings_6fbdd6b2 (remove after use)
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("bookings_6fbdd6b2")
+        .select("gdx")
+        .limit(20);
+      console.log("[GDX SAMPLE VALUES]", data);
+      if (error) console.error("[GDX SAMPLE ERROR]", error);
+    })();
+  }, []);
+
+  // GDX Booking Verification — state
+  const [gdxInput, setGdxInput] = useState("");
+  const [foundBooking, setFoundBooking] = useState(null);
+  const [searchAttempted, setSearchAttempted] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // ── Cart state (full Cart model — src/types/addons.js) ───────────────────
+  const [cart, setCart] = useState(() => createCart(slug));
+
+  // Recompute totals whenever tours or insurance change
+  const _updateTotals = (tours, insurance) => {
+    const totals = calculateCartTotal(tours, insurance);
+    return totals;
+  };
+
+  const addTourToCart = (tour) =>
+    setCart((prev) => {
+      if (prev.tours.find((t) => t.cartItemId === tour.id || t.tour?.id === tour.id)) return prev;
+      const item  = createCartTourItem(tour);
+      const tours = [...prev.tours, item];
+      return { ...prev, tours, ..._updateTotals(tours, prev.insurance) };
+    });
+
+  const removeTourFromCart = (cartItemId) =>
+    setCart((prev) => {
+      const tours = prev.tours.filter((t) => t.cartItemId !== cartItemId);
+      return { ...prev, tours, ..._updateTotals(tours, prev.insurance) };
+    });
+
+  const selectInsurance = (plan) =>
+    setCart((prev) => {
+      const insurance = prev.insurance?.id === plan.id
+        ? null
+        : createCartInsuranceItem(plan, 1);
+      return { ...prev, insurance, ..._updateTotals(prev.tours, insurance) };
+    });
+
+  const removeInsurance = () =>
+    setCart((prev) => ({ ...prev, insurance: null, ..._updateTotals(prev.tours, null) }));
+
+  // Keep gdxReference in sync when a booking is found
+  const cartTotal = cart.total;
+
+  const GDX_PATTERN = /^[0-9]+$/;
+
+  const handleGdxSearch = async () => {
+    const query = gdxInput.trim().toUpperCase();
+
+    console.group("[GDX] Booking Verification");
+    console.log("[GDX] Input:", query);
+
+    // ── FORMAT VALIDATION ─────────────────────────────────────────────────────
+    const isValid = GDX_PATTERN.test(query);
+    console.log("[GDX] Valid:", isValid);
+
+    if (!isValid) {
+      console.log("[GDX] Invalid format:", query);
+      console.groupEnd();
+      setFoundBooking(null);
+      setSearchAttempted(true);
+      return;
+    }
+    // ── END VALIDATION ────────────────────────────────────────────────────────
+
+    setIsSearching(true);
+    setSearchAttempted(false);
+
+    try {
+      const { data, error } = await supabase
+        .from("bookings_6fbdd6b2")
+        .select("*")
+        .eq("gdx", query)
+        .single();
+
+      console.log("[GDX] Supabase response:", data);
+
+      console.log("[GDX] Full Record JSON:");
+      console.log(JSON.stringify(data, null, 2));
+
+      console.log("[GDX] Supabase error:", error);
+
+      if (data) {
+        const booking = {
+          // Booking Summary
+          gdx:               data.gdx              || query,
+          status:            data.status            || "Confirmed",
+          // Traveler Information
+          name:              data.lead_name         || data.facebook_name || null,
+          mobile:            data.mobile_1          || null,
+          email:             data.email_1           || null,
+          guests:            data.total_number_of_guests || null,
+          // Travel Information
+          destination:       data.destination       || null,
+          travel_date:       data.travel_date       || null,
+          arrival_date:      data.arrival_date      || null,
+          departure_date:    data.departure_date    || null,
+          hotel:             data.hotel_name        || null,
+          airline:           data.airline_details_1 || data.name_of_airline || null,
+          tour_details:      data.tour_details      || null,
+          // Payment Information
+          package_price:     data.total_package_price_srp || null,
+          amount_paid:       data.total_amount_paid || null,
+          payment_method:    data.paymnt_type       || null,
+          // Documents
+          voucher:           data.voucher           || null,
+          automated_voucher: data.automated_voucher || null,
+          attachements:      data.attachements      || null,
+          _raw: data,
+        };
+        setFoundBooking(booking);
+      } else {
+        setFoundBooking(null);
+      }
+    } catch (err) {
+      console.error("[GDX] Unexpected error:", err);
+      setFoundBooking(null);
+    } finally {
+      setIsSearching(false);
+      setSearchAttempted(true);
+      console.groupEnd();
+    }
+  };
+
   if (!dest) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -932,6 +1604,16 @@ function PreviewContent() {
 
   // Section spacing constant
   const sectionGap = "py-10 lg:py-12";
+
+  // ── GDX Customer Portal helpers (used only by the booking card) ──────────────
+  const val = (v) =>
+    v !== null && v !== undefined && String(v).trim() !== "" ? String(v) : "Not Available";
+  const fmtCurrency = (v) => {
+    if (!v) return "Not Available";
+    const n = parseFloat(String(v).replace(/,/g, ""));
+    return isNaN(n) ? String(v) : `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+  const isUrl = (v) => typeof v === "string" && (v.startsWith("http://") || v.startsWith("https://"));
 
   return (
     <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
@@ -967,6 +1649,246 @@ function PreviewContent() {
         </div>
       </div>
 
+      {/* ════════════════════════════════════════════════════════════════════════
+          GDX Booking Verification Feature
+          ════════════════════════════════════════════════════════════════════════ */}
+      <div
+        className="px-4 lg:px-10 py-8 transition-colors duration-300"
+        style={{ backgroundColor: bg, borderBottom: `1px solid ${border}` }}
+      >
+        <div className="max-w-4xl mx-auto">
+
+          {/* GDX Search Section */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+            <div>
+              <p
+                className="font-body text-xs font-bold tracking-[0.3em] uppercase mb-1"
+                style={{ color: ORANGE }}
+              >
+                GDX Booking Verification
+              </p>
+              <p className="font-body text-sm" style={{ color: textSecondary }}>
+                Enter your GDX booking code to view your travel details
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                value={gdxInput}
+                onChange={(e) => setGdxInput(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === "Enter" && handleGdxSearch()}
+                placeholder="GDX-XXXXX"
+                maxLength={20}
+                aria-label="GDX booking code"
+                className="flex-1 sm:w-52 font-body font-semibold text-base tracking-widest px-4 py-3 rounded-xl border focus:outline-none transition-all"
+                style={{
+                  backgroundColor: bgCard,
+                  borderColor: gdxInput ? ORANGE : border,
+                  color: textPrimary,
+                }}
+              />
+              <button
+                onClick={handleGdxSearch}
+                disabled={isSearching}
+                aria-label="Search booking"
+                className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95 shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ backgroundColor: ORANGE, color: "#080808" }}
+              >
+                <Search className="w-4 h-4" />
+                {isSearching ? "Searching…" : "Search"}
+              </button>
+            </div>
+          </div>
+
+          {/* GDX Booking Summary Card */}
+          {searchAttempted && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+              className="mt-5"
+            >
+              {foundBooking ? (
+                <div
+                  className="rounded-2xl border-2 overflow-hidden"
+                  style={{ backgroundColor: bgCard, borderColor: ORANGE }}
+                >
+                  {/* ── Card Header ─────────────────────────────────────────── */}
+                  <div
+                    className="flex flex-wrap items-start justify-between gap-4 px-6 lg:px-8 pt-6 pb-5 border-b"
+                    style={{ borderColor: border }}
+                  >
+                    <div>
+                      <p className="font-body text-xs font-bold tracking-[0.3em] uppercase mb-1" style={{ color: ORANGE }}>
+                        Booking Verified
+                      </p>
+                      <h3 className="font-condensed font-black text-2xl lg:text-3xl tracking-wide leading-tight" style={{ color: textPrimary }}>
+                        {val(foundBooking.name)}
+                      </h3>
+                    </div>
+                    <span
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-body font-bold text-sm shrink-0"
+                      style={{ backgroundColor: isDark ? "#0D2010" : "#F0FFF4", color: "#22C55E", border: "1.5px solid #22C55E" }}
+                    >
+                      ✓ {val(foundBooking.status)}
+                    </span>
+                  </div>
+
+                  <div className="px-6 lg:px-8 py-6 space-y-8">
+
+                    {/* ── 1. Booking Summary ──────────────────────────────── */}
+                    <div>
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
+                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Booking Summary</p>
+                      </div>
+                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
+                        {[
+                          { label: "Booking Reference (GDX)", value: val(foundBooking.gdx) },
+                          { label: "Status",                  value: val(foundBooking.status) },
+                        ].map((f, i, arr) => (
+                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
+                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
+                            <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>{f.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* ── 2. Traveler Information ─────────────────────────── */}
+                    <div>
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
+                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Traveler Information</p>
+                      </div>
+                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
+                        {[
+                          { label: "Lead Guest",      value: val(foundBooking.name) },
+                          { label: "Contact Number",  value: val(foundBooking.mobile) },
+                          { label: "Email",           value: val(foundBooking.email) },
+                          { label: "Total Guests",    value: val(foundBooking.guests) },
+                        ].map((f, i, arr) => (
+                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
+                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
+                            <span className="font-body text-sm font-semibold text-right break-all" style={{ color: textPrimary }}>{f.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* ── 3. Travel Information ───────────────────────────── */}
+                    <div>
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
+                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Travel Information</p>
+                      </div>
+                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
+                        {[
+                          { label: "Destination",    value: val(foundBooking.destination) },
+                          { label: "Travel Date",    value: val(foundBooking.travel_date) },
+                          { label: "Arrival Date",   value: val(foundBooking.arrival_date) },
+                          { label: "Departure Date", value: val(foundBooking.departure_date) },
+                          { label: "Hotel",          value: val(foundBooking.hotel) },
+                          { label: "Airline",        value: val(foundBooking.airline) },
+                          { label: "Tour Details",   value: val(foundBooking.tour_details) },
+                        ].map((f, i, arr) => (
+                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
+                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
+                            <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>{f.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* ── 4. Payment Information ──────────────────────────── */}
+                    <div>
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
+                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Payment Information</p>
+                      </div>
+                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
+                        {[
+                          { label: "Package Price",   value: fmtCurrency(foundBooking.package_price) },
+                          { label: "Amount Paid",     value: fmtCurrency(foundBooking.amount_paid) },
+                          { label: "Payment Method",  value: val(foundBooking.payment_method) },
+                        ].map((f, i, arr) => (
+                          <div key={f.label} className="flex justify-between items-start gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
+                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
+                            <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>{f.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* ── 5. Documents ────────────────────────────────────── */}
+                    <div>
+                      <div className="flex items-center gap-2.5 mb-4">
+                        <div className="w-1 h-5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
+                        <p className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>Documents</p>
+                      </div>
+                      <div className="rounded-xl border overflow-hidden" style={{ borderColor: border }}>
+                        {[
+                          { label: "Voucher",           value: foundBooking.voucher },
+                          { label: "Automated Voucher", value: foundBooking.automated_voucher },
+                          { label: "Attachments",       value: foundBooking.attachements },
+                        ].map((f, i, arr) => (
+                          <div key={f.label} className="flex justify-between items-center gap-4 px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${border}` : "none", backgroundColor: i % 2 === 0 ? (isDark ? "#161616" : "#FAFAFA") : bgCard }}>
+                            <span className="font-body text-sm shrink-0" style={{ color: textSecondary }}>{f.label}</span>
+                            {isUrl(f.value) ? (
+                              <a
+                                href={f.value}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-body text-sm font-semibold underline hover:opacity-75 transition-opacity"
+                                style={{ color: ORANGE }}
+                              >
+                                Download ↗
+                              </a>
+                            ) : (
+                              <span className="font-body text-sm font-semibold text-right" style={{ color: textPrimary }}>
+                                {val(f.value)}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="font-body text-sm text-center pb-2" style={{ color: textSecondary }}>
+                      Your booking is confirmed. Watch the official briefing video below to prepare for your trip.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="rounded-2xl border px-6 py-10 text-center"
+                  style={{ backgroundColor: bgCard, borderColor: border }}
+                >
+                  <p className="text-4xl mb-4">🔍</p>
+                  <p
+                    className="font-condensed font-black text-2xl mb-2"
+                    style={{ color: textPrimary }}
+                  >
+                    No Booking Found
+                  </p>
+                  <p className="font-body text-base" style={{ color: textSecondary }}>
+                    No booking found for&nbsp;
+                    <span className="font-bold" style={{ color: ORANGE }}>
+                      {gdxInput}
+                    </span>
+                    .
+                    <br />
+                    Please check your GDX code and try again.
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </div>
+      </div>
+      {/* ════════════════════════════════════════════════════════════════════════ */}
+
       {/* ── PORTRAIT VIDEO SECTION ── */}
       <div className="bg-black py-16 px-4 lg:px-10 relative overflow-hidden">
         <div
@@ -995,13 +1917,13 @@ function PreviewContent() {
                 background: "linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
               }}
             >
-              <iframe
-                src={dest.videoUrl}
-                className="absolute inset-0 w-full h-full"
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                style={{ backgroundColor: "#000", border: "none" }}
-              />
+              <video
+                controls
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ backgroundColor: "#000" }}
+              >
+                <source src={dest.videoUrl} type="video/mp4" />
+              </video>
               <div className="absolute top-4 left-4 pointer-events-none">
                 <div
                   className="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-[0.25em] uppercase backdrop-blur-md border"
@@ -1189,6 +2111,70 @@ function PreviewContent() {
               <DestinationGuideSection briefing={briefing} theme={theme} />
             </div>
             <SectionDivider theme={theme} />
+
+            {/* ════════════════════════════════════════════════════════════════
+                ADD-ONS MODULE
+                ════════════════════════════════════════════════════════════════ */}
+
+            {/* ── OPTIONAL TOURS ── */}
+            {/* TODO: Globaltix API Integration — replace getToursByDestination() in mockTours.js */}
+            {/* TODO: LakbayHub API Integration — merge results in mockTours.js */}
+            {(() => {
+              const destTours = getToursByDestination(slug);
+              if (destTours.length === 0) return null;
+              return (
+                <>
+                  <div className={sectionGap}>
+                    <OptionalToursSection
+                      tours={destTours}
+                      cartTourIds={cart.tours.map((t) => t.tour?.id)}
+                      onAdd={addTourToCart}
+                      theme={theme}
+                    />
+                  </div>
+                  <SectionDivider theme={theme} />
+                </>
+              );
+            })()}
+
+            {/* ── TRAVEL INSURANCE ── */}
+            {/* TODO: Starr Insurance API Integration — replace getInsurancePlans() in mockInsurance.js */}
+            <div className={sectionGap}>
+              <TravelInsuranceSection
+                plans={getInsurancePlans()}
+                selectedInsurance={cart.insurance?.plan || cart.insurance}
+                onSelect={selectInsurance}
+                theme={theme}
+              />
+            </div>
+            <SectionDivider theme={theme} />
+
+            {/* ── CART SUMMARY ── */}
+            <div className={sectionGap}>
+              <CartSummarySection
+                cart={cart}
+                total={cartTotal}
+                onRemoveTour={removeTourFromCart}
+                onRemoveInsurance={removeInsurance}
+                theme={theme}
+              />
+            </div>
+            <SectionDivider theme={theme} />
+
+            {/* ── CHECKOUT ── */}
+            {/* TODO: Xendit Checkout Integration */}
+            <div className={sectionGap}>
+              <CheckoutSection
+                cart={cart}
+                total={cartTotal}
+                theme={theme}
+              />
+            </div>
+            <SectionDivider theme={theme} />
+
+            {/* ════════════════════════════════════════════════════════════════
+                END ADD-ONS MODULE
+                ════════════════════════════════════════════════════════════════ */}
 
             {/* ── 18. EMERGENCY CONTACTS ── */}
             <div className={sectionGap}>

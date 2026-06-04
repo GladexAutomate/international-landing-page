@@ -13,7 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "types": []
+    "types": ["vite/client"]
   },
   "include": ["src/**/*"],
   "exclude": [
@@ -21,7 +21,6 @@
     "dist",
     "src/vite-plugins",
     "src/components/ui",
-    "src/api",
-    "src/lib"
+    "src/api"
   ]
 }
