@@ -1358,15 +1358,15 @@ function CheckoutSection({ cart, total, theme }) {
             ) : (
               <div className="space-y-2.5">
                 {cart.tours.map((t) => (
-                  <div key={t.id} className="flex justify-between gap-4 font-body text-sm" style={{ color: textSecondary }}>
-                    <span className="truncate">{t.name}</span>
-                    <span className="shrink-0">₱{t.price.toLocaleString()}</span>
+                  <div key={t.cartItemId} className="flex justify-between gap-4 font-body text-sm" style={{ color: textSecondary }}>
+                    <span className="truncate">{t.tour.name}</span>
+                    <span className="shrink-0">₱{t.total.toLocaleString()}</span>
                   </div>
                 ))}
                 {cart.insurance && (
                   <div className="flex justify-between gap-4 font-body text-sm" style={{ color: textSecondary }}>
-                    <span>{cart.insurance.name}</span>
-                    <span className="shrink-0">₱{cart.insurance.price.toLocaleString()}</span>
+                    <span>{cart.insurance.plan?.name}</span>
+                    <span className="shrink-0">₱{cart.insurance.total.toLocaleString()}</span>
                   </div>
                 )}
                 <div
