@@ -1,186 +1,199 @@
 // @ts-nocheck
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Star, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Star } from "lucide-react";
+import { supabase } from "../lib/supabase";
 import BriefingSection from "./briefing/BriefingSection";
 
 const ORANGE = "#FF8C00";
 
-const QUESTIONS = [
-  { id: "booking", label: "Was the booking process easy?" },
-  { id: "communication", label: "Was our team responsive and helpful?" },
-  { id: "satisfaction", label: "Are you satisfied with the service so far?" },
-];
-
-const STAR_LABELS = ["", "Poor", "Fair", "Good", "Great", "Excellent!"];
-
-export default function RateMyService({ theme }) {
+export default function RateMyService({ theme, gdxReference }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
-  const [ratings, setRatings] = useState({});
-  const [wouldRefer, setWouldRefer] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
 
-  const allAnswered =
-    QUESTIONS.every((q) => ratings[q.id]) && wouldRefer !== null;
+  const [loading,        setLoading]        = useState(true);
+  const [existingReview, setExistingReview] = useState(null); // { rating, comment } | null
+  const [hovered,        setHovered]        = useState(0);
+  const [selected,       setSelected]       = useState(0);
+  const [comment,        setComment]        = useState("");
+  const [submitting,     setSubmitting]     = useState(false);
+  const [error,          setError]          = useState(null);
 
-  if (submitted) {
-    return (
-      <BriefingSection label="Your Feedback" title="Rate My Service" theme={theme}>
-        <div className="text-center py-10">
-          <p className="text-5xl mb-4">🙏</p>
-          <h4
-            className="font-condensed font-black text-2xl mb-2"
-            style={{ color: textPrimary }}
-          >
-            Thank You for Your Feedback!
-          </h4>
-          <p
-            className="font-body text-sm leading-relaxed mb-6 max-w-sm mx-auto"
-            style={{ color: textSecondary }}
-          >
-            Your input helps us improve the experience for every traveler. We
-            truly appreciate you taking the time.
-          </p>
-          <a
-            href="https://www.facebook.com/gladextours/reviews"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-body font-bold text-sm px-6 py-3 rounded-xl transition-all hover:opacity-90"
-            style={{ backgroundColor: ORANGE, color: "#080808" }}
-          >
-            <ExternalLink className="w-4 h-4" /> Leave a Public Review
-          </a>
-        </div>
-      </BriefingSection>
-    );
+  // Fetch existing review whenever the GDX reference changes
+  useEffect(() => {
+    if (!gdxReference) { setLoading(false); return; }
+
+    setLoading(true);
+    setExistingReview(null);
+    setSelected(0);
+    setComment("");
+    setError(null);
+
+    supabase
+      .from("reviews")
+      .select("rating, comment")
+      .eq("gdx_reference", gdxReference)
+      .maybeSingle()
+      .then(({ data, error: fetchError }) => {
+        if (!fetchError && data) setExistingReview(data);
+        setLoading(false);
+      });
+  }, [gdxReference]);
+
+  async function handleSubmit() {
+    if (!selected || !gdxReference || submitting) return;
+    setSubmitting(true);
+    setError(null);
+
+    const { error: insertError } = await supabase.from("reviews").insert({
+      gdx_reference: gdxReference,
+      rating:        selected,
+      comment:       comment.trim() || null,
+    });
+
+    if (insertError) {
+      setError("Something went wrong. Please try again.");
+      setSubmitting(false);
+      return;
+    }
+
+    setExistingReview({ rating: selected, comment: comment.trim() || null });
+    setSubmitting(false);
   }
 
+  if (!gdxReference) return null;
+
   return (
-    <BriefingSection label="Your Feedback" title="Rate My Service" theme={theme}>
-      <p
-        className="font-body text-sm leading-relaxed mb-5"
-        style={{ color: textSecondary }}
-      >
-        How was your booking experience so far? Your honest feedback helps us make every trip better.
-      </p>
+    <BriefingSection label="Your Experience" title="Review Our Service" theme={theme}>
 
-      <div className="space-y-4">
-        {/* Star rating questions */}
-        {QUESTIONS.map((q) => (
+      {/* ── Loading ── */}
+      {loading && (
+        <div className="flex items-center justify-center py-10">
           <div
-            key={q.id}
-            className="rounded-2xl border p-4"
-            style={{ backgroundColor: bgCard, borderColor: border }}
-          >
-            <p
-              className="font-body text-sm font-semibold mb-3"
-              style={{ color: textPrimary }}
-            >
-              {q.label}
-            </p>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() =>
-                    setRatings((r) => ({ ...r, [q.id]: star }))
-                  }
-                  className="transition-transform active:scale-110 p-0.5"
-                >
-                  <Star
-                    className="w-7 h-7 fill-current transition-colors"
-                    style={{
-                      color:
-                        (ratings[q.id] || 0) >= star
-                          ? ORANGE
-                          : isDark
-                          ? "#2E2E2E"
-                          : "#E5E5E5",
-                    }}
-                  />
-                </button>
-              ))}
-              {ratings[q.id] && (
-                <span
-                  className="font-body text-xs ml-2"
-                  style={{ color: ORANGE }}
-                >
-                  {STAR_LABELS[ratings[q.id]]}
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+            className="w-6 h-6 border-2 rounded-full animate-spin"
+            style={{ borderColor: ORANGE, borderTopColor: "transparent" }}
+          />
+        </div>
+      )}
 
-        {/* Recommend question */}
+      {/* ── Submitted / existing review ── */}
+      {!loading && existingReview && (
         <div
-          className="rounded-2xl border p-4"
+          className="rounded-2xl border p-6 space-y-3"
           style={{ backgroundColor: bgCard, borderColor: border }}
         >
-          <p
-            className="font-body text-sm font-semibold mb-3"
-            style={{ color: textPrimary }}
-          >
-            Would you recommend Gladex to a friend?
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {["Yes, definitely!", "Already did! 🎉", "Maybe later"].map(
-              (opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setWouldRefer(opt)}
-                  className="font-body font-bold text-sm px-4 py-2 rounded-xl transition-all"
-                  style={{
-                    backgroundColor:
-                      wouldRefer === opt
-                        ? ORANGE
-                        : isDark
-                        ? "rgba(255,255,255,0.06)"
-                        : "#F5F5F5",
-                    color:
-                      wouldRefer === opt ? "#080808" : textSecondary,
-                    border:
-                      wouldRefer === opt
-                        ? "none"
-                        : `1px solid ${border}`,
-                  }}
-                >
-                  {opt}
-                </button>
-              )
-            )}
+          <div className="flex gap-1.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className="w-6 h-6"
+                style={{
+                  fill:        i < existingReview.rating ? ORANGE : "none",
+                  color:       i < existingReview.rating ? ORANGE : isDark ? "#555" : "#CCC",
+                  strokeWidth: 1.5,
+                }}
+              />
+            ))}
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <motion.button
-            onClick={() => allAnswered && setSubmitted(true)}
-            whileTap={allAnswered ? { scale: 0.97 } : {}}
-            className="flex-1 font-condensed font-black text-lg py-3.5 rounded-xl transition-all"
-            style={{
-              backgroundColor: allAnswered
-                ? ORANGE
-                : isDark
-                ? "#2A2A2A"
-                : "#E5E5E5",
-              color: allAnswered ? "#080808" : textSecondary,
-              cursor: allAnswered ? "pointer" : "not-allowed",
-            }}
-          >
-            Submit Feedback
-          </motion.button>
-          <a
-            href="https://www.facebook.com/gladextours/reviews"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-body font-bold text-sm px-5 py-3.5 rounded-xl border flex items-center gap-2 justify-center transition-all hover:opacity-80"
-            style={{ borderColor: ORANGE, color: ORANGE }}
-          >
-            <ExternalLink className="w-4 h-4" /> Leave a Review
-          </a>
+          <div>
+            <p className="font-condensed font-bold text-base" style={{ color: textPrimary }}>
+              Thank you for your feedback! 🧡
+            </p>
+            <p className="font-body text-sm" style={{ color: ORANGE }}>
+              We hope you have an amazing trip.
+            </p>
+          </div>
+
+          {existingReview.comment && (
+            <p
+              className="font-body text-sm leading-relaxed italic px-4 py-3 rounded-xl"
+              style={{
+                backgroundColor: isDark ? "rgba(255,140,0,0.07)" : "rgba(255,140,0,0.05)",
+                color: textSecondary,
+              }}
+            >
+              "{existingReview.comment}"
+            </p>
+          )}
         </div>
-      </div>
+      )}
+
+      {/* ── Review form ── */}
+      {!loading && !existingReview && (
+        <div className="space-y-5">
+
+          <div>
+            <p className="font-body text-sm mb-3" style={{ color: textSecondary }}>
+              How would you rate your experience with Gladex Tours?
+            </p>
+            <div className="flex gap-2">
+              {Array.from({ length: 5 }).map((_, i) => {
+                const filled = i < (hovered || selected);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setSelected(i + 1)}
+                    onMouseEnter={() => setHovered(i + 1)}
+                    onMouseLeave={() => setHovered(0)}
+                    className="transition-transform hover:scale-110 focus:outline-none"
+                    aria-label={`Rate ${i + 1} star${i === 0 ? "" : "s"}`}
+                  >
+                    <Star
+                      className="w-8 h-8"
+                      style={{
+                        fill:        filled ? ORANGE : "none",
+                        color:       filled ? ORANGE : isDark ? "#555" : "#CCC",
+                        strokeWidth: 1.5,
+                        transition:  "all 0.12s ease",
+                      }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p
+              className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] mb-2"
+              style={{ color: textSecondary }}
+            >
+              Comments{" "}
+              <span className="normal-case tracking-normal font-normal text-xs">
+                (optional)
+              </span>
+            </p>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Tell us about your experience…"
+              rows={3}
+              className="w-full rounded-xl border px-4 py-3 font-body text-sm resize-none focus:outline-none transition-colors"
+              style={{
+                backgroundColor: bgCard,
+                borderColor:     border,
+                color:           textPrimary,
+              }}
+            />
+          </div>
+
+          {error && (
+            <p className="font-body text-sm" style={{ color: "#EF4444" }}>
+              {error}
+            </p>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={!selected || submitting}
+            className="w-full py-3 rounded-xl font-condensed font-bold text-base tracking-wide transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ backgroundColor: ORANGE, color: "#080808" }}
+          >
+            {submitting ? "Submitting…" : "Submit Review"}
+          </button>
+
+        </div>
+      )}
+
     </BriefingSection>
   );
 }

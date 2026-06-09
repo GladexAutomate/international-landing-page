@@ -2941,11 +2941,15 @@ function PreviewContent() {
             </div>
             <SectionDivider theme={theme} />
 
-            {/* ── 23. RATE MY SERVICE ── */}
-            <div className={sectionGap}>
-              <RateMyService theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            {/* ── 23. RATE MY SERVICE — only shown when a booking is loaded ── */}
+            {booking?.gdx && (
+              <>
+                <div className={sectionGap}>
+                  <RateMyService theme={theme} gdxReference={booking.gdx} />
+                </div>
+                <SectionDivider theme={theme} />
+              </>
+            )}
 
             {/* ── 24. REFERRAL ── */}
             <div className={sectionGap}>
