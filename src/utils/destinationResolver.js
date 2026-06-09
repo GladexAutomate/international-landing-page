@@ -76,8 +76,19 @@ function matchKeywords(text) {
 export function resolveDestinationSlug(booking) {
   if (!booking) return null;
 
+  // ── Strategy 0: resolved destinationName from Fusioo (most reliable) ─────
+  // getFullBookingFromFusioo sets this to the human-readable text, e.g. "Hong Kong"
+  const fromDestName = matchKeywords(booking.destinationName);
+  if (fromDestName) {
+    console.log("[GDX Resolver] Matched via destinationName:", booking.destinationName, "→", fromDestName);
+    return fromDestName;
+  }
+
   // ── Strategy 1: direct Fusioo ID lookup ──────────────────────────────────
-  const destId = booking.destination;
+  // Works when booking.destination is a plain string ID (not an array)
+  const destId = Array.isArray(booking.destination)
+    ? booking.destination[0]
+    : booking.destination;
   if (destId && FUSIOO_ID_MAP[destId]) {
     console.log("[GDX Resolver] Matched via FUSIOO_ID_MAP:", FUSIOO_ID_MAP[destId]);
     return FUSIOO_ID_MAP[destId];
@@ -115,8 +126,17 @@ export function resolveDestinationSlug(booking) {
     return fromPackage;
   }
 
-  // ── Strategy 5: tour_details text field ──────────────────────────────────
-  const fromTour = matchKeywords(booking.tour_details);
+  // ── Strategy 5: tourName from resolved Fusioo tour record ────────────────
+  const fromTourName = matchKeywords(booking.tourName);
+  if (fromTourName) {
+    console.log("[GDX Resolver] Matched via tourName:", booking.tourName, "→", fromTourName);
+    return fromTourName;
+  }
+
+  // ── Strategy 6: raw tour_details text (legacy Supabase field) ────────────
+  const fromTour = matchKeywords(
+    typeof booking.tour_details === "string" ? booking.tour_details : null
+  );
   if (fromTour) {
     console.log("[GDX Resolver] Matched via tour_details:", fromTour);
     return fromTour;

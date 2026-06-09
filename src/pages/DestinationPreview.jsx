@@ -1,16 +1,14 @@
-// @ts-nocheck
-import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+﻿// @ts-nocheck
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2, Download, FileText, User, CalendarDays, Hotel, Plane, Users, Tag, BadgeCheck, Mail, DollarSign, Briefcase, UserCheck, Car, MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
-import ThingsToDoSection from "../components/ThingsToDoSection";
-import { getActivitiesForDestination } from "../data/activitiesData";
+import { resolveVoucher, resolveItinerary, resolveFirstId } from "../services/fusiooDocumentService";
 import {
-  getToursByDestination,
   getInsurancePlans,
   createCart,
   createCartTourItem,
@@ -19,6 +17,11 @@ import {
   createOrder,
   PAYMENT_METHODS,
 } from "../data/addons/index.js";
+import { getToursForDestination } from "../services/toursService";
+import { getToursByDestination } from "../data/addons/mockTours";
+import TourBookingModal from "../components/TourBookingModal";
+import DemoPaymentModal from "../components/DemoPaymentModal";
+import OrderSuccessScreen from "../components/OrderSuccessScreen";
 
 // Briefing-specific components
 import BriefingSection from "../components/briefing/BriefingSection";
@@ -28,6 +31,11 @@ import TravelChecklist from "../components/briefing/TravelChecklist";
 import DosAndDonts from "../components/briefing/DosAndDonts";
 import BriefingFAQ from "../components/briefing/BriefingFAQ";
 import NeedAssistance from "../components/briefing/NeedAssistance";
+import WhatToBringCarousel from "../components/WhatToBringCarousel";
+import OutfitGuide from "../components/OutfitGuide";
+import BriefingTestimonials from "../components/BriefingTestimonials";
+import RateMyService from "../components/RateMyService";
+import ReferralSection from "../components/ReferralSection";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const ORANGE = "#FF8C00";
@@ -66,12 +74,6 @@ function WelcomeSection({ briefing, pkg, theme }) {
               style={{ backgroundColor: isDark ? "#2A2A2A" : "#F0F0F0", color: textSecondary }}
             >
               {pkg.duration}
-            </span>
-            <span
-              className="font-condensed font-bold text-xs px-3 py-1.5 rounded-full tracking-wider"
-              style={{ backgroundColor: isDark ? "#2A2A2A" : "#F0F0F0", color: textSecondary }}
-            >
-              Code: {pkg.code}
             </span>
           </div>
         )}
@@ -534,31 +536,6 @@ function RequirementsSection({ pkg, theme }) {
   );
 }
 
-// ─── 14. WHAT TO BRING ───────────────────────────────────────────────────────
-function WhatToBringGrid({ items = [], theme }) {
-  const { bgCard, border, textPrimary, textSecondary } = theme;
-  if (!items.length) return null;
-
-  return (
-    <BriefingSection label="Packing Guide" title="What to Bring" theme={theme}>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {items.map((item, i) => (
-          <div
-            key={i}
-            className="flex flex-col items-center gap-2 p-3.5 rounded-2xl border text-center"
-            style={{ backgroundColor: bgCard, borderColor: border }}
-          >
-            <span className="text-2xl">{item.icon}</span>
-            <span className="font-body text-xs leading-snug" style={{ color: textSecondary }}>
-              {item.label}
-            </span>
-          </div>
-        ))}
-      </div>
-    </BriefingSection>
-  );
-}
-
 // ─── 15. CONNECTIVITY GUIDE ──────────────────────────────────────────────────
 function ConnectivitySection({ briefing, theme }) {
   const { bgCard, bgAlt, border, textPrimary, textSecondary, isDark } = theme;
@@ -746,68 +723,383 @@ function CurrencySection({ briefing, theme }) {
   );
 }
 
+// ─── PHOTO SLIDER (used in Destination Guide Photo Spots tab) ────────────────
+function PhotoSlider({ items, theme }) {
+  const { textPrimary, textSecondary, isDark } = theme;
+  const [index, setIndex] = useState(0);
+  const total = items.length;
+  const touchStartX = useRef(null);
+
+  const prev = () => setIndex((i) => (i - 1 + total) % total);
+  const next = () => setIndex((i) => (i + 1) % total);
+
+  function onTouchStart(e) { touchStartX.current = e.touches[0].clientX; }
+  function onTouchEnd(e) {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+    touchStartX.current = null;
+  }
+
+  const item = items[index];
+  return (
+    <div>
+      <div
+        className="relative rounded-2xl overflow-hidden select-none"
+        style={{ aspectRatio: "4/3" }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={index}
+            src={item.img}
+            alt={item.name}
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.38 }}
+            loading="lazy"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
+          />
+        </AnimatePresence>
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+
+        {/* Text overlay */}
+        <div className="absolute inset-x-0 bottom-0 px-5 pb-5 pointer-events-none">
+          <p className="font-condensed font-black text-white text-2xl sm:text-3xl leading-tight drop-shadow-lg">
+            {item.name}
+          </p>
+          <p className="font-body text-sm text-white/85 mt-1 leading-snug drop-shadow">
+            {item.desc}
+          </p>
+        </div>
+
+        {/* Navigation arrows */}
+        <button
+          onClick={prev}
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          style={{ backgroundColor: "rgba(0,0,0,0.50)", backdropFilter: "blur(4px)" }}
+        >
+          <ChevronLeft className="w-5 h-5 text-white" />
+        </button>
+        <button
+          onClick={next}
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          style={{ backgroundColor: "rgba(0,0,0,0.50)", backdropFilter: "blur(4px)" }}
+        >
+          <ChevronRight className="w-5 h-5 text-white" />
+        </button>
+
+        {/* Counter badge */}
+        <div
+          className="absolute top-3 right-3 font-body text-xs font-bold px-3 py-1 rounded-full"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", color: "#FFF", backdropFilter: "blur(4px)" }}
+        >
+          {index + 1} / {total}
+        </div>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="flex gap-2 justify-center mt-4">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: i === index ? 24 : 8,
+              height: 8,
+              backgroundColor: i === index ? ORANGE : (isDark ? "#444" : "#DDD"),
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── 17. DESTINATION GUIDE ───────────────────────────────────────────────────
 function DestinationGuideSection({ briefing, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  const [activeTab, setActiveTab] = useState(0);
   const guide = briefing?.destinationGuide;
+  const currencyGuide = briefing?.currencyGuide;
   if (!guide) return null;
 
-  return (
-    <BriefingSection label="Know Your Destination" title="Destination Guide" theme={theme}>
-      <div className="space-y-4">
-        {guide.intro && (
-          <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{guide.intro}</p>
-        )}
+  const TABS = [
+    {
+      key: "places",
+      label: "Best Places",
+      icon: "🗺️",
+      type: "places",
+      items: (guide.highlights || []).map((h) => ({ icon: h.icon, name: h.name, desc: h.description, img: h.img })),
+    },
+    {
+      key: "food",
+      label: "Best Food",
+      icon: "🍜",
+      type: "food",
+      items: guide.bestFood || [],
+    },
+    {
+      key: "photos",
+      label: "Photo Spots",
+      icon: "📸",
+      type: "photos",
+      items: guide.photoSpots || [],
+    },
+    {
+      key: "tips",
+      label: "Local Tips",
+      icon: "💡",
+      type: "tips",
+      items: guide.localTips || [],
+    },
+    {
+      key: "weather",
+      label: "Weather & Info",
+      icon: "🌤️",
+      type: "weather",
+      items: [],
+    },
+    {
+      key: "currency",
+      label: "Currency",
+      icon: "💱",
+      type: "currency",
+      items: [],
+    },
+    {
+      key: "safety",
+      label: "Safety Tips",
+      icon: "🛡️",
+      type: "tips",
+      items: guide.safetyTips || [],
+    },
+  ].filter((tab) => {
+    if (tab.type === "places") return (guide.highlights || []).length > 0;
+    if (tab.type === "food" || tab.type === "photos") return tab.items.length > 0;
+    if (tab.type === "tips") return tab.items.length > 0;
+    if (tab.type === "weather") return (guide.practicalInfo || []).length > 0;
+    if (tab.type === "currency") return !!currencyGuide;
+    return false;
+  });
 
-        {/* Highlights */}
-        {guide.highlights?.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {guide.highlights.map((hl, i) => (
+  const clampedIndex = Math.min(activeTab, TABS.length - 1);
+  const tab = TABS[clampedIndex];
+
+  const renderContent = () => {
+    if (!tab) return null;
+
+    // ── Best Places: horizontal image carousel ─────────────────────────────
+    if (tab.type === "places") {
+      return (
+        <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
+          {tab.items.map((item, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 snap-start w-64 sm:w-auto rounded-2xl overflow-hidden border group"
+              style={{ backgroundColor: bgCard, borderColor: border }}
+            >
               <div
-                key={i}
-                className="flex items-start gap-3 px-4 py-3.5 rounded-xl border"
-                style={{ backgroundColor: bgCard, borderColor: border }}
+                className="relative overflow-hidden"
+                style={{ aspectRatio: "4/3", backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}
               >
-                <span className="text-xl shrink-0">{hl.icon}</span>
-                <div>
-                  <p className="font-condensed font-bold text-sm tracking-wide mb-0.5" style={{ color: textPrimary }}>
-                    {hl.name}
-                  </p>
-                  <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>
-                    {hl.description}
-                  </p>
+                {item.img ? (
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/images/placeholder.svg";
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="absolute inset-0 items-center justify-center text-5xl"
+                  style={{ display: item.img ? "none" : "flex" }}
+                >
+                  {item.icon}
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent pointer-events-none" />
+                <p className="absolute bottom-3 left-3 right-3 font-condensed font-black text-white text-base leading-tight z-10 drop-shadow">
+                  {item.name}
+                </p>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Practical info */}
-        {guide.practicalInfo?.length > 0 && (
-          <div className="rounded-2xl border overflow-hidden" style={{ borderColor: border, backgroundColor: bgCard }}>
-            <div className="px-5 py-3 border-b" style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}>
-              <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>
-                Practical Information
-              </p>
+              <div className="px-4 py-3">
+                <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
+              </div>
             </div>
-            <div className="px-5 py-4 space-y-3">
-              {guide.practicalInfo.map((info, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <Globe className="w-4 h-4 mt-0.5 shrink-0" style={{ color: ORANGE }} />
-                  <div>
-                    <span className="font-body text-xs font-bold block mb-0.5" style={{ color: textPrimary }}>
-                      {info.label}
-                    </span>
-                    <span className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>
-                      {info.value}
-                    </span>
+          ))}
+        </div>
+      );
+    }
+
+    // ── Best Food: horizontal card carousel ───────────────────────────────
+    if (tab.type === "food") {
+      return (
+        <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
+          {tab.items.map((item, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 snap-start w-60 sm:w-auto rounded-2xl overflow-hidden border group"
+              style={{ backgroundColor: bgCard, borderColor: border }}
+            >
+              <div
+                className="aspect-video overflow-hidden"
+                style={{ backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}
+              >
+                <img
+                  src={item.img}
+                  alt={item.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
+                />
+              </div>
+              <div className="px-4 py-3">
+                <p className="font-condensed font-bold text-base leading-tight mb-1" style={{ color: textPrimary }}>{item.name}</p>
+                <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ── Photo Spots: full-width single-image slider ───────────────────────
+    if (tab.type === "photos") {
+      return <PhotoSlider items={tab.items} theme={theme} />;
+    }
+
+    if (tab.type === "tips") {
+      return (
+        <div className="space-y-2">
+          {tab.items.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-3 px-4 py-3.5 rounded-2xl border"
+              style={{ backgroundColor: bgCard, borderColor: border }}
+            >
+              <span className="text-xl shrink-0">{item.icon}</span>
+              <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{item.tip}</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (tab.type === "weather") {
+      return (
+        <div className="space-y-3">
+          {(guide.practicalInfo || []).map((info, i) => (
+            <div
+              key={i}
+              className="px-4 py-3.5 rounded-2xl border"
+              style={{ backgroundColor: bgCard, borderColor: border }}
+            >
+              <p className="font-condensed font-bold text-sm mb-1" style={{ color: textPrimary }}>{info.label}</p>
+              <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{info.value}</p>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (tab.type === "currency" && currencyGuide) {
+      return (
+        <div className="space-y-3">
+          <div className="px-5 py-4 rounded-2xl border" style={{ backgroundColor: bgCard, borderColor: border }}>
+            <p className="font-condensed font-black text-lg mb-1" style={{ color: textPrimary }}>
+              {currencyGuide.currency} ({currencyGuide.symbol})
+            </p>
+            <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+              {currencyGuide.exchangeRate}
+            </p>
+          </div>
+          {currencyGuide.roughPrices?.length > 0 && (
+            <div className="rounded-2xl border overflow-hidden" style={{ borderColor: border, backgroundColor: bgCard }}>
+              <div className="px-5 py-3 border-b" style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}>
+                <p className="font-condensed font-bold text-sm" style={{ color: textPrimary }}>Price Reference</p>
+              </div>
+              <div>
+                {currencyGuide.roughPrices.map((rp, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start justify-between gap-4 px-5 py-3 border-b last:border-0"
+                    style={{ borderColor: border }}
+                  >
+                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{rp.item}</p>
+                    <p className="font-body text-xs font-bold shrink-0" style={{ color: ORANGE }}>{rp.price}</p>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {currencyGuide.tips?.length > 0 && (
+            <div className="space-y-2">
+              {currencyGuide.tips.map((tip, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2 px-4 py-3 rounded-xl border"
+                  style={{ backgroundColor: bgCard, borderColor: border }}
+                >
+                  <span className="font-bold mt-0.5 shrink-0" style={{ color: ORANGE }}>✓</span>
+                  <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{tip}</p>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <BriefingSection label="Know Your Destination" title="Destination Guide" theme={theme}>
+      {guide.intro && (
+        <p className="font-body text-sm leading-relaxed mb-5" style={{ color: textSecondary }}>{guide.intro}</p>
+      )}
+
+      {/* Category Tabs */}
+      <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
+        {TABS.map((t, i) => (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(i)}
+            className="flex items-center gap-1.5 whitespace-nowrap font-body font-bold text-sm px-4 py-2 rounded-xl transition-all shrink-0"
+            style={{
+              backgroundColor: clampedIndex === i ? ORANGE : (isDark ? "rgba(255,255,255,0.06)" : "#F5F5F5"),
+              color: clampedIndex === i ? "#080808" : textSecondary,
+              border: clampedIndex === i ? "none" : `1px solid ${border}`,
+            }}
+          >
+            <span>{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
       </div>
+
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={clampedIndex}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.22 }}
+        >
+          {renderContent()}
+        </motion.div>
+      </AnimatePresence>
     </BriefingSection>
   );
 }
@@ -903,121 +1195,157 @@ function ImportantNoticesSection({ pkg, theme }) {
 // ════════════════════════════════════════════════════════════════════════════════
 
 // ─── OPTIONAL TOURS SECTION ───────────────────────────────────────────────────
-// Data: src/data/addons/mockTours.js → getToursByDestination(slug)
-// TODO: Globaltix API Integration — replace mock data with live API in mockTours.js
-// TODO: LakbayHub API Integration — merge LakbayHub results in mockTours.js
+// Data: src/services/toursService.js → getToursForDestination(slug) → Globaltix API
+// TODO: LakbayHub API Integration — merge LakbayHub results into toursService.js
 function OptionalToursSection({ tours, cartTourIds, onAdd, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   if (!tours || tours.length === 0) return null;
 
-  const SOURCE_LABEL = {
-    globaltix:     "Globaltix",
-    lakbayhub:     "LakbayHub",
-    gladex_manual: "Gladex",
+  const primaryImage = (tour) => {
+    const img = tour.images?.find((i) => i.isPrimary);
+    return img ? { url: img.url, fallback: img.fallbackUrl || null } : null;
   };
 
-  const primaryImage = (tour) =>
-    tour.images?.find((i) => i.isPrimary)?.url || null;
-
   return (
-    <BriefingSection label="Add to Your Trip" title="Optional Tours" theme={theme}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <BriefingSection label="Add to Your Trip" title="Optional Tours & Activities" theme={theme}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {tours.map((tour) => {
           const inCart = cartTourIds.includes(tour.id);
-          const imgUrl = primaryImage(tour);
+          const img = primaryImage(tour);
           return (
             <div
               key={tour.id}
               className="rounded-2xl border-2 overflow-hidden flex flex-col transition-all duration-200"
-              style={{ backgroundColor: bgCard, borderColor: inCart ? ORANGE : border }}
+              style={{
+                backgroundColor: bgCard,
+                borderColor: inCart ? ORANGE : border,
+                boxShadow: inCart ? `0 4px 20px ${ORANGE}25` : "none",
+              }}
             >
-              {/* Tour image */}
-              <div className="relative aspect-video overflow-hidden" style={{ backgroundColor: isDark ? "#1A1A1A" : "#F0F0F0" }}>
-                {imgUrl ? (
-                  <img src={imgUrl} alt={tour.name} className="w-full h-full object-cover" loading="lazy" />
+              {/* Tour image — 4:3 ratio for larger visual impact */}
+              <div
+                className="relative aspect-[4/3] overflow-hidden flex items-center justify-center"
+                style={{ backgroundColor: isDark ? "#1A1A1A" : "#F0F0F0" }}
+              >
+                {img ? (
+                  <img
+                    src={img.url}
+                    alt={tour.name}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    loading="lazy"
+                    onError={img.fallback ? (e) => { e.currentTarget.src = img.fallback; e.currentTarget.onerror = null; } : undefined}
+                  />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-5xl">🗺️</div>
+                  <span className="text-6xl">🗺️</span>
                 )}
-                {/* Provider source badge */}
-                <span
-                  className="absolute top-2 left-2 font-body text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded-md"
-                  style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "#fff" }}
+
+                {/* Duration badge top-right */}
+                {tour.duration && (
+                  <span
+                    className="absolute top-2 right-2 font-body text-[11px] font-bold px-2.5 py-1 rounded-lg"
+                    style={{ backgroundColor: "rgba(0,0,0,0.65)", color: "#fff" }}
+                  >
+                    ⏱ {tour.duration}
+                  </span>
+                )}
+
+                {/* Price badge bottom-right */}
+                <div
+                  className="absolute bottom-0 right-0 px-3.5 py-2 rounded-tl-xl"
+                  style={{ backgroundColor: ORANGE }}
                 >
-                  {SOURCE_LABEL[tour.source] || tour.source}
-                </span>
+                  <span className="font-condensed font-black text-lg text-white">
+                    ₱{tour.price.toLocaleString()}
+                  </span>
+                  <span className="font-body text-[10px] text-white ml-1 opacity-80">/adult</span>
+                </div>
+
+                {/* Added-to-cart indicator */}
+                {inCart && (
+                  <div
+                    className="absolute top-2 left-2 inline-flex items-center gap-1 font-body text-[11px] font-bold px-2.5 py-1 rounded-lg"
+                    style={{ backgroundColor: "#22C55E", color: "#fff" }}
+                  >
+                    <Check className="w-3 h-3" strokeWidth={3} /> Added
+                  </div>
+                )}
               </div>
 
+              {/* Card body */}
               <div className="p-4 flex flex-col flex-1">
-                {/* Category */}
                 {tour.category && (
                   <p className="font-body text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: ORANGE }}>
                     {tour.category}
                   </p>
                 )}
-                <h4 className="font-condensed font-black text-lg leading-tight mb-1" style={{ color: textPrimary }}>
+                <h4 className="font-condensed font-black text-xl leading-tight mb-2" style={{ color: textPrimary }}>
                   {tour.name}
                 </h4>
-                <p className="font-body text-xs mb-1" style={{ color: textSecondary }}>⏱ {tour.duration}</p>
-                {tour.meetingPoint && (
-                  <p className="font-body text-xs mb-2 flex items-start gap-1" style={{ color: textSecondary }}>
-                    <MapPin className="w-3 h-3 shrink-0 mt-0.5" style={{ color: ORANGE }} />
-                    {tour.meetingPoint}
+
+                {/* Availability + meeting point */}
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span
+                    className="inline-flex items-center gap-1 font-body text-[11px] font-bold px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: isDark ? "rgba(34,197,94,0.12)" : "#F0FFF4", color: "#22C55E", border: "1px solid rgba(34,197,94,0.3)" }}
+                  >
+                    📅 Available Daily
+                  </span>
+                  {tour.meetingPoint && (
+                    <span className="font-body text-xs flex items-center gap-1 truncate" style={{ color: textSecondary }}>
+                      <MapPin className="w-3 h-3 shrink-0" style={{ color: ORANGE }} />
+                      {tour.meetingPoint}
+                    </span>
+                  )}
+                </div>
+
+                {/* Description (2 lines max) */}
+                {tour.description && (
+                  <p
+                    className="font-body text-sm leading-relaxed mb-3"
+                    style={{ color: textSecondary, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+                  >
+                    {tour.description}
                   </p>
                 )}
-                <p className="font-body text-sm leading-relaxed mb-3 flex-1" style={{ color: textSecondary }}>
-                  {tour.description}
-                </p>
 
                 {/* Inclusions */}
-                <div className="mb-3">
-                  <p className="font-body text-xs font-bold uppercase tracking-wide mb-2" style={{ color: textSecondary }}>
-                    Inclusions
-                  </p>
-                  <ul className="space-y-1">
-                    {tour.inclusions.map((inc, i) => (
+                {tour.inclusions?.length > 0 && (
+                  <ul className="space-y-1 mb-4 flex-1">
+                    {tour.inclusions.slice(0, 3).map((inc, i) => (
                       <li key={i} className="flex items-center gap-1.5 font-body text-xs" style={{ color: textSecondary }}>
                         <Check className="w-3 h-3 shrink-0" style={{ color: "#22C55E" }} strokeWidth={2.5} />
                         {inc}
                       </li>
                     ))}
+                    {tour.inclusions.length > 3 && (
+                      <li className="font-body text-xs" style={{ color: textSecondary }}>
+                        +{tour.inclusions.length - 3} more included
+                      </li>
+                    )}
                   </ul>
-                </div>
-
-                {/* Pricing options */}
-                {tour.bookingOptions?.length > 1 && (
-                  <div className="mb-3 space-y-1">
-                    {tour.bookingOptions.slice(0, 3).map((opt) => (
-                      <div key={opt.id} className="flex justify-between font-body text-xs" style={{ color: textSecondary }}>
-                        <span>{opt.label}</span>
-                        <span className="font-semibold">{opt.price === 0 ? "Free" : `₱${opt.price.toLocaleString()}`}</span>
-                      </div>
-                    ))}
-                  </div>
                 )}
 
-                {/* Footer row */}
-                <div className="flex items-center justify-between gap-3 pt-3 border-t" style={{ borderColor: border }}>
-                  <div>
-                    <span className="font-condensed font-black text-xl" style={{ color: ORANGE }}>
-                      ₱{tour.price.toLocaleString()}
+                {/* CTA — full width, prominent */}
+                <button
+                  onClick={() => onAdd(tour)}
+                  disabled={inCart}
+                  className="w-full font-condensed font-black text-base py-3.5 rounded-xl mt-auto transition-all active:scale-[0.98] disabled:cursor-default"
+                  style={{
+                    backgroundColor: inCart ? "transparent" : ORANGE,
+                    color: inCart ? "#22C55E" : "#080808",
+                    border: inCart ? "1.5px solid #22C55E" : "none",
+                  }}
+                >
+                  {inCart ? (
+                    <span className="flex items-center justify-center gap-1.5">
+                      <Check className="w-4 h-4" strokeWidth={2.5} /> Added to Trip
                     </span>
-                    <span className="font-body text-xs ml-1" style={{ color: textSecondary }}>/adult</span>
-                  </div>
-                  <button
-                    onClick={() => onAdd(tour)}
-                    disabled={inCart}
-                    className="inline-flex items-center gap-1.5 font-body font-bold text-xs px-4 py-2.5 rounded-xl transition-all active:scale-95 disabled:cursor-default"
-                    style={{
-                      backgroundColor: inCart ? "transparent" : ORANGE,
-                      color: inCart ? "#22C55E" : "#080808",
-                      border: inCart ? "1.5px solid #22C55E" : "none",
-                    }}
-                  >
-                    {inCart
-                      ? <><Check className="w-3.5 h-3.5" strokeWidth={3} /> Added</>
-                      : <><Plus className="w-3.5 h-3.5" /> Add To Trip</>}
-                  </button>
-                </div>
+                  ) : (
+                    <span className="flex items-center justify-center gap-1.5">
+                      <Plus className="w-4 h-4" /> Add To Trip
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           );
@@ -1033,118 +1361,172 @@ function OptionalToursSection({ tours, cartTourIds, onAdd, theme }) {
 function TravelInsuranceSection({ plans, selectedInsurance, onSelect, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
 
-  const PROVIDER_LABEL = {
-    starr:         "Starr Insurance",
-    gladex_manual: "Gladex",
+  const TIER_STYLE = {
+    basic:   { accent: "#6B7280", ctaText: "#FFFFFF" },
+    standard:{ accent: ORANGE,    ctaText: "#080808" },
+    premium: { accent: "#8B5CF6", ctaText: "#FFFFFF" },
   };
 
   return (
     <BriefingSection label="Travel Protection" title="Travel Insurance" theme={theme}>
-      <div className="space-y-4">
+
+      {/* Header banner */}
+      <div
+        className="rounded-2xl px-5 py-4 mb-6 flex items-start gap-4"
+        style={{ backgroundColor: isDark ? "rgba(255,140,0,0.08)" : "#FFF8F0", border: `1.5px solid ${ORANGE}30` }}
+      >
+        <span className="text-3xl shrink-0 mt-0.5">🛡️</span>
+        <div>
+          <h4 className="font-condensed font-black text-lg leading-tight mb-1" style={{ color: textPrimary }}>
+            Protect Your Trip Before You Go
+          </h4>
+          <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+            Travel insurance covers unexpected medical emergencies, trip cancellations, and lost baggage —
+            a small cost for total peace of mind.
+          </p>
+        </div>
+      </div>
+
+      {/* Premium pricing cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         {plans.map((plan) => {
           const selected = selectedInsurance?.id === plan.id;
+          const ts = TIER_STYLE[plan.tier] || TIER_STYLE.basic;
+          const coverageItems = plan.coverageLimits?.length > 0
+            ? plan.coverageLimits.slice(0, 4).map((l) => `${l.type}: up to ₱${l.limitAmount.toLocaleString()}`)
+            : (plan.coverage || []);
+
           return (
             <div
               key={plan.id}
-              className="rounded-2xl border-2 p-5 transition-all duration-200 cursor-pointer"
+              className="rounded-2xl border-2 overflow-hidden flex flex-col cursor-pointer transition-all duration-200"
               style={{
-                backgroundColor: selected ? (isDark ? "#1A0A00" : "#FFF8F0") : bgCard,
-                borderColor: selected ? ORANGE : border,
+                backgroundColor: selected
+                  ? (isDark ? (plan.tier === "premium" ? "#130A20" : "#1A0A00") : (plan.tier === "premium" ? "#FAF5FF" : "#FFF8F0"))
+                  : bgCard,
+                borderColor: selected ? ts.accent : (plan.recommended ? `${ORANGE}60` : border),
+                boxShadow: selected ? `0 4px 24px ${ts.accent}28` : "none",
               }}
               onClick={() => onSelect(plan)}
             >
-              {/* Header row */}
-              <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl mt-0.5 shrink-0">🛡️</span>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      {plan.recommended && (
-                        <span className="font-body text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded-full" style={{ backgroundColor: ORANGE, color: "#080808" }}>
-                          Recommended
-                        </span>
-                      )}
-                      <span className="font-body text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded border" style={{ borderColor: border, color: textSecondary }}>
-                        {PROVIDER_LABEL[plan.provider] || plan.provider}
-                      </span>
-                    </div>
-                    <h4 className="font-condensed font-black text-lg leading-tight" style={{ color: textPrimary }}>
-                      {plan.name}
-                    </h4>
-                    {/* Plan code visible for transparency */}
-                    {plan.planCode && (
-                      <p className="font-body text-[10px] mt-0.5" style={{ color: textSecondary }}>
-                        Plan: {plan.planCode}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="text-right">
-                    <span className="font-condensed font-black text-2xl" style={{ color: ORANGE }}>
-                      ₱{plan.price.toLocaleString()}
-                    </span>
-                    <p className="font-body text-xs" style={{ color: textSecondary }}>/person</p>
-                  </div>
+              {/* Plan header */}
+              <div className="px-4 pt-5 pb-3 border-b" style={{ borderColor: selected ? `${ts.accent}25` : border }}>
+                {plan.recommended && (
                   <div
-                    className="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
-                    style={{ borderColor: selected ? ORANGE : border, backgroundColor: selected ? ORANGE : "transparent" }}
+                    className="inline-flex items-center gap-1 font-body text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full mb-2"
+                    style={{ backgroundColor: ORANGE, color: "#080808" }}
                   >
-                    {selected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                    ⭐ Recommended
                   </div>
+                )}
+                <p
+                  className="font-body text-xs font-bold uppercase tracking-widest mb-1"
+                  style={{ color: ts.accent }}
+                >
+                  {plan.tier?.toUpperCase() || "PLAN"}
+                </p>
+                <h4 className="font-condensed font-black text-lg leading-tight" style={{ color: textPrimary }}>
+                  {plan.name}
+                </h4>
+              </div>
+
+              {/* Price */}
+              <div className="px-4 py-3 border-b" style={{ borderColor: selected ? `${ts.accent}25` : border }}>
+                <div className="flex items-baseline gap-1">
+                  <span className="font-condensed font-black text-3xl" style={{ color: ts.accent }}>
+                    ₱{plan.price.toLocaleString()}
+                  </span>
+                  <span className="font-body text-sm" style={{ color: textSecondary }}>/person</span>
                 </div>
               </div>
 
-              {/* Coverage list — from structured coverageLimits if available, else plain strings */}
-              {plan.coverageLimits?.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-                  {plan.coverageLimits.map((limit, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <Check className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "#22C55E" }} />
-                      <div>
-                        <span className="font-body text-xs font-semibold block" style={{ color: textPrimary }}>{limit.type}</span>
-                        <span className="font-body text-xs" style={{ color: textSecondary }}>
-                          up to ₱{limit.limitAmount.toLocaleString()} — {limit.description}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-                  {plan.coverage.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 font-body text-sm" style={{ color: textSecondary }}>
-                      <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#22C55E" }} />
+              {/* Coverage */}
+              <div className="px-4 py-4 flex-1">
+                <ul className="space-y-2">
+                  {coverageItems.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 font-body text-xs" style={{ color: textSecondary }}>
+                      <Check className="w-3 h-3 mt-0.5 shrink-0" style={{ color: ts.accent }} strokeWidth={2.5} />
                       {item}
                     </li>
                   ))}
                 </ul>
-              )}
+                {plan.documentUrl && (
+                  <a
+                    href={plan.documentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 font-body text-xs font-semibold mt-3 hover:opacity-75 transition-opacity"
+                    style={{ color: ts.accent }}
+                  >
+                    <ExternalLink className="w-3 h-3" /> Policy Document
+                  </a>
+                )}
+              </div>
 
-              {/* Policy document link if available */}
-              {plan.documentUrl && (
-                <a href={plan.documentUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 font-body text-xs font-semibold mb-3 hover:opacity-75 transition-opacity"
-                  style={{ color: ORANGE }}>
-                  <ExternalLink className="w-3 h-3" /> Policy Document
-                </a>
-              )}
-
-              <button
-                onClick={(e) => { e.stopPropagation(); onSelect(plan); }}
-                className="w-full font-body font-bold text-sm py-3 rounded-xl transition-all active:scale-[0.99]"
-                style={{
-                  backgroundColor: selected ? "transparent" : ORANGE,
-                  color: selected ? ORANGE : "#080808",
-                  border: selected ? `1.5px solid ${ORANGE}` : "none",
-                }}
-              >
-                {selected ? "✓ Selected — Click to Remove" : "Add Insurance"}
-              </button>
+              {/* CTA button */}
+              <div className="px-4 pb-4">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSelect(plan); }}
+                  className="w-full font-condensed font-black text-base py-3 rounded-xl transition-all active:scale-[0.98]"
+                  style={{
+                    backgroundColor: selected ? "transparent" : ts.accent,
+                    color: selected ? ts.accent : ts.ctaText,
+                    border: selected ? `1.5px solid ${ts.accent}` : "none",
+                  }}
+                >
+                  {selected ? "✓ Selected" : "Add Insurance"}
+                </button>
+              </div>
             </div>
           );
         })}
       </div>
+
+      {/* Why Travel Insurance Matters */}
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{
+          backgroundColor: isDark ? "rgba(139,92,246,0.05)" : "#FAFAFF",
+          borderColor: isDark ? "rgba(139,92,246,0.25)" : "#C4B5FD",
+        }}
+      >
+        <div
+          className="px-5 py-4 border-b flex items-center gap-3"
+          style={{
+            borderColor: isDark ? "rgba(139,92,246,0.2)" : "#DDD6FE",
+            backgroundColor: isDark ? "rgba(139,92,246,0.08)" : "#EDE9FE",
+          }}
+        >
+          <span className="text-2xl">🛡️</span>
+          <p className="font-condensed font-black text-lg" style={{ color: isDark ? "#C4B5FD" : "#5B21B6" }}>
+            Why Travel Insurance Matters
+          </p>
+        </div>
+        <div className="px-5 py-4">
+          <p className="font-body text-sm leading-relaxed mb-4" style={{ color: textSecondary }}>
+            Travel insurance is optional but highly recommended. It protects you from unexpected costs that could ruin your entire trip:
+          </p>
+          <ul className="space-y-2.5">
+            {[
+              { icon: "🏥", label: "Medical Emergencies", desc: "Hospital bills abroad can reach ₱100,000+. Insurance covers treatment, hospitalization & emergency evacuation." },
+              { icon: "✈️", label: "Trip Delays", desc: "Flight cancellations and delays can strand you with extra hotel and meal expenses — covered under most plans." },
+              { icon: "🧳", label: "Lost Baggage", desc: "Airlines lose bags more often than you think. Get reimbursed for essentials while your luggage is located." },
+              { icon: "🔄", label: "Flight Interruptions", desc: "Missed connections or forced rerouting costs can be significant. Travel insurance has you covered." },
+              { icon: "⚡", label: "Unexpected Incidents", desc: "Accidents, theft, or sudden illness can happen to anyone. Travel with confidence knowing you're protected." },
+            ].map((item, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="text-base shrink-0 mt-0.5">{item.icon}</span>
+                <div>
+                  <span className="font-body text-sm font-bold" style={{ color: textPrimary }}>{item.label} — </span>
+                  <span className="font-body text-sm" style={{ color: textSecondary }}>{item.desc}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
     </BriefingSection>
   );
 }
@@ -1189,7 +1571,10 @@ function CartSummarySection({ cart, total, onRemoveTour, onRemoveInsurance, them
                           {item.tour.name}
                         </p>
                         <p className="font-body text-xs" style={{ color: textSecondary }}>
-                          {item.tour.duration} · {item.participants.adults} adult{item.participants.adults !== 1 ? "s" : ""}
+                          {item.selectedOption?.optionName
+                            ? `${item.selectedOption.optionName} · ${item.qty} pax`
+                            : `${item.tour.duration || "Tour"} · ${item.qty ?? 1} pax`}
+                          {item.bookingDate && ` · ${new Date(item.bookingDate + "T00:00:00").toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}`}
                         </p>
                       </div>
                     </div>
@@ -1268,21 +1653,56 @@ function CartSummarySection({ cart, total, onRemoveTour, onRemoveInsurance, them
 
 // ─── CHECKOUT SECTION ─────────────────────────────────────────────────────────
 // Data: src/data/addons/index.js → createOrder(), PAYMENT_METHODS
-// TODO: Xendit Checkout Integration — replace onClick handler in this function
+//
+// DEMO MODE ONLY — This section simulates a complete checkout flow for
+// stakeholder visualization. No real payment gateway is called.
+// Replace with real gateway integration later (PayMongo / Xendit / BUX).
 function CheckoutSection({ cart, total, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
-  const [selectedMethod, setSelectedMethod]   = useState(null);
-  const [customer, setCustomer]               = useState({ name: "", email: "", phone: "" });
-  const [orderPlaced, setOrderPlaced]         = useState(null);  // holds last CheckoutOrder
-  const isEmpty    = cart.tours.length === 0 && !cart.insurance;
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [customer, setCustomer]             = useState({ name: "", email: "", phone: "" });
+
+  // DEMO MODE ONLY — demo modal + success state
+  const [demoModalOpen, setDemoModalOpen]   = useState(false);
+  const [pendingOrder,  setPendingOrder]    = useState(null);
+  const [orderSuccess,  setOrderSuccess]    = useState(null); // { order, demoRef }
+
+  const isEmpty     = cart.tours.length === 0 && !cart.insurance;
   const hasCustomer = customer.name.trim() && customer.email.trim() && customer.phone.trim();
-  const canProceed = !isEmpty && selectedMethod !== null && hasCustomer;
+  const canProceed  = !isEmpty && selectedMethod !== null && hasCustomer;
+
+  const selectedMethodObj = PAYMENT_METHODS.find((m) => m.id === selectedMethod);
+
+  // DEMO MODE ONLY — Replace with real gateway integration later
+  // Real integration steps:
+  //   1. POST order to Supabase orders table
+  //   2. Call gateway API (PayMongo / Xendit / BUX) with orderId as external reference
+  //   3. Redirect user to gateway-provided checkout URL
+  const handleProceedToPayment = () => {
+    const order = createOrder(cart, customer, selectedMethod);
+    setPendingOrder(order);
+    setDemoModalOpen(true);
+  };
+
+  // Show success screen once demo payment is confirmed
+  if (orderSuccess) {
+    return (
+      <BriefingSection label="Order Confirmed" title="Add-ons Confirmed" theme={theme}>
+        <OrderSuccessScreen
+          order={orderSuccess.order}
+          demoRef={orderSuccess.demoRef}
+          paymentMethod={selectedMethodObj}
+          theme={theme}
+        />
+      </BriefingSection>
+    );
+  }
 
   return (
     <BriefingSection label="Complete Your Order" title="Checkout" theme={theme}>
       <div className="space-y-5">
 
-        {/* Customer details — required for Xendit invoice + Starr enrollment */}
+        {/* Customer details */}
         <div className="rounded-xl border overflow-hidden" style={{ borderColor: border, backgroundColor: bgCard }}>
           <div className="px-4 py-3 border-b" style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}>
             <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>Your Details</p>
@@ -1308,31 +1728,40 @@ function CheckoutSection({ cart, total, theme }) {
           </div>
         </div>
 
-        {/* Payment method selector */}
+        {/* Payment gateway selector — DEMO MODE ONLY */}
         <div>
           <p className="font-body text-sm font-semibold mb-3" style={{ color: textSecondary }}>
-            Select Payment Method
+            Select Payment Gateway
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {PAYMENT_METHODS.map((method) => {
               const selected = selectedMethod === method.id;
               return (
                 <button
                   key={method.id}
                   onClick={() => setSelectedMethod(selected ? null : method.id)}
-                  className="flex flex-col items-center gap-2 py-4 px-3 rounded-xl border-2 font-body font-semibold text-sm transition-all active:scale-95"
+                  className="flex flex-col items-center gap-2 py-4 px-3 rounded-xl border-2 font-body transition-all active:scale-95"
                   style={{
                     backgroundColor: selected ? (isDark ? "#1A0A00" : "#FFF8F0") : bgCard,
                     borderColor: selected ? ORANGE : border,
                     color: selected ? ORANGE : textSecondary,
                   }}
                 >
-                  <span className="text-2xl">{method.emoji}</span>
-                  {method.label}
+                  <span className="text-3xl">{method.emoji}</span>
+                  <span className="font-semibold text-sm">{method.label}</span>
+                  <span
+                    className="font-body text-[10px] font-normal leading-tight text-center"
+                    style={{ color: selected ? `${ORANGE}AA` : textSecondary }}
+                  >
+                    {method.description}
+                  </span>
                 </button>
               );
             })}
           </div>
+          <p className="font-body text-[10px] mt-2 text-center" style={{ color: textSecondary }}>
+            Your payment details are encrypted and processed securely.
+          </p>
         </div>
 
         {/* Order summary card */}
@@ -1380,54 +1809,165 @@ function CheckoutSection({ cart, total, theme }) {
           </div>
         </div>
 
-        {/* Proceed button */}
-        {/* TODO: Xendit Checkout Integration */}
+        {/* Proceed to Payment — opens DemoPaymentModal */}
         <button
           disabled={!canProceed}
           className="w-full font-condensed font-black text-xl py-4 rounded-xl transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ backgroundColor: ORANGE, color: "#080808" }}
-          onClick={() => {
-            // Build the full CheckoutOrder using the Cart model + customer details
-            const order = createOrder(cart, customer, selectedMethod);
-            setOrderPlaced(order);
-            console.group("[CHECKOUT] Order created");
-            console.log("[CHECKOUT] Order ID:     ", order.orderId);
-            console.log("[CHECKOUT] Total:        ₱" + order.total.toLocaleString());
-            console.log("[CHECKOUT] Method:       ", order.paymentMethod);
-            console.log("[CHECKOUT] Customer:     ", order.customer);
-            console.log("[CHECKOUT] Line items:   ", order.lineItems);
-            console.log("[CHECKOUT] Full order:   ", order);
-            console.groupEnd();
-            // TODO: Xendit Checkout Integration
-            //   1. POST order to your Supabase orders table for persistence
-            //   2. Call Xendit API: POST /v2/invoices with orderId as externalId
-            //   3. Redirect to order.xendit.checkoutUrl for payment
-          }}
+          onClick={handleProceedToPayment}
         >
           {isEmpty
             ? "Add Items to Continue"
             : !selectedMethod
-              ? "Select a Payment Method"
-              : `Proceed to Payment  •  ₱${total.toLocaleString()}`}
+              ? "Select a Payment Gateway"
+              : !hasCustomer
+                ? "Fill In Your Details"
+                : `Proceed To Checkout  •  ₱${total.toLocaleString()}`}
         </button>
 
         {!isEmpty && !selectedMethod && (
           <p className="font-body text-xs text-center" style={{ color: textSecondary }}>
-            Please select a payment method above to continue.
+            Please select a payment gateway above to continue.
           </p>
         )}
       </div>
+
+      {/* DEMO MODE ONLY — DemoPaymentModal */}
+      <AnimatePresence>
+        {demoModalOpen && selectedMethodObj && (
+          <DemoPaymentModal
+            method={selectedMethodObj}
+            total={total}
+            theme={theme}
+            onSuccess={(demoRef) => {
+              setDemoModalOpen(false);
+              setOrderSuccess({ order: pendingOrder, demoRef });
+            }}
+            onCancel={() => setDemoModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </BriefingSection>
   );
 }
 
 // ─── MAIN PAGE CONTENT ────────────────────────────────────────────────────────
 function PreviewContent() {
-  const { slug } = useParams();
-  const navigate = useNavigate();
+  const { slug }   = useParams();
+  const navigate   = useNavigate();
+  const location   = useLocation();
   const { isDark } = useTheme();
-  const dest = getDestinationBySlug(slug);
+  const dest    = getDestinationBySlug(slug);
   const briefing = getBriefingBySlug(slug);
+
+  // ── Read enriched booking passed from GDX search (or sessionStorage fallback) ─
+  const booking = location.state?.booking ?? (() => {
+    try { return JSON.parse(sessionStorage.getItem("gdx_booking")); } catch { return null; }
+  })();
+  console.log("[BOOKING RECEIVED]", booking);
+
+  // ── Fusioo document resolution state ─────────────────────────────────────
+  // status: "idle" | "loading" | "url" | "unavailable"
+  const [voucherDoc,      setVoucherDoc]      = useState({ status: "idle", url: null });
+  const [itineraryDoc,    setItineraryDoc]    = useState({ status: "idle", url: null });
+  const [bookingExpanded, setBookingExpanded] = useState(false);
+
+  useEffect(() => {
+    if (!booking) return;
+
+    const FUSIOO_ID_RE = /^i[0-9a-f]{32}$/i;
+    const isFusiooId   = (v) => typeof v === "string" && FUSIOO_ID_RE.test(v.trim());
+
+    /**
+     * Normalises any document field value into a flat array of Fusioo record ID strings.
+     *
+     * Handles all four storage formats that Supabase / Fusioo webhooks may produce:
+     *   1. null / undefined                              → []
+     *   2. plain string ID   "id906c67b..."             → ["id906c67b..."]
+     *   3. JSON-string array '["id906...", "i..."]'     → ["id906...", "i..."]
+     *   4. actual JS array   ["id906...", "i..."]        → ["id906...", "i..."]
+     */
+    const normalizeToIds = (val) => {
+      if (!val) return [];
+
+      // ── String: plain ID or JSON-encoded array ────────────────────────────
+      if (typeof val === "string") {
+        const s = val.trim();
+        // Looks like a JSON array or object → try to parse it
+        if (s.startsWith("[") || s.startsWith("{")) {
+          try {
+            const parsed = JSON.parse(s);
+            return normalizeToIds(parsed);          // recurse on the parsed value
+          } catch {
+            // Not valid JSON; fall through and treat as a plain string
+          }
+        }
+        return [s];                                 // plain string value
+      }
+
+      // ── Array: recursively normalize each element ─────────────────────────
+      if (Array.isArray(val)) {
+        return val.flatMap(normalizeToIds);
+      }
+
+      // ── Object: might be a Fusioo record stub { id, value } ──────────────
+      if (typeof val === "object") {
+        // If the object has an "id" key that looks like a Fusioo ID, use it
+        if (isFusiooId(val.id)) return [val.id];
+        // Otherwise recurse over all values
+        return Object.values(val).flatMap(normalizeToIds)
+          .filter((v) => typeof v === "string");
+      }
+
+      return [];
+    };
+
+    // ── Log raw field values + their types ───────────────────────────────────
+    console.group("[DOCUMENT AUDIT] Raw booking document fields — GDX", booking.gdx);
+    console.log("typeof booking.voucher          :", typeof booking.voucher,           "→", booking.voucher);
+    console.log("typeof booking.initial_voucher  :", typeof booking.initial_voucher,   "→", booking.initial_voucher);
+    console.log("typeof booking.automated_voucher:", typeof booking.automated_voucher, "→", booking.automated_voucher);
+    console.log("typeof booking.itinerary        :", typeof booking.itinerary,         "→", booking.itinerary);
+    console.log("typeof booking.travel_itinerary :", typeof booking.travel_itinerary,  "→", booking.travel_itinerary);
+    console.log("typeof booking.itinerary_file   :", typeof booking.itinerary_file,    "→", booking.itinerary_file);
+    console.groupEnd();
+
+    // ── Normalize all voucher fields into a flat array of IDs ────────────────
+    const voucherIds = [
+      ...normalizeToIds(booking.voucher),
+      ...normalizeToIds(booking.initial_voucher),
+      ...normalizeToIds(booking.automated_voucher),
+    ].filter(isFusiooId);
+
+    const itineraryIds = [
+      ...normalizeToIds(booking.itinerary),
+      ...normalizeToIds(booking.travel_itinerary),
+      ...normalizeToIds(booking.itinerary_file),
+    ].filter(isFusiooId);
+
+    console.log("[DOCUMENT AUDIT] Normalized voucher IDs  :", voucherIds);
+    console.log("[DOCUMENT AUDIT] Normalized itinerary IDs:", itineraryIds);
+
+    // ── Resolve voucher ───────────────────────────────────────────────────────
+    if (voucherIds.length > 0) {
+      setVoucherDoc({ status: "loading", url: null });
+      resolveVoucher(voucherIds[0])
+        .then((url) => setVoucherDoc({ status: url ? "url" : "unavailable", url }))
+        .catch(() => setVoucherDoc({ status: "unavailable", url: null }));
+    } else {
+      console.log("[DOCUMENT AUDIT] No valid Fusioo IDs found in voucher fields.");
+    }
+
+    // ── Resolve itinerary ─────────────────────────────────────────────────────
+    if (itineraryIds.length > 0) {
+      setItineraryDoc({ status: "loading", url: null });
+      resolveItinerary(itineraryIds[0])
+        .then((url) => setItineraryDoc({ status: url ? "url" : "unavailable", url }))
+        .catch(() => setItineraryDoc({ status: "unavailable", url: null }));
+    } else {
+      console.log("[DOCUMENT AUDIT] No valid Fusioo IDs found in itinerary fields.");
+    }
+  }, [booking?.gdx]); // re-run only if the GDX number changes
 
   // Use the first package for briefing content (most destinations have one)
   const pkg = dest?.packages?.[0] || null;
@@ -1449,10 +1989,42 @@ function PreviewContent() {
     navBorder: isDark ? "#222222" : "#E5E5E5",
   };
 
-  const activitiesData = getActivitiesForDestination(slug);
+  // ── Globaltix optional tours ─────────────────────────────────────────────
+  const [globaltixTours, setGlobaltixTours]   = useState([]);
+  const [toursLoading,   setToursLoading]     = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setToursLoading(true);
+    getToursForDestination(slug)
+      .then((tours) => {
+        if (cancelled) return;
+        if (tours.length > 0) {
+          setGlobaltixTours(tours);
+        } else {
+          // DEMO MODE ONLY — fall back to mock tours when Globaltix returns nothing.
+          // International destinations return 0 on staging because our reseller account
+          // only has Philippine products. Replace this fallback once Globaltix configures
+          // the account with international inventory.
+          setGlobaltixTours(getToursByDestination(slug));
+        }
+        setToursLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          // On error also fall back to mock data so the demo still works
+          setGlobaltixTours(getToursByDestination(slug));
+          setToursLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [slug]);
 
   // ── Cart state (full Cart model — src/types/addons.js) ───────────────────
   const [cart, setCart] = useState(() => createCart(slug));
+
+  // Booking modal state — null = closed, tour object = open
+  const [bookingModalTour, setBookingModalTour] = useState(null);
 
   // Recompute totals whenever tours or insurance change
   const _updateTotals = (tours, insurance) => {
@@ -1460,13 +2032,18 @@ function PreviewContent() {
     return totals;
   };
 
-  const addTourToCart = (tour) =>
+  const addTourToCart = (tour, selectedOption, qty, bookingDate) =>
     setCart((prev) => {
-      if (prev.tours.find((t) => t.cartItemId === tour.id || t.tour?.id === tour.id)) return prev;
-      const item  = createCartTourItem(tour);
+      if (prev.tours.find((t) => t.tour?.id === tour.id)) return prev;
+      const item  = createCartTourItem(tour, selectedOption, qty, bookingDate);
       const tours = [...prev.tours, item];
       return { ...prev, tours, ..._updateTotals(tours, prev.insurance) };
     });
+
+  const handleBookingConfirm = (tour, selectedOption, qty, bookingDate) => {
+    addTourToCart(tour, selectedOption, qty, bookingDate);
+    setBookingModalTour(null);
+  };
 
   const removeTourFromCart = (cartItemId) =>
     setCart((prev) => {
@@ -1487,7 +2064,9 @@ function PreviewContent() {
 
   const cartTotal = cart.total;
 
-  if (!dest) {
+  // Hard error only when there is no booking either — a customer with a booking
+  // should always reach their booking dashboard even if the destination slug is unknown.
+  if (!dest && !booking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -1522,23 +2101,677 @@ function PreviewContent() {
         />
       </div>
 
-      {/* ── HERO ── */}
-      <div className="relative overflow-hidden" style={{ height: "60vh", minHeight: 340 }}>
-        <img src={dest.heroImage} alt={dest.name} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-        <div className="absolute bottom-8 left-0 right-0 text-center px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <h1 className="font-condensed font-black text-white text-4xl lg:text-6xl tracking-wide mb-2">{dest.name}</h1>
-            <div className="flex items-center justify-center gap-1.5 mb-2">
-              <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
-              <span className="font-body text-white/80 text-sm">{dest.country}</span>
-            </div>
-            <p className="font-body text-white/70 text-sm max-w-md mx-auto">{dest.tagline}</p>
-          </motion.div>
+      {/* ── HERO (destination page only) ── */}
+      {dest && (
+        <div className="relative overflow-hidden" style={{ height: "60vh", minHeight: 340 }}>
+          <img src={dest.heroImage} alt={dest.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+          <div className="absolute bottom-8 left-0 right-0 text-center px-4">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+              <h1 className="font-condensed font-black text-white text-4xl lg:text-6xl tracking-wide mb-2">{dest.name}</h1>
+              <div className="flex items-center justify-center gap-1.5 mb-2">
+                <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
+                <span className="font-body text-white/80 text-sm">{dest.country}</span>
+              </div>
+              <p className="font-body text-white/70 text-sm max-w-md mx-auto">{dest.tagline}</p>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ── PORTRAIT VIDEO SECTION ── */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          VIEW MY TRIP BUTTON + TRAVELER DASHBOARD (collapsible)
+          ══════════════════════════════════════════════════════════════════════ */}
+
+      {/* "View My Trip" trigger — shown when booking loaded, dashboard collapsed */}
+      {booking && !bookingExpanded && (
+        <div
+          className="px-4 lg:px-10 py-8 flex justify-center transition-colors duration-300"
+          style={{ backgroundColor: bg }}
+        >
+          <motion.button
+            onClick={() => setBookingExpanded(true)}
+            className="inline-flex items-center gap-2 font-body font-bold text-base px-8 py-4 rounded-2xl"
+            style={{ backgroundColor: ORANGE, color: "#080808" }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.02, boxShadow: "0 0 28px rgba(255,140,0,0.50)" }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <MapPin className="w-5 h-5" />
+            View My Trip
+          </motion.button>
+        </div>
+      )}
+
+      {/* Traveler Dashboard — expands inline when View My Trip is clicked */}
+      <AnimatePresence>
+        {booking && bookingExpanded && (
+          <motion.div
+            key="traveler-dashboard"
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          >
+      {booking && (() => {
+        // ══════════════════════════════════════════════════════════════════════
+        // HELPERS
+        // ══════════════════════════════════════════════════════════════════════
+        const isFusiooId = (v) => typeof v === "string" && /^i[0-9a-f]{32}$/i.test(v);
+
+        // Strip HTML tags from a string
+        const stripHtml = (v) => typeof v === "string" ? v.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : v;
+
+        // Format any value to a readable string, or return null to hide it
+        const fmtValue = (v) => {
+          if (v === null || v === undefined || v === "") return null;
+          // Array: flatten, clean each item, join
+          if (Array.isArray(v)) {
+            const items = v.map(fmtValue).filter(Boolean);
+            return items.length ? items.join(", ") : null;
+          }
+          // Object: probably a Fusioo nested record stub
+          if (typeof v === "object") return null;
+          const s = stripHtml(String(v)).trim();
+          if (!s || isFusiooId(s)) return null;
+          return s;
+        };
+
+        // Format ISO date → "June 4, 2026"
+        const fmtDate = (v) => {
+          if (!v) return null;
+          const raw = fmtValue(v);
+          if (!raw) return null;
+          try {
+            const d = new Date(raw);
+            if (!isNaN(d) && raw.includes("-")) return d.toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" });
+          } catch {}
+          return raw;
+        };
+
+        // Format currency → ₱12,345.00
+        const fmtCurrency = (v) => {
+          const raw = fmtValue(v);
+          if (!raw) return null;
+          const n = parseFloat(String(raw).replace(/,/g, ""));
+          if (isNaN(n)) return raw;
+          return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        };
+
+        // ── Status / payment logic ─────────────────────────────────────────────
+        const paymentRaw   = fmtValue(booking.formula_1) || fmtValue(booking.payment_type);
+        const paymentLabel = paymentRaw || null;
+        const paymentColor = paymentRaw?.toLowerCase().includes("full")    ? "#22C55E"
+                           : paymentRaw?.toLowerCase().includes("partial") ? ORANGE
+                           : paymentRaw?.toLowerCase().includes("pend")    ? "#EF4444"
+                           : textSecondary;
+        const paymentBg    = paymentRaw?.toLowerCase().includes("full")    ? (isDark ? "rgba(34,197,94,0.12)"  : "#F0FFF4")
+                           : paymentRaw?.toLowerCase().includes("partial") ? (isDark ? "rgba(255,140,0,0.12)"  : "#FFF8F0")
+                           : paymentRaw?.toLowerCase().includes("pend")    ? (isDark ? "rgba(239,68,68,0.12)"  : "#FFF5F5")
+                           : (isDark ? "rgba(255,255,255,0.05)" : "#F5F5F5");
+        const statusLabel  = fmtValue(booking.status) || "Confirmed";
+        const statusColor  = statusLabel?.toLowerCase().includes("process") || statusLabel?.toLowerCase().includes("confirm")
+          ? "#22C55E" : ORANGE;
+
+        // ══════════════════════════════════════════════════════════════════════
+        // SECTION DEFINITIONS
+        // Each section has: title, icon, fields[]
+        // Fields with null values are automatically hidden.
+        // ══════════════════════════════════════════════════════════════════════
+        const sections = [
+          // ── 1. Booking Summary ──────────────────────────────────────────────
+          {
+            title: "Booking Summary",
+            icon: <BadgeCheck className="w-4 h-4" />,
+            fields: [
+              { label: "GDX Number",       value: fmtValue(booking.gdx) },
+              { label: "Status",           value: fmtValue(booking.status) },
+              { label: "Payment Status",   value: paymentLabel },
+              { label: "Transaction Type", value: fmtValue(booking.transaction_type) },
+              { label: "Booking Date",     value: fmtDate(booking.date_created) || fmtDate(booking.created) },
+              { label: "Last Modified",    value: fmtDate(booking.last_modified) },
+            ],
+          },
+
+          // ── 2. Traveler Information ─────────────────────────────────────────
+          {
+            title: "Traveler Information",
+            icon: <User className="w-4 h-4" />,
+            fields: [
+              { label: "Lead Guest",   value: fmtValue(booking.lead_name) || fmtValue(booking.facebook_name) },
+              { label: "Total Guests", value: fmtValue(booking.total_number_of_guests) || fmtValue(booking.no_of_person) },
+              { label: "Guest Names",  value: fmtValue(booking.name_of_guests) },
+              { label: "Email",        value: fmtValue(booking.email_1) },
+              { label: "Mobile",       value: fmtValue(booking.mobile_1) },
+            ],
+          },
+
+          // ── 3. Travel Information ───────────────────────────────────────────
+          {
+            title: "Travel Information",
+            icon: <MapPin className="w-4 h-4" />,
+            fields: [
+              { label: "Destination",    value: fmtValue(booking.destinationName) || fmtValue(booking.destination) },
+              { label: "Travel Date",    value: fmtDate(booking.travel_date) },
+              { label: "Arrival Date",   value: fmtDate(booking.arrivalDate) || fmtDate(booking.arrival_date) },
+              { label: "Departure Date", value: fmtDate(booking.departureDate) || fmtDate(booking.departure_date) },
+              { label: "Duration",       value: fmtValue(booking.duration) },
+            ],
+          },
+
+          // ── 4. Accommodation ────────────────────────────────────────────────
+          {
+            title: "Accommodation",
+            icon: <Briefcase className="w-4 h-4" />,
+            fields: [
+              { label: "Hotel",         value: fmtValue(booking.hotelName) || fmtValue(booking.hotel_name) },
+              { label: "Room Type",     value: fmtValue(booking.room_type) },
+              { label: "Check-in",      value: fmtDate(booking.check_in) || fmtDate(booking.checkin) },
+              { label: "Check-out",     value: fmtDate(booking.check_out) || fmtDate(booking.checkout) },
+              { label: "Nights",        value: fmtValue(booking.number_of_nights) },
+            ],
+          },
+
+          // ── 5. Flight Information ───────────────────────────────────────────
+          {
+            title: "Flight Information",
+            icon: <Briefcase className="w-4 h-4" />,
+            fields: [
+              { label: "Airline",           value: fmtValue(booking.airlineName) || fmtValue(booking.name_of_airline) },
+              { label: "Booking Ref / PNR", value: fmtValue(booking.pnr) },
+              { label: "Departing Flight",  value: fmtValue(booking.flightDeparture) },
+              { label: "Returning Flight",  value: fmtValue(booking.flightReturn) },
+              { label: "Flight Cost",       value: fmtCurrency(booking.flightCost) || fmtCurrency(booking.airline_cost) },
+            ],
+          },
+
+          // ── 6. Tour Information ─────────────────────────────────────────────
+          {
+            title: "Tour Information",
+            icon: <MapPin className="w-4 h-4" />,
+            fields: [
+              { label: "Tour",        value: fmtValue(booking.tourName) },
+              { label: "Tour Date",   value: fmtDate(booking.tourDate) },
+              { label: "Description", value: fmtValue(booking.tourDescription) },
+              { label: "Operator",    value: fmtValue(booking.tour_operator) },
+            ],
+          },
+
+          // ── 7. Transfer Information ─────────────────────────────────────────
+          {
+            title: "Transfer Information",
+            icon: <Briefcase className="w-4 h-4" />,
+            fields: [
+              { label: "Transfer Details",  value: fmtValue(booking.transferInfo) },
+              { label: "Transfer Provider", value: fmtValue(booking.transfer_provider) },
+            ],
+          },
+
+          // ── 8. Payment Information ──────────────────────────────────────────
+          {
+            title: "Payment Information",
+            icon: <DollarSign className="w-4 h-4" />,
+            fields: [
+              { label: "Package Price (SRP)",   value: fmtCurrency(booking.total_package_price_srp) },
+              { label: "Amount Paid",           value: fmtCurrency(booking.amountPaid) },
+              { label: "Remaining Balance",     value: fmtCurrency(booking.remainingBalance) },
+              { label: "Refund",                value: fmtCurrency(booking.refundAmount) },
+              { label: "Total Cost",            value: fmtCurrency(booking.total_cost) },
+              { label: "Land Arrangement Cost", value: fmtCurrency(booking.total_land_arrangement_cost) },
+              { label: "Visa Cost",             value: fmtCurrency(booking.total_visa_cost) },
+            ],
+          },
+
+          // ── 9. Agent Information ────────────────────────────────────────────
+          {
+            title: "Agent Information",
+            icon: <UserCheck className="w-4 h-4" />,
+            fields: [
+              { label: "Travel Consultant", value: fmtValue(booking.name_of_agent) || fmtValue(booking.name_of_agent_1) || fmtValue(booking.agent_name) },
+              { label: "Agent Team",        value: fmtValue(booking.agent) },
+            ],
+          },
+        ];
+
+        // ── Filter out empty fields and empty sections ──────────────────────
+        const activeSections = sections
+          .map((s) => ({ ...s, fields: s.fields.filter((f) => f.value) }))
+          .filter((s) => s.fields.length > 0);
+
+        // ── Track which keys were displayed ────────────────────────────────
+        const DISPLAYED_KEYS = new Set([
+          // Booking Summary
+          "gdx","status","formula_1","payment_type","transaction_type",
+          "date_created","created","last_modified",
+          // Traveler
+          "lead_name","facebook_name","name_of_guests","total_number_of_guests","no_of_person",
+          "email_1","mobile_1",
+          // Travel
+          "destinationName","destination","travel_date",
+          "arrivalDate","arrival_date","departureDate","departure_date","duration",
+          // Accommodation
+          "hotelName","hotel_name","room_type","check_in","checkin","check_out","checkout","number_of_nights",
+          // Flight
+          "airlineName","name_of_airline","pnr","flightDeparture","flightReturn","flightCost","airline_cost",
+          // Tour
+          "tourName","tourDate","tourDescription","tour_operator",
+          // Transfer
+          "transferInfo","transfer_provider","transfer_details",
+          // Payment
+          "total_package_price_srp","total_amount_paid","amountPaid","remainingBalance","refundAmount",
+          "total_cost","total_land_arrangement_cost","total_visa_cost",
+          // Agent
+          "name_of_agent","name_of_agent_1","agent_name","agent",
+        ]);
+
+        // Internal/system keys that should never be shown to the user
+        const HIDDEN_KEYS = new Set([
+          "id","dashboard_id","record_id","received_at","source_at","source_ip",
+          "webhook_source","record_url","app_id","created_by","last_modified_by",
+          "voucher","initial_voucher","automated_voucher",
+          "itinerary","travel_itinerary","itinerary_file",
+          "attachements","attachments","_raw",
+          // Raw Fusioo linked-record ID arrays (resolved versions are in DISPLAYED_KEYS)
+          "airline_details_1","tour_details",
+        ]);
+
+        // ── Build fallback "Additional" fields ─────────────────────────────
+        const additionalFields = Object.entries(booking)
+          .filter(([k, v]) => {
+            if (DISPLAYED_KEYS.has(k) || HIDDEN_KEYS.has(k)) return false;
+            const formatted = fmtValue(v);
+            return formatted && formatted.length > 0;
+          })
+          .map(([k, v]) => ({
+            label: k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+            value: fmtValue(v),
+          }))
+          .filter((f) => f.value);
+
+        // ── Console audit ─────────────────────────────────────────────────
+        const displayedFields = activeSections.flatMap((s) => s.fields.map((f) => f.label));
+        const hiddenFields    = Object.keys(booking).filter((k) => !DISPLAYED_KEYS.has(k) && !HIDDEN_KEYS.has(k));
+        console.log("[BOOKING AUDIT] Full booking object", booking);
+        console.log("[BOOKING AUDIT] Displayed fields", displayedFields);
+        console.log("[BOOKING AUDIT] Additional fields found", hiddenFields);
+
+        return (
+          <div
+            className="px-4 lg:px-10 py-10 transition-colors duration-300"
+            style={{ backgroundColor: bg }}
+          >
+            <div className="max-w-4xl mx-auto space-y-5">
+
+              {/* ── WELCOME HERO ──────────────────────────────────────────── */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="rounded-3xl overflow-hidden relative"
+                style={{
+                  background: isDark
+                    ? "linear-gradient(135deg, #2A1000 0%, #1A0800 60%, #0F0500 100%)"
+                    : "linear-gradient(135deg, #FF8C00 0%, #FF6A00 60%, #E05A00 100%)",
+                  boxShadow: isDark
+                    ? "0 0 60px rgba(255,140,0,0.15), 0 4px 20px rgba(0,0,0,0.5)"
+                    : "0 8px 40px rgba(255,140,0,0.35)",
+                }}
+              >
+                {isDark && (
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(255,140,0,0.22) 0%, transparent 70%)" }}
+                  />
+                )}
+                <div className="relative px-6 py-8 sm:px-10 sm:py-10">
+                  {/* Confirmed badge */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span
+                      className="inline-flex items-center gap-1.5 font-body text-[11px] font-bold tracking-[0.2em] uppercase px-3 py-1.5 rounded-full"
+                      style={{ backgroundColor: "rgba(34,197,94,0.2)", color: isDark ? "#4ADE80" : "#FFFFFF", border: "1px solid rgba(34,197,94,0.4)" }}
+                    >
+                      <Check className="w-3 h-3" strokeWidth={3} /> Trip Confirmed
+                    </span>
+                  </div>
+
+                  {/* Headline */}
+                  <h2
+                    className="font-condensed font-black text-3xl sm:text-4xl lg:text-5xl leading-tight mb-2"
+                    style={{ color: isDark ? ORANGE : "#FFFFFF" }}
+                  >
+                    Your Trip Is Confirmed! 🧡
+                  </h2>
+                  <p
+                    className="font-body text-base sm:text-lg mb-6 leading-relaxed"
+                    style={{ color: isDark ? "rgba(255,200,100,0.8)" : "rgba(255,255,255,0.88)" }}
+                  >
+                    {`Hi ${fmtValue(booking.lead_name || booking.facebook_name) || "Traveler"}! Your ${fmtValue(booking.destinationName || booking.destination) || "trip"} is all set.`}
+                  </p>
+
+                  {/* Trip stats grid */}
+                  {(() => {
+                    const stats = [
+                      fmtValue(booking.destinationName || booking.destination) ? { icon: "🌏", label: "Destination", value: fmtValue(booking.destinationName || booking.destination) } : null,
+                      (fmtDate(booking.travel_date) || fmtDate(booking.arrivalDate || booking.arrival_date)) ? { icon: "📅", label: "Travel Date", value: fmtDate(booking.travel_date) || fmtDate(booking.arrivalDate || booking.arrival_date) } : null,
+                      fmtValue(booking.hotelName || booking.hotel_name) ? { icon: "🏨", label: "Hotel", value: fmtValue(booking.hotelName || booking.hotel_name) } : null,
+                      (fmtValue(booking.total_number_of_guests) || fmtValue(booking.no_of_person)) ? { icon: "👥", label: "Guests", value: `${fmtValue(booking.total_number_of_guests) || fmtValue(booking.no_of_person)} pax` } : null,
+                    ].filter(Boolean).slice(0, 4);
+                    return stats.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                        {stats.map((stat, idx) => (
+                          <div
+                            key={idx}
+                            className="rounded-xl px-3.5 py-3"
+                            style={{ backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.22)" }}
+                          >
+                            <p className="font-body text-[11px] mb-1" style={{ color: isDark ? "rgba(255,200,100,0.55)" : "rgba(255,255,255,0.7)" }}>
+                              {stat.icon} {stat.label}
+                            </p>
+                            <p className="font-body text-sm font-bold leading-snug" style={{ color: isDark ? "rgba(255,200,100,0.9)" : "#FFFFFF" }}>
+                              {stat.value}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null;
+                  })()}
+
+                  {/* Action buttons */}
+                  <div className="flex flex-wrap gap-2.5">
+                    {voucherDoc?.status === "url" && voucherDoc.url && (
+                      <a
+                        href={voucherDoc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
+                        style={{ backgroundColor: isDark ? ORANGE : "#FFFFFF", color: isDark ? "#080808" : ORANGE }}
+                      >
+                        <Download className="w-4 h-4" /> Download Voucher
+                      </a>
+                    )}
+                    {itineraryDoc?.status === "url" && itineraryDoc.url && (
+                      <a
+                        href={itineraryDoc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
+                        style={{ backgroundColor: isDark ? "rgba(255,140,0,0.15)" : "rgba(255,255,255,0.25)", color: isDark ? ORANGE : "#FFFFFF", border: `1px solid ${isDark ? "rgba(255,140,0,0.35)" : "rgba(255,255,255,0.45)"}` }}
+                      >
+                        <FileText className="w-4 h-4" /> Download Itinerary
+                      </a>
+                    )}
+                    <a
+                      href="https://m.me/gladextours"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-80 active:scale-95"
+                      style={{ backgroundColor: "transparent", color: isDark ? "rgba(255,200,100,0.8)" : "rgba(255,255,255,0.85)", border: `1px solid ${isDark ? "rgba(255,140,0,0.3)" : "rgba(255,255,255,0.4)"}` }}
+                    >
+                      💬 Contact Support
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* ── BOOKING DETAILS CARD ──────────────────────────────────── */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="rounded-2xl overflow-hidden"
+                style={{
+                  border: `1.5px solid ${ORANGE}`,
+                  boxShadow: isDark
+                    ? "0 0 50px rgba(255,140,0,0.10), 0 2px 16px rgba(0,0,0,0.5)"
+                    : "0 4px 30px rgba(255,140,0,0.12), 0 1px 8px rgba(0,0,0,0.06)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  backgroundColor: bgCard,
+                }}
+              >
+                {/* ── Summary bar ────────────────────────────────────────── */}
+                <div
+                  className="px-6 py-5 border-b"
+                  style={{
+                    borderColor: border,
+                    background: isDark
+                      ? "linear-gradient(135deg, #1A0A00 0%, #120800 100%)"
+                      : "linear-gradient(135deg, #FFF8F0 0%, #FFF3E0 100%)",
+                  }}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    {/* Left */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          className="inline-flex items-center gap-1.5 font-body text-[11px] font-bold tracking-[0.25em] uppercase px-2.5 py-1 rounded-full"
+                          style={{ backgroundColor: "rgba(34,197,94,0.15)", color: "#22C55E", border: "1px solid rgba(34,197,94,0.35)" }}
+                        >
+                          <Check className="w-3 h-3" strokeWidth={3} /> Booking Verified
+                        </span>
+                      </div>
+                      <h3 className="font-condensed font-black text-xl lg:text-2xl tracking-wide leading-tight" style={{ color: textPrimary }}>
+                        Your Booking Details
+                      </h3>
+                      <p className="font-body text-xs mt-1" style={{ color: textSecondary }}>
+                        Retrieved from your GDX booking record
+                      </p>
+                    </div>
+                    {/* Right — close button + status badges */}
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <motion.button
+                        onClick={() => setBookingExpanded(false)}
+                        className="flex items-center gap-1.5 font-body font-semibold text-xs px-3.5 py-1.5 rounded-xl border transition-colors"
+                        style={{
+                          backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                          borderColor:     isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)",
+                          color: textPrimary,
+                        }}
+                        whileHover={{ scale: 1.03, backgroundColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.09)" }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        Close
+                      </motion.button>
+                      <span
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-body font-bold text-xs"
+                        style={{ backgroundColor: isDark ? "rgba(34,197,94,0.12)" : "#F0FFF4", color: statusColor, border: `1.5px solid ${statusColor}` }}
+                      >
+                        <Check className="w-3 h-3" strokeWidth={3} />
+                        {statusLabel}
+                      </span>
+                      {paymentLabel && (
+                        <span
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-body font-bold text-xs"
+                          style={{ backgroundColor: paymentBg, color: paymentColor, border: `1.5px solid ${paymentColor}` }}
+                        >
+                          {paymentLabel}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Sectioned fields ───────────────────────────────────── */}
+                {activeSections.map((section, si) => (
+                  <div key={section.title}>
+                    {/* Section divider header */}
+                    <div
+                      className="flex items-center gap-2 px-5 py-2.5 border-b"
+                      style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)" }}
+                    >
+                      <span style={{ color: ORANGE }}>{section.icon}</span>
+                      <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
+                        {section.title}
+                      </p>
+                    </div>
+                    {/* Fields two-column grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2">
+                      {section.fields.map((f, i) => (
+                        <motion.div
+                          key={f.label}
+                          initial={{ opacity: 0, x: -4 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.25, delay: 0.03 * (si * 4 + i) }}
+                          className="group flex items-start gap-3 px-5 py-3.5 border-b transition-colors duration-150"
+                          style={{
+                            borderColor: border,
+                            borderRight: (i % 2 === 0) ? `1px solid ${border}` : "none",
+                            backgroundColor: "transparent",
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                        >
+                          <div className="min-w-0">
+                            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] mb-0.5" style={{ color: textSecondary }}>
+                              {f.label}
+                            </p>
+                            <p className="font-body text-sm font-semibold break-words leading-snug" style={{ color: textPrimary }}>
+                              {f.value}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* ── Additional Booking Information (dynamic fallback) ────── */}
+                {additionalFields.length > 0 && (
+                  <div>
+                    <div
+                      className="flex items-center gap-2 px-5 py-2.5 border-b"
+                      style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)" }}
+                    >
+                      <MoreHorizontal className="w-4 h-4" style={{ color: textSecondary }} />
+                      <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: textSecondary }}>
+                        Additional Booking Information
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2">
+                      {additionalFields.map((f, i) => (
+                        <div
+                          key={f.label}
+                          className="flex items-start gap-3 px-5 py-3.5 border-b transition-colors duration-150"
+                          style={{
+                            borderColor: border,
+                            borderRight: (i % 2 === 0) ? `1px solid ${border}` : "none",
+                          }}
+                        >
+                          <div className="min-w-0">
+                            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] mb-0.5" style={{ color: textSecondary }}>
+                              {f.label}
+                            </p>
+                            <p className="font-body text-sm break-words leading-snug" style={{ color: textPrimary }}>
+                              {f.value}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* ── TRAVEL DOCUMENTS (resolved from Fusioo) ───────────────── */}
+              {(voucherDoc.status !== "idle" || itineraryDoc.status !== "idle") && (
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                  className="rounded-2xl border overflow-hidden"
+                  style={{ backgroundColor: bgCard, borderColor: border }}
+                >
+                  {/* Header */}
+                  <div
+                    className="px-6 py-4 border-b"
+                    style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
+                  >
+                    <p className="font-condensed font-black text-lg leading-tight" style={{ color: textPrimary }}>
+                      Travel Documents
+                    </p>
+                    <p className="font-body text-xs mt-0.5" style={{ color: textSecondary }}>
+                      Access the documents associated with your booking.
+                    </p>
+                  </div>
+
+                  <div className="px-6 py-5">
+                    <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+
+                      {/* ── Voucher button ─────────────────────────── */}
+                      {voucherDoc.status === "loading" && (
+                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
+                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
+                          <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
+                          Loading Voucher…
+                        </button>
+                      )}
+                      {voucherDoc.status === "url" && (
+                        <a href={voucherDoc.url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95"
+                          style={{ backgroundColor: ORANGE, color: "#080808" }}>
+                          <Download className="w-4 h-4" />
+                          Download Voucher
+                        </a>
+                      )}
+                      {voucherDoc.status === "unavailable" && (
+                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
+                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.6 }}>
+                          <Download className="w-4 h-4" />
+                          Voucher Not Available
+                        </button>
+                      )}
+
+                      {/* ── Itinerary button ──────────────────────── */}
+                      {itineraryDoc.status === "loading" && (
+                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
+                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
+                          <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
+                          Loading Itinerary…
+                        </button>
+                      )}
+                      {itineraryDoc.status === "url" && (
+                        <a href={itineraryDoc.url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border transition-all hover:opacity-80 active:scale-95"
+                          style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: isDark ? "transparent" : "#FFF8F0" }}>
+                          <FileText className="w-4 h-4" />
+                          Download Itinerary
+                        </a>
+                      )}
+                      {itineraryDoc.status === "unavailable" && (
+                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
+                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.6 }}>
+                          <FileText className="w-4 h-4" />
+                          Itinerary Not Available
+                        </button>
+                      )}
+
+                    </div>
+
+                    {/* Explanatory note when unavailable */}
+                    {(voucherDoc.status === "unavailable" || itineraryDoc.status === "unavailable") && (
+                      <p className="font-body text-xs mt-4" style={{ color: textSecondary }}>
+                        Some documents are not yet available for direct download. Please contact your travel consultant for assistance.
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+            </div>
+          </div>
+        );
+      })()}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── PORTRAIT VIDEO SECTION (destination page only) ── */}
+      {dest && (
       <div className="bg-black py-16 px-4 lg:px-10 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-20"
@@ -1616,6 +2849,7 @@ function PreviewContent() {
           )}
         </div>
       </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           BRIEFING SECTIONS — only renders when a briefing exists for this slug
@@ -1678,7 +2912,29 @@ function PreviewContent() {
             </div>
             <SectionDivider theme={theme} />
 
-            {/* ── 10. IMMIGRATION ADVISORY ── */}
+            {/* ── 10. EMERGENCY CONTACTS ── */}
+            <div className={sectionGap}>
+              <EmergencyContactsSection briefing={briefing} theme={theme} />
+            </div>
+            <SectionDivider theme={theme} />
+
+            {/* ── 11. DO'S AND DON'TS ── */}
+            {briefing.dosAndDonts && (
+              <>
+                <div className={sectionGap}>
+                  <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={theme}>
+                    <DosAndDonts
+                      dos={briefing.dosAndDonts.dos}
+                      donts={briefing.dosAndDonts.donts}
+                      theme={theme}
+                    />
+                  </BriefingSection>
+                </div>
+                <SectionDivider theme={theme} />
+              </>
+            )}
+
+            {/* ── 12. IMMIGRATION ADVISORY ── */}
             {briefing.immigrationAdvisory?.length > 0 && (
               <>
                 <div className={sectionGap}>
@@ -1734,30 +2990,26 @@ function PreviewContent() {
             )}
 
             {/* ── 14. WHAT TO BRING ── */}
-            {briefing.whatToBring?.length > 0 && (
-              <>
-                <div className={sectionGap}>
-                  <WhatToBringGrid items={briefing.whatToBring} theme={theme} />
-                </div>
-                <SectionDivider theme={theme} />
-              </>
-            )}
-
-            {/* ── 15. CONNECTIVITY GUIDE ── */}
             <div className={sectionGap}>
-              <ConnectivitySection briefing={briefing} theme={theme} />
+              <WhatToBringCarousel items={briefing.whatToBring || []} theme={theme} />
             </div>
             <SectionDivider theme={theme} />
 
-            {/* ── 16. CURRENCY GUIDE ── */}
+            {/* ── 14.5 OUTFIT GUIDE ── */}
             <div className={sectionGap}>
-              <CurrencySection briefing={briefing} theme={theme} />
+              <OutfitGuide theme={theme} />
             </div>
             <SectionDivider theme={theme} />
 
-            {/* ── 17. DESTINATION GUIDE ── */}
+            {/* ── 15. DESTINATION GUIDE ── */}
             <div className={sectionGap}>
               <DestinationGuideSection briefing={briefing} theme={theme} />
+            </div>
+            <SectionDivider theme={theme} />
+
+            {/* ── 16. CONNECTIVITY GUIDE ── */}
+            <div className={sectionGap}>
+              <ConnectivitySection briefing={briefing} theme={theme} />
             </div>
             <SectionDivider theme={theme} />
 
@@ -1765,26 +3017,20 @@ function PreviewContent() {
                 ADD-ONS MODULE
                 ════════════════════════════════════════════════════════════════ */}
 
-            {/* ── OPTIONAL TOURS ── */}
-            {/* TODO: Globaltix API Integration — replace getToursByDestination() in mockTours.js */}
-            {/* TODO: LakbayHub API Integration — merge results in mockTours.js */}
-            {(() => {
-              const destTours = getToursByDestination(slug);
-              if (destTours.length === 0) return null;
-              return (
-                <>
-                  <div className={sectionGap}>
-                    <OptionalToursSection
-                      tours={destTours}
-                      cartTourIds={cart.tours.map((t) => t.tour?.id)}
-                      onAdd={addTourToCart}
-                      theme={theme}
-                    />
-                  </div>
-                  <SectionDivider theme={theme} />
-                </>
-              );
-            })()}
+            {/* ── OPTIONAL TOURS (live Globaltix) ── */}
+            {!toursLoading && globaltixTours.length > 0 && (
+              <>
+                <div className={sectionGap}>
+                  <OptionalToursSection
+                    tours={globaltixTours}
+                    cartTourIds={cart.tours.map((t) => t.tour?.id)}
+                    onAdd={(tour) => setBookingModalTour(tour)}
+                    theme={theme}
+                  />
+                </div>
+                <SectionDivider theme={theme} />
+              </>
+            )}
 
             {/* ── TRAVEL INSURANCE ── */}
             {/* TODO: Starr Insurance API Integration — replace getInsurancePlans() in mockInsurance.js */}
@@ -1825,29 +3071,7 @@ function PreviewContent() {
                 END ADD-ONS MODULE
                 ════════════════════════════════════════════════════════════════ */}
 
-            {/* ── 18. EMERGENCY CONTACTS ── */}
-            <div className={sectionGap}>
-              <EmergencyContactsSection briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
-
-            {/* ── 19. DO'S AND DON'TS ── */}
-            {briefing.dosAndDonts && (
-              <>
-                <div className={sectionGap}>
-                  <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={theme}>
-                    <DosAndDonts
-                      dos={briefing.dosAndDonts.dos}
-                      donts={briefing.dosAndDonts.donts}
-                      theme={theme}
-                    />
-                  </BriefingSection>
-                </div>
-                <SectionDivider theme={theme} />
-              </>
-            )}
-
-            {/* ── 20. FAQ ── */}
+            {/* ── FAQ ── */}
             {briefing.faqs?.length > 0 && (
               <>
                 <div className={sectionGap}>
@@ -1861,36 +3085,36 @@ function PreviewContent() {
 
             {/* ── 21. NEED ASSISTANCE ── */}
             {briefing.assistanceContacts && (
-              <div className={sectionGap}>
-                <BriefingSection label="Contact Us" title="Need Assistance?" theme={theme}>
-                  <NeedAssistance contacts={briefing.assistanceContacts} theme={theme} />
-                </BriefingSection>
-              </div>
+              <>
+                <div className={sectionGap}>
+                  <BriefingSection label="Contact Us" title="Need Assistance?" theme={theme}>
+                    <NeedAssistance contacts={briefing.assistanceContacts} theme={theme} />
+                  </BriefingSection>
+                </div>
+                <SectionDivider theme={theme} />
+              </>
             )}
+
+            {/* ── 22. TESTIMONIALS ── */}
+            <div className={sectionGap}>
+              <BriefingTestimonials theme={theme} />
+            </div>
+            <SectionDivider theme={theme} />
+
+            {/* ── 23. RATE MY SERVICE ── */}
+            <div className={sectionGap}>
+              <RateMyService theme={theme} />
+            </div>
+            <SectionDivider theme={theme} />
+
+            {/* ── 24. REFERRAL ── */}
+            <div className={sectionGap}>
+              <ReferralSection theme={theme} />
+            </div>
 
           </div>
         </div>
       )}
-
-      {/* ══════════════════════════════════════════════════════════════════════
-          ACTIVITIES / ATTRACTIONS CAROUSEL (moved to bottom of page)
-          ══════════════════════════════════════════════════════════════════════ */}
-      <div
-        className="border-t py-12 px-4 lg:px-10 transition-colors duration-300 font-body"
-        style={{ backgroundColor: isDark ? "#111111" : "#FFFFFF", borderColor: theme.border }}
-      >
-        <div className="max-w-6xl mx-auto">
-          <ThingsToDoSection
-            isDark={isDark}
-            textPrimary={theme.textPrimary}
-            textSecondary={theme.textSecondary}
-            border={theme.border}
-            bgCard={theme.bgCard}
-            bgAlt={theme.bgAlt}
-            activitiesData={activitiesData}
-          />
-        </div>
-      </div>
 
       {/* ── NAVIGATION FOOTER ── */}
       <div className="py-12 px-4 border-t transition-colors duration-300" style={{ backgroundColor: bgAlt, borderColor: border }}>
@@ -1911,6 +3135,19 @@ function PreviewContent() {
           </button>
         </div>
       </div>
+
+      {/* ── BOOKING MODAL ── */}
+      <AnimatePresence>
+        {bookingModalTour && (
+          <TourBookingModal
+            key={bookingModalTour.id}
+            tour={bookingModalTour}
+            theme={theme}
+            onClose={() => setBookingModalTour(null)}
+            onConfirm={handleBookingConfirm}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

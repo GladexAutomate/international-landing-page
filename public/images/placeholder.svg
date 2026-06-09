@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" fill="none">
+  <rect width="400" height="300" fill="#1C1C1C"/>
+  <!-- Camera body -->
+  <rect x="155" y="118" width="90" height="68" rx="10" stroke="#333" stroke-width="2.5"/>
+  <!-- Lens ring outer -->
+  <circle cx="200" cy="150" r="22" stroke="#333" stroke-width="2.5"/>
+  <!-- Lens ring inner -->
+  <circle cx="200" cy="150" r="10" fill="#333"/>
+  <!-- Viewfinder bump -->
+  <path d="M178 118 L185 104 L215 104 L222 118" stroke="#333" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+  <!-- Flash dot -->
+  <circle cx="232" cy="126" r="4" fill="#333"/>
+  <!-- Label -->
+  <text x="200" y="214" text-anchor="middle" fill="#444" font-family="system-ui,-apple-system,BlinkMacSystemFont,sans-serif" font-size="13" font-weight="500" letter-spacing="0.3">Photo Coming Soon</text>
+</svg>

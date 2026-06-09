@@ -4,15 +4,12 @@
  * This is the single entry point for all add-ons data and utilities.
  * Import from here rather than from individual files:
  *
- *   import { getToursByDestination, getInsurancePlans, createCart, calculateCartTotal }
- *     from "../data/addons";
+ *   import { getInsurancePlans, createCart, calculateCartTotal } from "../data/addons";
  *
- * Future API integrations only need to change the underlying implementation
- * in mockTours.js or mockInsurance.js — this file's exports stay stable.
+ * Tour data is now served live via src/services/toursService.js (Globaltix API).
  */
 
-export { getToursByDestination } from "./mockTours.js";
-export { getInsurancePlans }     from "./mockInsurance.js";
+export { getInsurancePlans } from "./mockInsurance.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ID GENERATOR
@@ -56,24 +53,30 @@ export function createCart(destinationSlug, gdxReference) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Wraps a Tour in a CartTourItem with default participants (1 adult).
+ * Creates a CartTourItem from a confirmed booking modal selection.
  *
- * @param {import("../../types/addons").Tour} tour
+ * @param {import("../../types/addons").Tour}              tour
+ * @param {import("../../types/addons").TourBookingOption} selectedOption
+ * @param {number}  qty         - participant count (>= option.minPurchaseQty)
+ * @param {string}  [bookingDate] - "YYYY-MM-DD"; required when tour.requiresBookingDate
  * @returns {import("../../types/addons").CartTourItem}
  */
-export function createCartTourItem(tour) {
+export function createCartTourItem(tour, selectedOption, qty, bookingDate) {
+  const unitPrice = selectedOption?.price ?? tour.price;
+  const count     = qty ?? 1;
   return {
-    type:        "tour",
-    cartItemId:  generateId(),
+    type:           "tour",
+    cartItemId:     generateId(),
     tour,
-    bookingDate:  null,
-    bookingTime:  null,
-    sessionId:    null,
-    participants: { adults: 1, children: 0, infants: 0 },
-    unitPrice:    tour.price,        // price snapshot at add-to-cart time
-    total:        tour.price * 1,    // unitPrice × adults
-    providerBookingRef:  null,       // TODO: Globaltix hold reference
-    providerStatus:      "pending",
+    selectedOption: selectedOption ?? null,
+    qty:            count,
+    bookingDate:    bookingDate  || null,
+    bookingTime:    null,
+    sessionId:      null,
+    unitPrice,
+    total:          unitPrice * count,
+    providerBookingRef: null,
+    providerStatus:     "pending",
   };
 }
 
@@ -145,9 +148,11 @@ export function createOrder(cart, customer, paymentMethod) {
     ...cart.tours.map((item) => ({
       lineItemId:  generateId(),
       type:        "tour",
-      name:        item.tour.name,
+      name:        item.selectedOption
+        ? `${item.tour.name} — ${item.selectedOption.optionName}`
+        : item.tour.name,
       description: item.tour.description,
-      quantity:    item.participants.adults,
+      quantity:    item.qty ?? 1,
       unitPrice:   item.unitPrice,
       total:       item.total,
       cartItemId:  item.cartItemId,
@@ -213,20 +218,42 @@ export function createOrder(cart, customer, paymentMethod) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAYMENT METHODS (stable list — Xendit supports all four)
+// PAYMENT METHODS — provider-agnostic gateway list
 // ─────────────────────────────────────────────────────────────────────────────
+// DEMO MODE ONLY — No real gateway is connected.
+// Replace with real gateway integration later:
+//   BUX:      https://bux.ph/developers
+//   PayMongo: https://developers.paymongo.com
+//   Xendit:   https://developers.xendit.co
 
-// TODO: Xendit Checkout Integration
-// Xendit payment method identifiers:
-//   GCash       → "GCASH"
-//   Maya        → "PAYMAYA"
-//   Credit Card → "CREDIT_CARD" (via Xendit payment intent)
-//   Bank Transfer → "BANK_TRANSFER" (OTC or online banking)
+/**
+ * @typedef {{ id: string; label: string; emoji: string; description: string; provider: string }} PaymentMethod
+ */
 
-/** @type {{ id: string; label: string; emoji: string; xenditMethod: string }[]} */
+/** @type {PaymentMethod[]} */
 export const PAYMENT_METHODS = [
-  { id: "gcash",  label: "GCash",               emoji: "📱", xenditMethod: "GCASH" },
-  { id: "maya",   label: "Maya",                emoji: "💜", xenditMethod: "PAYMAYA" },
-  { id: "card",   label: "Credit / Debit Card", emoji: "💳", xenditMethod: "CREDIT_CARD" },
-  { id: "bank",   label: "Bank Transfer",        emoji: "🏦", xenditMethod: "BANK_TRANSFER" },
+  {
+    id:          "bux",
+    label:       "BUX",
+    emoji:       "🏦",
+    description: "BUX Wallet · QR Ph · Online Banking",
+    provider:    "BUX",
+    // Replace with real BUX gateway integration later
+  },
+  {
+    id:          "paymongo",
+    label:       "PayMongo",
+    emoji:       "💳",
+    description: "GCash · Maya · Credit Card · Bank Transfer",
+    provider:    "PayMongo",
+    // Replace with real PayMongo gateway integration later
+  },
+  {
+    id:          "xendit",
+    label:       "Xendit",
+    emoji:       "🏧",
+    description: "GCash · Maya · Credit Card",
+    provider:    "Xendit",
+    // Replace with real Xendit gateway integration later
+  },
 ];

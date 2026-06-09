@@ -23,20 +23,32 @@
  */
 
 /**
- * One price tier (adult / child / senior).
- * Maps to Globaltix's "pricingOptions" array.
+ * One bookable option from Globaltix ProductOptions API.
+ * Maps option.id (optionID) + ticketType[].id (ticketTypeID) from the two-level response.
+ * Loaded lazily per product when TourBookingModal opens.
  *
  * @typedef {Object} TourBookingOption
- * @property {string}  id        - "adult" | "child" | "senior"
- * @property {string}  label     - "Adult (18+)"
- * @property {number}  price     - PHP
- * @property {number}  [minAge]
- * @property {number}  [maxAge]
+ * @property {string}      id             - composite key: `${optionId}-${ticketTypeId}`
+ * @property {number}      optionId       - Globaltix option.id; pass as optionID to availability
+ * @property {string}      optionName     - e.g. "Beginners' Trail"
+ * @property {number}      ticketTypeId   - Globaltix ticketType.id; pass as ticketTypeID to availability
+ * @property {string}      ticketTypeName - e.g. "Per Pax"
+ * @property {string}      sku
+ * @property {number}      price          - originalPrice: display price to customer (PHP)
+ * @property {number}      nettPrice      - reseller net cost
+ * @property {number}      minPurchaseQty - minimum pax; enforced in booking UI
+ * @property {number|null} maxPurchaseQty
+ * @property {number|null} ageFrom
+ * @property {number|null} ageTo
+ * @property {boolean}     isCancellable
+ * @property {string[]}    cancellationNotes
+ * @property {string[]}    inclusions     - per-option inclusions from Globaltix
+ * @property {boolean}     visitDateRequired
  */
 
 /**
  * An available booking slot.
- * sessionId is what Globaltix requires in the booking payload to hold a slot.
+ * Populated in a future phase once /api/event availability endpoint is confirmed.
  *
  * @typedef {Object} TourAvailabilitySlot
  * @property {string}  date       - "2026-08-15"
@@ -119,20 +131,21 @@
 
 /**
  * Cart line item — tour.
- * providerBookingRef is the Globaltix "hold" reference
- * that must be confirmed or released after payment.
+ * selectedOption + qty replace the old participants shape after booking modal is used.
+ * bookingTime/sessionId remain null until /api/event availability is confirmed.
  *
  * @typedef {Object} CartTourItem
- * @property {"tour"}      type
- * @property {string}      cartItemId       - uuid, unique per cart row
- * @property {Tour}        tour
- * @property {string}      [bookingDate]    - "2026-08-15"
- * @property {string}      [bookingTime]    - "09:00"
- * @property {string}      [sessionId]      - chosen TourAvailabilitySlot.sessionId
- * @property {{ adults: number; children: number; infants: number }} participants
- * @property {number}      unitPrice        - price snapshot at add-to-cart time
- * @property {number}      total
- * @property {string}      [providerBookingRef]  - Globaltix temp hold ref
+ * @property {"tour"}                type
+ * @property {string}                cartItemId
+ * @property {Tour}                  tour
+ * @property {TourBookingOption|null} selectedOption  - chosen in TourBookingModal
+ * @property {number}                qty             - participant count
+ * @property {string}                [bookingDate]   - "YYYY-MM-DD"; required when tour.requiresBookingDate
+ * @property {string}                [bookingTime]   - future: from /api/event availability
+ * @property {string}                [sessionId]     - future: from /api/event availability
+ * @property {number}                unitPrice       - price snapshot at add-to-cart time
+ * @property {number}                total           - qty × unitPrice
+ * @property {string}                [providerBookingRef]
  * @property {"pending"|"confirmed"|"expired"} [providerStatus]
  */
 

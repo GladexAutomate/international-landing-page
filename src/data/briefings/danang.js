@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Da Nang Vietnam — Complete Briefing Data
- * Package: GDX-UOV15B2 | 4D3N Da Nang 2026
+ * Package: GDX-UOV15B2 | 5D4N Da Nang 2026
  *
  * This file is the single source of truth for the Da Nang briefing page.
  * Update content here only — no changes to components required.
@@ -11,7 +11,7 @@ export const danangBriefing = {
   // ─── 1. WELCOME MESSAGE ──────────────────────────────────────────────────
   welcomeMessage: {
     title: "Official Da Nang Briefing",
-    subtitle: "4D3N Da Nang, Vietnam — 2026",
+    subtitle: "5D4N Da Nang, Vietnam — 2026",
     packageCode: "GDX-UOV15B2",
     body: [
       "Welcome and congratulations on your upcoming trip to Da Nang, Vietnam with Gladex Tours!",
@@ -20,19 +20,115 @@ export const danangBriefing = {
     ],
   },
 
+  // ─── 2. PACKAGE INCLUSIONS ───────────────────────────────────────────────
+  // Key name matches the component override: briefing?.briefingInclusions
+  briefingInclusions: [
+    "Round trip airfare via VietJet Air (VJ)",
+    "Hotel accommodation with daily breakfast",
+    "Meals as listed in the itinerary",
+    "Roundtrip airport transfers (airport–hotel–airport)",
+    "Use of amenities at the hotel",
+    "Sightseeing tours as specified in the itinerary, including required entrance tickets",
+    "Air-conditioned tour bus — one seat per person guaranteed",
+    "English-speaking tour guide and driver",
+    "Tipping fee (already included — no additional tip required for guide/driver)",
+    "Airport tax",
+    "Baggage allowance: 20 kg check-in luggage + 7 kg carry-on",
+  ],
+
+  // ─── 3. PACKAGE EXCLUSIONS ───────────────────────────────────────────────
+  // Key name matches the component override: briefing?.briefingExclusions
+  briefingExclusions: [
+    "Extra baggage allowance beyond the included 20 kg check-in + 7 kg carry-on",
+    "Travel insurance — EXCEPT for passengers who have already paid",
+    "Philippine travel tax (PH Travel Tax) — EXCEPT for passengers who have already paid",
+    "Single supplement — EXCEPT for passengers who have already paid",
+    "Vietnam e-Visa fee — EXCEPT for passengers who have already paid",
+    "Personal expenses: optional tours, souvenir shopping, snacks, beverages outside meals",
+    "Any items or services not explicitly listed in the inclusions above",
+  ],
+
+  // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
+  // Shape: { day, title, activities[] } — consumed by ItineraryTimeline component
+  itinerary: [
+    {
+      day: 1,
+      title: "Manila to Da Nang — Son Tra Peninsula · Canaan Island · Hoi An",
+      activities: [
+        "Depart from Manila via VietJet Air and fly to Da Nang International Airport.",
+        "Upon arrival, meet and greet with your Gladex tour guide at the arrivals hall.",
+        "First stop: Son Tra Peninsula — admire the iconic Lady Buddha statue overlooking the South China Sea.",
+        "Next: Canaan Island — enjoy a relaxing visit including a fun coconut boat ride experience.",
+        "Afternoon: Explore the beautiful and historic Hoi An Ancient Town — a UNESCO World Heritage Site.",
+        "Dinner at a group restaurant, then transfer to the hotel and check in.",
+        "Overnight stay in Da Nang.",
+      ],
+    },
+    {
+      day: 2,
+      title: "Ba Na Hills — Golden Bridge · French Village · Cable Car",
+      activities: [
+        "After breakfast, prepare for one of the highlights of the trip.",
+        "Full-day visit to Ba Na Hills — experience the world-renowned cable car ride to the summit at 1,487 m.",
+        "Walk the iconic Golden Bridge (Cầu Vàng) — held by giant stone hands, Vietnam's most photographed landmark.",
+        "Explore the stunning French-inspired architecture and the Fantasy Park amusement area.",
+        "Enjoy breathtaking panoramic mountain and coastal views from the summit.",
+        "Quick stop at a local mini supermarket for personal shopping on the way back.",
+        "Dinner, then transfer back to the hotel for overnight stay.",
+      ],
+    },
+    {
+      day: 3,
+      title: "Da Nang City Tour — Dragon Bridge · Love Bridge · APEC Park · Pink Church",
+      activities: [
+        "After breakfast, continue exploring the city of Da Nang.",
+        "Visit a local latex shop before heading into the city centre.",
+        "See the iconic Dragon Bridge (Cầu Rồng) spanning the Han River.",
+        "Stroll the romantic Love Bridge — a scenic riverside attraction popular for photos and evening walks.",
+        "Visit the peaceful APEC Park along the Han River waterfront.",
+        "Stop at Da Nang Cathedral, known as the Pink Church — one of the city's most recognizable landmarks.",
+        "Shopping stop for local souvenirs and specialty finds.",
+        "Dinner, then transfer back to the hotel for overnight stay.",
+      ],
+    },
+    {
+      day: 4,
+      title: "Free Time · Hai Van Pass · Lang Co Beach · Jewelry Stop",
+      activities: [
+        "After breakfast, enjoy free time before the morning activities.",
+        "Visit local treasure shops and experience authentic Vietnamese coffee and bánh mì (Vietnamese bread).",
+        "Scenic drive through the legendary Hai Van Pass (Đèo Hải Vân) — one of Vietnam's most spectacular coastal mountain roads.",
+        "Stop at Lang Co Beach — a beautiful white-sand coastal stretch with stunning ocean views, known as the 'Bali Gallery' road.",
+        "Last-minute shopping stop at a jewelry boutique.",
+        "Transfer back to Da Nang. Dinner and overnight stay at the hotel.",
+      ],
+    },
+    {
+      day: 5,
+      title: "Da Nang to Manila — Departure Day",
+      activities: [
+        "After breakfast, check out of the hotel.",
+        "Final transfer to Da Nang International Airport.",
+        "Complete airport check-in and immigration procedures for your return flight.",
+        "Board VietJet Air flight back to Manila.",
+        "Arrive in Manila with unforgettable memories from Vietnam.",
+      ],
+    },
+  ],
+
   // ─── 5. TRAVEL INFORMATION CENTER ────────────────────────────────────────
   travelInformation: {
     beforeDeparture: [
       "Secure your Vietnam e-Visa at least 7 days before departure at evisa.xuatnhapcanh.gov.vn.",
       "Complete your eTravel Philippines registration at etravel.gov.ph — required by Philippine immigration for all international departures.",
       "Submit your Vietnam Pre-Arrival Information online as instructed by our team.",
-      "Arrive at the departure airport at least 3 hours before your scheduled international flight.",
+      "Arrive at the departure airport at least 4–5 hours before your scheduled international flight.",
       "Ensure your passport is valid for at least 6 months beyond your travel return date.",
       "Confirm your compulsory travel insurance documents are received and saved.",
       "Download offline maps of Da Nang and Hoi An on Google Maps before you leave.",
       "Inform your bank about your travel dates to prevent international card blocks.",
-      "Prepare USD 100–150 or its VND equivalent for personal expenses.",
-      "Complete online check-in for your flight (opens 24–48 hours before departure).",
+      "Prepare approximately USD 300 for personal expenses, optional purchases, and leisure spending during the 5-day trip.",
+      "Online check-in is NOT available for this package — this is a group/chartered flight booking. All passengers must check in at the airport counter on departure day.",
     ],
     uponArrival: [
       "Proceed to the Immigration counter at Da Nang International Airport.",
@@ -50,7 +146,7 @@ export const danangBriefing = {
       icon: "🇵🇭",
       step: "Philippine Departure Procedure",
       details: [
-        "Arrive at the airport at least 3 hours before your international flight departure time.",
+        "Arrive at the airport at least 4–5 hours before your international flight departure time.",
         "Proceed to the airline check-in counter — have your passport and booking reference ready.",
         "After check-in, proceed to the Bureau of Immigration (BI) departure hall.",
         "At BI: Present your passport, boarding pass, and round-trip ticket.",
@@ -69,6 +165,17 @@ export const danangBriefing = {
         "Exit to the Arrivals Hall — look for your Gladex Tours representative holding a sign.",
         "Do NOT accept offers from unauthorized taxi operators, porters, or travel agents.",
         "Contact your tour guide immediately if you cannot locate the Gladex meet-and-greet point.",
+      ],
+    },
+    {
+      icon: "🛂",
+      step: "For E-Visa Holders — Immigration Procedure",
+      details: [
+        "Before reaching the main immigration queue, look for an Immigration Officer holding a paper with your name.",
+        "Submit your printed LOA (Letter of Approval), original passport, and two (2) pcs. 2×2 photos with white background.",
+        "Visa stamping usually takes approximately 5–10 minutes.",
+        "After stamping, proceed to the standard immigration clearance counter.",
+        "Claim your luggage at the baggage carousel, then meet the tour guide at the exit.",
       ],
     },
   ],
@@ -111,17 +218,17 @@ export const danangBriefing = {
     { icon: "☀️", text: "Apply sunscreen every morning before going out — UV index in Vietnam is very high year-round." },
     { icon: "💧", text: "Drink sealed bottled water only throughout your trip. Tap water is NOT safe to drink in Vietnam." },
     { icon: "💊", text: "Inform your guide of any medical conditions, allergies, or dietary restrictions before Day 1." },
-    { icon: "📱", text: "Save your tour guide's contact number and keep your phone charged at all times." },
+    { icon: "📱", text: "Download WhatsApp and activate your eSIM or local SIM before departure for easy communication with the guide and Gladex team." },
     { icon: "📸", text: "Respect photo restrictions at temples, government buildings, and any site marked as prohibited." },
-    { icon: "⚠️", text: "The group departs at the scheduled time. Travelers who cause delays may be subject to penalties per the package terms." },
+    { icon: "⚠️", text: "The group departs at the scheduled time. Travelers who leave the group without permission are subject to penalties — see Group Departure Policy." },
     { icon: "🧴", text: "Ba Na Hills altitude reaches 1,487 m — bring a light jacket as it is noticeably cooler at the summit." },
   ],
 
-  // ─── 11. SHOPPING STOP ADVISORY ──────────────────────────────────────────
+  // ─── 10. SHOPPING STOP ADVISORY ──────────────────────────────────────────
   shoppingAdvisory: {
     title: "Shopping Stop Advisory",
     warningLabel: "IMPORTANT NOTICE",
-    body: "Shopping stops at designated stores are an official part of the group tour itinerary. These stops support local businesses and are built into the tour program. Participation in these stops is required as a group; however, purchasing is entirely voluntary.",
+    body: "Shopping stops at designated stores (latex shop, jewelry shop, treasure shops, souvenir stores) are an official part of the group tour itinerary. Participation is required as a group; however, purchasing is entirely voluntary. Please expect possible long shop visits due to product presentations and potential delays.",
     rules: [
       "There is NO OBLIGATION to purchase anything at shopping stops.",
       "All purchases are voluntary — you will never be pressured by the guide or store staff.",
@@ -133,43 +240,125 @@ export const danangBriefing = {
     penaltyNote: "⚠️ Passengers caught engaging in prohibited personal transactions bear full personal legal and financial responsibility under Philippine customs and immigration regulations. Gladex Tours will not intervene in individual violations.",
   },
 
-  // ─── 13. TRAVEL READINESS CHECKLIST ──────────────────────────────────────
+  // ─── 11. GROUP DEPARTURE POLICY ──────────────────────────────────────────
+  groupDeparturePolicy: {
+    title: "Group Departure Policy",
+    intro: "All passengers are required to stay with the group during all scheduled tour hours. Leaving the group without prior permission from the local operator is not allowed and is subject to the following penalties:",
+    penalties: [
+      {
+        label: "Day 1 — Upon Arrival in Da Nang",
+        amount: "USD 200 per person",
+        description: "Any passenger who leaves the group without permission on the first day upon arrival in Da Nang.",
+      },
+      {
+        label: "Last Day — In Da Nang",
+        amount: "USD 100 per person",
+        description: "Any passenger who leaves the group without permission on the final day in Da Nang.",
+      },
+    ],
+    notes: [
+      "Gladex Tours will not be responsible for any passenger who leaves the group without permission.",
+      "In cases where a passenger abandons the group, the matter may be reported to border authorities or local police if necessary.",
+      "The itinerary flow may change depending on the actual tour situation, weather, or operational requirements.",
+    ],
+  },
+
+  // ─── 12. TRAVEL READINESS CHECKLIST ──────────────────────────────────────
   checklist: [
-    { id: "passport", label: "Passport validity checked (min. 6 months beyond return date)" },
-    { id: "evisa", label: "Vietnam e-Visa applied and received (evisa.xuatnhapcanh.gov.vn)" },
-    { id: "etravel", label: "eTravel Philippines registered (etravel.gov.ph)" },
-    { id: "prearrival", label: "Vietnam Pre-Arrival Information submitted" },
-    { id: "insurance", label: "Travel insurance confirmed and documents saved" },
-    { id: "flights", label: "Flight e-tickets printed or downloaded (with flight number)" },
-    { id: "hotel", label: "Hotel confirmation saved on phone" },
-    { id: "emergency", label: "Emergency contacts saved (guide, Gladex hotline, consulate)" },
-    { id: "currency", label: "Cash prepared: USD 100–150 or equivalent VND" },
-    { id: "sim", label: "Vietnam SIM card or international roaming arranged" },
-    { id: "maps", label: "Offline maps downloaded (Da Nang + Hoi An)" },
-    { id: "packing", label: "Packing completed (see What to Bring section)" },
-    { id: "checkin", label: "Online check-in completed (opens 24–48 hours before departure)" },
-    { id: "departure", label: "Airport arrival time confirmed — plan to arrive 3 hours before departure" },
-    { id: "briefing", label: "This entire briefing page read and saved on your phone" },
+    { id: "passport",     icon: "🛂", label: "Valid ID / Passport" },
+    { id: "voucher",      icon: "📄", label: "Travel Voucher" },
+    { id: "ticket",       icon: "✈️", label: "Flight Ticket" },
+    { id: "hotel_voucher",icon: "🏨", label: "Hotel Voucher" },
+    { id: "cash",         icon: "💵", label: "Cash" },
+    { id: "powerbank",    icon: "🔋", label: "Powerbank" },
+    { id: "mobile_data",  icon: "📶", label: "Mobile Data" },
+    { id: "chargers",     icon: "🔌", label: "Chargers" },
+    { id: "medicines",    icon: "💊", label: "Medicines" },
+    { id: "sunscreen",    icon: "🌞", label: "Sunscreen" },
+    { id: "clothing",     icon: "👗", label: "Appropriate Clothing" },
   ],
 
-  // ─── 14. WHAT TO BRING ───────────────────────────────────────────────────
+  // ─── 13. WHAT TO BRING ───────────────────────────────────────────────────
   whatToBring: [
     { icon: "👟", label: "Comfortable walking shoes (expect 3–5 km of walking daily)" },
-    { icon: "👕", label: "Light, breathable clothing (3–4 sets)" },
+    { icon: "👕", label: "Light, breathable clothing (4–5 sets for 5 days)" },
     { icon: "🧥", label: "Light jacket or cardigan (Ba Na Hills summit is noticeably cold)" },
     { icon: "🌂", label: "Compact umbrella or rain jacket" },
     { icon: "🧴", label: "Sunscreen SPF 50+ (apply daily)" },
     { icon: "🪲", label: "Insect repellent (especially for Hoi An outdoor areas)" },
     { icon: "💊", label: "Personal medication (and any prescription documents)" },
-    { icon: "💴", label: "Cash: USD and/or Vietnamese Dong (VND)" },
+    { icon: "💴", label: "Cash: approx. USD 300 and/or Vietnamese Dong (VND)" },
     { icon: "🔌", label: "Universal power adapter (Vietnam uses Type A/C/F outlets, 220V)" },
     { icon: "🔋", label: "Portable charger / power bank (for full-day tours)" },
     { icon: "📄", label: "Original passport (required at hotels and immigration)" },
-    { icon: "🖨️", label: "Printed Vietnam e-Visa approval letter" },
+    { icon: "🖨️", label: "Printed Vietnam e-Visa approval letter (+ LOA if applicable)" },
     { icon: "📱", label: "eTravel QR code (printed or screenshot on phone)" },
-    { icon: "📸", label: "1–2 spare passport-sized photos" },
+    { icon: "📸", label: "2 pcs. 2×2 passport-sized photos with white background (for e-Visa holders)" },
     { icon: "🎒", label: "Small daypack for tour days" },
     { icon: "💧", label: "Reusable water bottle (refill from hotel's filtered water station)" },
+  ],
+
+  // ─── 14. OUTFIT GUIDE ────────────────────────────────────────────────────
+  outfitGuide: [
+    {
+      occasion: "Airport & Travel Days",
+      icon: "✈️",
+      tips: [
+        "Comfortable, loose-fitting clothing for long flights and layovers.",
+        "Easy-to-remove shoes for airport security.",
+        "Light layer or cardigan — airline cabin temperatures can be cold.",
+        "Avoid tight jeans or formal wear for comfort during transit.",
+      ],
+    },
+    {
+      occasion: "Ba Na Hills (Day 2)",
+      icon: "🌁",
+      tips: [
+        "Light jacket or hoodie — the summit at 1,487 m is noticeably cooler than the city.",
+        "Comfortable walking shoes with grip — the terrain involves stairs and uneven surfaces.",
+        "Avoid flip-flops or sandals — not suitable for the cable car platform and hill paths.",
+        "Layer up: you can remove the jacket once you warm up from walking.",
+      ],
+    },
+    {
+      occasion: "Hoi An Ancient Town (Day 1)",
+      icon: "🏮",
+      tips: [
+        "Casual, comfortable clothing in light, breathable fabric.",
+        "Modest attire — cover shoulders and knees when entering any temple or pagoda.",
+        "Comfortable footwear — expect significant walking on cobblestone streets.",
+        "Light colours look great in photos against the lantern-lit backdrop.",
+      ],
+    },
+    {
+      occasion: "Da Nang City Tour (Day 3)",
+      icon: "🌆",
+      tips: [
+        "Light and breathable clothing — city tours are mostly outdoors in heat.",
+        "Comfortable walking shoes.",
+        "Bring a small bag for shopping stops (latex shop, souvenir stores).",
+        "Hat or cap for sun protection during outdoor stops.",
+      ],
+    },
+    {
+      occasion: "Hai Van Pass & Lang Co Beach (Day 4)",
+      icon: "🌊",
+      tips: [
+        "Casual clothing suitable for scenic outdoor stops and photography.",
+        "Comfortable footwear — you may walk on the pass viewing area and beach.",
+        "Light jacket if you are sensitive to wind on the mountain road.",
+        "Sunglasses and hat recommended for the beachside stop.",
+      ],
+    },
+    {
+      occasion: "Evening Activities",
+      icon: "🌙",
+      tips: [
+        "Smart-casual attire works for most Da Nang restaurants and evening areas.",
+        "Comfortable footwear for after-dinner walks near Dragon Bridge or Love Bridge.",
+        "Light layer for cooler evenings by the river.",
+      ],
+    },
   ],
 
   // ─── 15. CONNECTIVITY GUIDE ──────────────────────────────────────────────
@@ -214,13 +403,14 @@ export const danangBriefing = {
         description: "Download offline maps before you leave. Some tour locations have limited signal.",
         steps: [
           "Open Google Maps → Search 'Da Nang' → Tap the three-dot menu → Download offline map",
-          "Also download: 'Hoi An' (for Day 3 ancient town tour)",
+          "Also download: 'Hoi An' (for Day 1 ancient town tour)",
           "Alternative app: MAPS.ME — fully offline navigation, no data needed",
         ],
         cost: "Free",
       },
     ],
     tips: [
+      "Download WhatsApp before departure — your guide and Gladex team will communicate via WhatsApp.",
       "Keep your phone charged — bring a power bank for full-day tours.",
       "Ba Na Hills cable car area has limited mobile signal — save your maps before going up.",
       "WhatsApp, Messenger, Viber, and all social apps work normally in Vietnam.",
@@ -234,7 +424,7 @@ export const danangBriefing = {
     symbol: "₫",
     exchangeRate: "Approximately PHP 1 = 430–470 VND (rate varies daily — check before exchanging)",
     usdNote: "USD is widely accepted at hotels, tourist shops, and major restaurants in Da Nang and Hoi An. Carrying a mix of USD and VND is recommended.",
-    recommendedCash: "Prepare USD 100–150 for personal expenses: optional tours, shopping, tips, snacks.",
+    recommendedCash: "Prepare approximately USD 300 for personal expenses, souvenir shopping, leisure spending, and optional purchases during the 5-day trip.",
     whereToExchange: [
       { place: "Da Nang Airport", note: "Convenient upon arrival but rates may be slightly lower than the city" },
       { place: "Authorized Banks (Vietcombank, Techcombank)", note: "Best rates — bring your passport for identification" },
@@ -244,10 +434,10 @@ export const danangBriefing = {
     tips: [
       "Always count your money immediately after exchanging — do it in front of the teller.",
       "Do NOT exchange money with street vendors or unauthorized changers.",
-      "Keep small VND bills (VND 20,000–100,000) for local purchases, transport, and tips.",
+      "Keep small VND bills (VND 20,000–100,000) for local purchases, transport, and personal tips.",
       "Credit cards are accepted at major malls, hotel restaurants, and tourist shops.",
       "Notify your Philippine bank of your travel dates to avoid international transaction blocks.",
-      "Tipping is not mandatory in Vietnam but is appreciated — VND 20,000–50,000 for good service.",
+      "Tipping for your tour guide and driver is already included in the package. Tipping at restaurants or for other personal services is optional and at your discretion.",
     ],
     roughPrices: [
       { item: "Sealed water bottle (convenience store)", price: "VND 10,000–15,000 ≈ PHP 25–35" },
@@ -265,33 +455,75 @@ export const danangBriefing = {
     highlights: [
       {
         icon: "🌉",
-        name: "Golden Bridge (Cầu Vàng) — Ba Na Hills",
-        description: "Held by giant stone hands 1,400 m above sea level, the Golden Bridge is Vietnam's most photographed landmark. Located inside the Ba Na Hills resort complex.",
+        name: "Golden Bridge (Cầu Vàng)",
+        description: "Held by giant stone hands 1,400 m above sea level, Vietnam's most photographed landmark at Ba Na Hills.",
+        img: "/images/destinations/danang/places/golden-bridge.jpg",
       },
       {
         icon: "🏖️",
         name: "Mỹ Khê Beach",
-        description: "Stretching 30 km along the coast, Mỹ Khê is one of the most beautiful beaches in Southeast Asia — fine white sand and clear turquoise water just minutes from the city.",
+        description: "30 km of fine white sand and clear turquoise water — one of Southeast Asia's most beautiful beaches, minutes from the city.",
+        img: "/images/destinations/danang/places/my-khe-beach.jpg",
       },
       {
         icon: "🐉",
         name: "Dragon Bridge (Cầu Rồng)",
-        description: "Da Nang's iconic dragon-shaped bridge spanning the Han River. On Saturday and Sunday evenings at 9 PM, the dragon breathes fire and water — a spectacular show.",
+        description: "Da Nang's iconic dragon-shaped bridge over the Han River. Every Saturday & Sunday at 9 PM it breathes real fire and water.",
+        img: "/images/destinations/danang/places/dragon-bridge.jpg",
       },
       {
-        icon: "🏯",
+        icon: "🏮",
         name: "Hội An Ancient Town",
-        description: "A UNESCO World Heritage Site, Hội An is a beautifully preserved 15th–19th century trading port. Famous for its lantern-lit streets, tailors, and authentic Vietnamese cuisine.",
+        description: "A UNESCO World Heritage Site — lantern-lit streets, ancient temples, and authentic Central Vietnamese cuisine, 30 km south.",
+        img: "/images/destinations/danang/places/hoi-an.jpg",
       },
       {
         icon: "⛵",
         name: "Bà Nà Hills Resort",
-        description: "A hilltop French-inspired resort at 1,487 m altitude with the Golden Bridge, Fantasy Park amusement area, French Village, and stunning panoramic views of the coast.",
+        description: "A French-inspired mountain resort at 1,487 m — home to the Golden Bridge, Fantasy Park, and panoramic coastal views.",
+        img: "/images/destinations/danang/places/ba-na-hills.jpg",
       },
       {
         icon: "🗿",
-        name: "Marble Mountains (Ngũ Hành Sơn)",
-        description: "Five limestone and marble hills named after the five elements. Contains Buddhist sanctuaries, natural caves, and a panoramic viewpoint overlooking the coast and Da Nang city.",
+        name: "Marble Mountains",
+        description: "Five limestone peaks with Buddhist sanctuaries and hidden caves. Climb to the summit for sweeping views of Da Nang and the sea.",
+        img: "/images/destinations/danang/places/marble-mountains.jpg",
+      },
+      {
+        icon: "🙏",
+        name: "Son Tra & Lady Buddha",
+        description: "Vietnam's 67 m tall Lady Buddha overlooks the South China Sea from Son Tra Peninsula — peaceful and scenic on Day 1.",
+        img: "/images/destinations/danang/places/son-tra.jpg",
+      },
+      {
+        icon: "🥥",
+        name: "Canaan Island & Coconut Boats",
+        description: "Ride traditional round bamboo basket boats through a water palm forest — a uniquely Vietnamese riverside experience.",
+        img: "/images/destinations/danang/places/canaan-island.jpg",
+      },
+      {
+        icon: "❤️",
+        name: "Love Bridge (Cầu Tình Yêu)",
+        description: "A romantic Han River pedestrian bridge adorned with love locks. Perfect for evening strolls and city skyline photography.",
+        img: "/images/destinations/danang/places/love-bridge.jpg",
+      },
+      {
+        icon: "🩷",
+        name: "Da Nang Cathedral (Pink Church)",
+        description: "Built in 1923, this distinctive pink-façaded cathedral is one of Da Nang's most recognizable and photogenic landmarks.",
+        img: "/images/destinations/danang/places/da-nang-cathedral.jpg",
+      },
+      {
+        icon: "🏔️",
+        name: "Hai Van Pass (Đèo Hải Vân)",
+        description: "A 21 km mountain pass with spectacular South China Sea views — the 'ocean cloud pass' made famous by Top Gear.",
+        img: "/images/destinations/danang/places/hai-van-pass.jpg",
+      },
+      {
+        icon: "🌊",
+        name: "Lang Co Beach",
+        description: "A pristine white-sand lagoon at the foot of Hai Van Pass, framed by mountains and turquoise sea — Central Vietnam's hidden gem.",
+        img: "/images/destinations/danang/places/lang-co-beach.jpg",
       },
     ],
     practicalInfo: [
@@ -320,6 +552,76 @@ export const danangBriefing = {
         value: "Police: 113 | Fire: 114 | Medical / Ambulance: 115 | Tourist Hotline: 1800 599 9936 (toll-free)",
       },
     ],
+    bestFood: [
+      {
+        name: "Mì Quảng",
+        desc: "Da Nang's signature noodle dish — turmeric-yellow broth, pork, shrimp, peanuts & fresh herbs. A must-try on every visit.",
+        img: "/images/destinations/danang/food/mi-quang.jpg",
+      },
+      {
+        name: "Bún Chả Cá",
+        desc: "Central Vietnam's fish-cake noodle soup. Silky broth with house-made fish cakes, tomato, and fresh dill.",
+        img: "/images/destinations/danang/food/bun-cha-ca.jpg",
+      },
+      {
+        name: "Fresh Seafood",
+        desc: "Grilled or steamed catch-of-the-day at beachfront restaurants along Mỹ Khê. Order by weight for the freshest experience.",
+        img: "/images/destinations/danang/food/seafood.jpg",
+      },
+      {
+        name: "Bánh Xèo",
+        desc: "Sizzling crispy Vietnamese pancake stuffed with shrimp, pork, bean sprouts, and mushrooms. Wrap in lettuce and dip in nước chấm.",
+        img: "/images/destinations/danang/food/banh-xeo.jpg",
+      },
+      {
+        name: "Bánh Mì",
+        desc: "Vietnamese baguette loaded with pâté, pickled vegetables, coriander, and your choice of filling. Perfect grab-and-go breakfast.",
+        img: "/images/destinations/danang/food/banh-mi.jpg",
+      },
+    ],
+    photoSpots: [
+      {
+        name: "Golden Bridge",
+        desc: "The iconic hands-shaped bridge at Ba Na Hills. Best photos at sunrise — arrive early to avoid crowds and get golden light.",
+        img: "/images/destinations/danang/photo-spots/golden-bridge.jpg",
+      },
+      {
+        name: "Dragon Bridge",
+        desc: "Da Nang's landmark fire-breathing dragon bridge over the Han River. Illuminated at night — best shots from the riverbank promenade.",
+        img: "/images/destinations/danang/photo-spots/dragon-bridge.jpg",
+      },
+      {
+        name: "Mỹ Khê Beach",
+        desc: "One of Asia's most beautiful beaches — 20km of white sand and clear water. Perfect sunrise shots facing east from the shoreline.",
+        img: "/images/destinations/danang/photo-spots/my-khe-beach.jpg",
+      },
+      {
+        name: "Hội An Ancient Town",
+        desc: "UNESCO World Heritage lantern-lit streets just 30km south. Best photos during the full-moon lantern festival or at dusk.",
+        img: "/images/destinations/danang/photo-spots/hoi-an.jpg",
+      },
+      {
+        name: "Marble Mountains",
+        desc: "Five limestone peaks with hidden caves and hilltop pagodas. Climb to the summit for panoramic views of Da Nang and the sea.",
+        img: "/images/destinations/danang/photo-spots/marble-mountains.jpg",
+      },
+    ],
+    localTips: [
+      { icon: "🛵", tip: "Cross roads slowly and steadily — traffic rarely stops completely. Walk at a consistent pace and vehicles will flow around you." },
+      { icon: "🚕", tip: "Use Grab (like Uber) for all transport. Fixed app prices protect you from overcharging — avoid unmarked taxis." },
+      { icon: "💰", tip: "Pay in Vietnamese Dong (VND) everywhere. Exchange at the airport or banks — street money changers may short-change you." },
+      { icon: "🍽️", tip: "Local eateries open early and popular spots fill up by 7am. Arrive early for the freshest food and shorter queues." },
+      { icon: "🌞", tip: "Apply SPF 50+ sunscreen before any outdoor activity. The tropical UV index is high even on cloudy days." },
+      { icon: "📶", tip: "Buy a local SIM at the airport (Viettel or Mobifone) for cheap 4G data. Grab and Google Maps work seamlessly with it." },
+    ],
+    safetyTips: [
+      { icon: "🎒", tip: "Wear your bag in front in crowded tourist areas. Motorbike bag-snatching can happen — keep valuables secured and close to your body." },
+      { icon: "🏖️", tip: "Follow beach safety flags. Some stretches near the river mouth have strong undertows — swim only in designated areas with lifeguards." },
+      { icon: "💧", tip: "Drink bottled water only. Avoid ice from street stalls — hotels and reputable restaurants use purified ice." },
+      { icon: "☀️", tip: "Rest indoors during 12–2pm peak heat. Heatstroke risk is real in summer. Stay hydrated with water, not just cold drinks." },
+      { icon: "📱", tip: "Save Gladex (+63 917 875 2200) and Vietnam Medical Emergency (115) in your phone before you leave the hotel each day." },
+      { icon: "🏦", tip: "Use ATMs inside banks or malls for safety. Carry small VND denominations (₫20,000–₫50,000) for markets and local transport." },
+    ],
   },
 
   // ─── 18. EMERGENCY CONTACTS ──────────────────────────────────────────────
@@ -336,13 +638,13 @@ export const danangBriefing = {
         },
         {
           label: "Gladex WhatsApp",
-          value: "+63 917 XXX XXXX",
+          value: "+63 917 875 2200",
           type: "whatsapp",
-          url: "https://wa.me/63917XXXXXXX",
+          url: "https://wa.me/639178752200",
         },
         {
           label: "Gladex Hotline",
-          value: "0917-XXX-XXXX",
+          value: "+63 917 875 2200",
           type: "phone",
         },
       ],
@@ -386,7 +688,7 @@ export const danangBriefing = {
     },
   ],
 
-  // ─── 10. IMMIGRATION ADVISORY ────────────────────────────────────────────
+  // ─── 19. IMMIGRATION ADVISORY ────────────────────────────────────────────
   immigrationAdvisory: [
     {
       type: "Employed Travelers",
@@ -476,7 +778,7 @@ export const danangBriefing = {
     },
   ],
 
-  // ─── 19. DO'S AND DON'TS ─────────────────────────────────────────────────
+  // ─── 20. DO'S AND DON'TS ─────────────────────────────────────────────────
   dosAndDonts: {
     dos: [
       "Wear comfortable, modest clothing — especially when visiting temples and pagodas in Hoi An.",
@@ -517,19 +819,43 @@ export const danangBriefing = {
     },
     whatsapp: {
       label: "WhatsApp",
-      url: "https://wa.me/63917XXXXXXX",
-      number: "+63 917 XXX XXXX",
+      url: "https://wa.me/639178752200",
+      number: "+63 917 875 2200",
       subtext: "Available during business hours",
     },
     hotline: {
       label: "Gladex Hotline",
-      number: "0917-XXX-XXXX",
+      number: "+63 917 875 2200",
       subtext: "For urgent travel concerns",
     },
   },
 
-  // ─── 20. FAQs ─────────────────────────────────────────────────────────────
+  // ─── 22. FAQs ─────────────────────────────────────────────────────────────
   faqs: [
+    {
+      q: "What if my flight is delayed?",
+      a: "Contact the Gladex Tours hotline immediately — your tour guide will be notified and arrangements will be adjusted. Do not board a different flight or make any new bookings without consulting our team. Standard Travel Insurance and above cover flight delay expenses (meals, accommodation) for delays of 6 hours or more.",
+    },
+    {
+      q: "What time is hotel check-in?",
+      a: "Standard check-in time is 2:00 PM. Early check-in (before 2:00 PM) is subject to room availability and cannot be guaranteed. If you arrive early, the hotel will safely store your luggage while you explore. Late check-out may also be requested at the front desk and is subject to a surcharge.",
+    },
+    {
+      q: "What if it rains during the tour?",
+      a: "Most tours in Da Nang continue in light rain. Your guide will have an umbrella or rain poncho. Ba Na Hills occasionally closes during extreme weather (typhoons, strong winds) — if this occurs, an alternative activity will be arranged. Tours are designed to proceed regardless of weather unless there is a safety concern.",
+    },
+    {
+      q: "Is the tour refundable?",
+      a: "The 5D4N Da Nang package is non-refundable after the final payment due date. Rescheduling may be allowed at the discretion of Gladex Tours subject to availability and applicable fees. Travel insurance is strongly recommended to protect against unforeseen cancellations due to medical emergencies or natural disasters.",
+    },
+    {
+      q: "Can I add optional tours?",
+      a: "Yes! Scroll down to the Optional Tours section on this page to browse available activities and add them directly to your trip. You can also contact your Gladex travel consultant via Messenger or WhatsApp to request specific tours or custom experiences.",
+    },
+    {
+      q: "Who do I contact during an emergency?",
+      a: "For urgent matters: contact your Tour Guide first (number provided in the Emergency Contacts section). For medical emergencies in Vietnam, dial 115 (ambulance). For Gladex support, call or message +63 917 875 2200 (available on Messenger and WhatsApp). Save all emergency numbers before you leave your hotel each day.",
+    },
     {
       q: "What do I do if I miss my flight?",
       a: "Contact the Gladex Tours hotline or your tour guide immediately. Do not purchase a new ticket without consulting our team first. Travel insurance covers missed flights under certain qualifying conditions — keep your insurance certificate accessible at all times.",
@@ -540,15 +866,15 @@ export const danangBriefing = {
     },
     {
       q: "Can I explore Da Nang on my own?",
-      a: "Free time may be available depending on the day's schedule. Always inform your guide in advance, ensure you have the guide's contact number, and return to the meeting point or hotel on time. Do not arrange private transportation through unofficial channels.",
+      a: "Free time may be available depending on the day's schedule — Day 4 has a free period in the morning. Always inform your guide in advance, ensure you have the guide's contact number, and return to the meeting point or hotel on time. Do not arrange private transportation through unofficial channels.",
     },
     {
       q: "What currency should I use in Da Nang?",
-      a: "Vietnamese Dong (VND) is the official currency. USD is also widely accepted in tourist areas, hotels, and restaurants. Exchange money at the airport upon arrival, authorized banks (Vietcombank, Techcombank), or reputable money changers. Never exchange with street vendors. Bring USD 100–150 in cash for personal expenses.",
+      a: "Vietnamese Dong (VND) is the official currency. USD is also widely accepted in tourist areas, hotels, and restaurants. Exchange money at the airport upon arrival, authorized banks (Vietcombank, Techcombank), or reputable money changers. Never exchange with street vendors. Prepare approximately USD 300 for personal expenses during the 5-day trip.",
     },
     {
       q: "Is tipping expected in Vietnam?",
-      a: "Tipping is not mandatory but is appreciated for good service. For group tour guides and drivers, USD 1–2 per person per day is a common courtesy — entirely voluntary. For restaurants and hotels, small tips of VND 20,000–50,000 are welcomed.",
+      a: "Tipping fee for your tour guide and driver is already included in the 5D4N package — you do not need to tip them separately. For restaurants, hotels, or any additional personal services you arrange on your own, small tips are appreciated but entirely optional.",
     },
     {
       q: "What happens if I'm late at the group meeting point?",
@@ -567,8 +893,8 @@ export const danangBriefing = {
       a: "The eTravel Philippines system (etravel.gov.ph) is mandatory for all Filipino travelers departing internationally. Register at least 72 hours before your departure. You will receive a QR code that BI officers will scan upon departure. Keep this QR code accessible — save a screenshot or print it.",
     },
     {
-      q: "What is included in the 4D3N Da Nang package?",
-      a: "Round-trip airfare, 3 nights hotel accommodation (based on selected category), daily breakfast, Ba Na Hills cable car and Golden Bridge admission, guided city tours, and airport transfers. Refer to the Package Inclusions section above for the complete list. Vietnam e-Visa fee, personal expenses, shopping, tipping, and optional tours are NOT included.",
+      q: "What is included in the 5D4N Da Nang package?",
+      a: "Round-trip airfare via VietJet Air, 4 nights hotel accommodation with daily breakfast, meals as listed in the itinerary, roundtrip airport transfers, guided sightseeing tours with entrance tickets, air-conditioned tour bus, English-speaking guide and driver, tipping fee, airport tax, and baggage allowance (20 kg + 7 kg carry-on). Refer to the Package Inclusions section for the complete list.",
     },
     {
       q: "What happens if Ba Na Hills closes due to weather?",
@@ -577,6 +903,10 @@ export const danangBriefing = {
     {
       q: "Is travel insurance mandatory?",
       a: "Yes. Compulsory travel insurance is a requirement for all travelers on this package. Your insurance certificate will be provided by Gladex Tours. Ensure you receive and understand your coverage before departure. The insurance covers medical emergencies, trip interruptions, and baggage loss.",
+    },
+    {
+      q: "Is online check-in available for this package?",
+      a: "No. Online check-in is not available for this group/chartered flight booking — all passengers are under a single booking reference number. Any individual changes or partial check-ins could affect the entire group. All passengers must proceed to the airport check-in counter directly on the day of departure.",
     },
   ],
 };

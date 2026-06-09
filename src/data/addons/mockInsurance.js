@@ -31,7 +31,7 @@ const INSURANCE_PLANS = [
     quoteEndpoint: null,                // POST https://api.starrcompanies.com/quotes
     enrollEndpoint: null,               // POST https://api.starrcompanies.com/policies
 
-    price: 500,
+    price: 399,
     currency: "PHP",
     pricePerDay: null,
     maxDurationDays: 30,
@@ -64,7 +64,7 @@ const INSURANCE_PLANS = [
     quoteEndpoint: null,
     enrollEndpoint: null,
 
-    price: 1200,
+    price: 699,
     currency: "PHP",
     pricePerDay: null,
     maxDurationDays: 60,
@@ -103,7 +103,7 @@ const INSURANCE_PLANS = [
     quoteEndpoint: null,
     enrollEndpoint: null,
 
-    price: 2500,
+    price: 999,
     currency: "PHP",
     pricePerDay: null,
     maxDurationDays: 90,

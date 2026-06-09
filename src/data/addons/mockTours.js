@@ -1,26 +1,47 @@
 /**
- * MOCK TOUR DATA — Globaltix / LakbayHub Schema
+ * MOCK TOUR DATA — Demo-only data for international destinations.
  *
  * All fields conform to the Tour typedef in src/types/addons.js.
- * When Globaltix or LakbayHub APIs go live, replace each mock record
- * with the API response mapped to the same field names.
+ * bookingOptions conform to the TourBookingOption typedef — they use optionId/ticketTypeId: null
+ * because these are not backed by a real Globaltix product.
  *
- * TODO: Globaltix API Integration
- *   - Replace mock objects with: GET /api/products?destinationId={id}
- *   - Map Globaltix response fields to the Tour interface
- *   - sourceId    = globaltix.productId
- *   - sourceProductCode = globaltix.productCode
- *
- * TODO: LakbayHub API Integration
- *   - Source PH-specific tour listings
- *   - source = "lakbayhub"
- *   - sourceId = lakbayhub.listingId
+ * DEMO MODE ONLY — Replace each destination block with live API data when available:
+ *   Globaltix: GET /api/product/list → filter by city → GET /api/product/info → mapGlobtixProductToTour
+ *   Then load bookingOptions lazily via bookingService.getBookingOptionsForProduct()
  */
+
+// ── Helper ─────────────────────────────────────────────────────────────────────
+// Creates a mock TourBookingOption without real Globaltix IDs.
+function opt(id, label, price, { ageFrom = null, ageTo = null, cancellationPolicy = "" } = {}) {
+  return {
+    id,
+    optionId:          null,      // no real Globaltix option
+    optionName:        label,
+    ticketTypeId:      null,
+    ticketTypeName:    label,
+    sku:               null,
+    price,
+    nettPrice:         price,
+    minPurchaseQty:    1,
+    maxPurchaseQty:    null,
+    ageFrom,
+    ageTo,
+    isCancellable:     true,
+    cancellationNotes: cancellationPolicy ? [cancellationPolicy] : [],
+    inclusions:        [],        // tour-level inclusions are on tour.inclusions
+    visitDateRequired: false,     // driven by parent tour.requiresBookingDate
+  };
+}
+
+const FREE_CANCEL_24H  = "Free cancellation up to 24 hours before departure.";
+const FREE_CANCEL_48H  = "Free cancellation up to 48 hours before departure.";
+const FREE_CANCEL_72H  = "Free cancellation up to 72 hours before departure.";
+const NON_REFUNDABLE   = "Non-refundable. Rescheduling up to 24 hours before.";
 
 /** @type {Record<string, import("../../types/addons").Tour[]>} */
 const TOURS_BY_DESTINATION = {
 
-  // ── DA NANG VIETNAM ──────────────────────────────────────────────────────
+  // ── DA NANG VIETNAM ──────────────────────────────────────────────────────────
   "danang-vietnam": [
     {
       id: "danang-tour-0",
@@ -29,11 +50,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "gtx_DAN_001",
       sourceProductCode: "GTX-DAN-HRC-2026",
       sourceCategoryId: "cruises",
-      description:
-        "Glide along the Han River as Da Nang lights up at night. Enjoy a buffet dinner, live music, and the iconic Dragon Bridge fire-breathing show from the water.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=600&q=80", isPrimary: true },
-      ],
+      description: "Glide along the Han River as Da Nang lights up at night. Enjoy a buffet dinner, live music, and the iconic Dragon Bridge fire-breathing show from the water.",
+      images: [{ url: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=600&q=80", isPrimary: true }],
       duration: "Evening Tour (3 hrs)",
       durationMinutes: 180,
       meetingPoint: "Han River Pier, Da Nang city centre",
@@ -42,18 +60,17 @@ const TOURS_BY_DESTINATION = {
       price: 1800,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 1800 },
-        { id: "child",  label: "Child (3–11)", price: 1200 },
-        { id: "infant", label: "Infant (0–2)", price: 0 },
+        opt("adult",  "Adult (12+)",  1800, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child",  "Child (3–11)", 1200, { ageFrom: 3, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("infant", "Infant (0–2)", 0,    { ageTo: 2, cancellationPolicy: FREE_CANCEL_24H }),
       ],
       inclusions: ["Buffet dinner", "Live entertainment", "River cruise (3 hrs)", "Life jackets"],
       exclusions: ["Alcoholic beverages", "Hotel transfer"],
-      importantNotes: ["Departs at 7:30 PM sharp — be at the pier by 7:15 PM."],
-      cancellationPolicy: "Free cancellation up to 24 hours before departure.",
       requiresBookingDate: true,
       availability: [],
       minParticipants: 1,
-      maxParticipants: 120,
+      isCancellable: true,
+      isInstantConfirmation: true,
     },
     {
       id: "danang-tour-1",
@@ -62,11 +79,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "gtx_DAN_002",
       sourceProductCode: "GTX-DAN-MMT-2026",
       sourceCategoryId: "cultural",
-      description:
-        "Explore the five limestone hills of Ngũ Hành Sơn, dotted with Buddhist pagodas, ancient caves, and panoramic views of Da Nang and the South China Sea.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&q=80", isPrimary: true },
-      ],
+      description: "Explore the five limestone hills of Ngũ Hành Sơn, dotted with Buddhist pagodas, ancient caves, and panoramic views of Da Nang and the South China Sea.",
+      images: [{ url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&q=80", isPrimary: true }],
       duration: "Half Day (4 hrs)",
       durationMinutes: 240,
       meetingPoint: "Hotel lobby pick-up (included)",
@@ -75,16 +89,16 @@ const TOURS_BY_DESTINATION = {
       price: 1500,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 1500 },
-        { id: "child",  label: "Child (5–11)", price: 1000 },
+        opt("adult", "Adult (12+)",   1500, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (5–11)",  1000, { ageFrom: 5, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
       ],
       inclusions: ["English-speaking guide", "Return hotel transfer", "Entrance fee", "Bottled water"],
       exclusions: ["Personal shopping", "Tips"],
-      importantNotes: ["Wear comfortable shoes — there are stairs."],
-      cancellationPolicy: "Free cancellation up to 24 hours before departure.",
       requiresBookingDate: false,
       availability: [],
       minParticipants: 1,
+      isCancellable: true,
+      isInstantConfirmation: true,
     },
     {
       id: "danang-tour-2",
@@ -93,11 +107,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "lbh_DAN_003",
       sourceProductCode: "LBH-DAN-HOI-EVE",
       sourceCategoryId: "cultural",
-      description:
-        "Wander the lantern-lit streets of Hội An Ancient Town after dark, release a floating lantern on the Thu Bồn River, and browse the famous silk shops and tailors.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600&q=80", isPrimary: true },
-      ],
+      description: "Wander the lantern-lit streets of Hội An Ancient Town after dark, release a floating lantern on the Thu Bồn River, and browse the famous silk shops and tailors.",
+      images: [{ url: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600&q=80", isPrimary: true }],
       duration: "Evening Tour (4 hrs)",
       durationMinutes: 240,
       meetingPoint: "Da Nang city centre pick-up point",
@@ -106,14 +117,15 @@ const TOURS_BY_DESTINATION = {
       price: 2000,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 2000 },
-        { id: "child",  label: "Child (5–11)", price: 1400 },
+        opt("adult", "Adult (12+)",  2000, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_48H }),
+        opt("child", "Child (5–11)", 1400, { ageFrom: 5, ageTo: 11, cancellationPolicy: FREE_CANCEL_48H }),
       ],
       inclusions: ["Round-trip transfer", "English-speaking guide", "Lantern release experience", "Entrance fee"],
       exclusions: ["Meals", "Shopping"],
-      cancellationPolicy: "Free cancellation up to 48 hours before departure.",
       requiresBookingDate: true,
       availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
     },
     {
       id: "danang-tour-3",
@@ -122,11 +134,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "gtx_DAN_004",
       sourceProductCode: "GTX-DAN-MSS-2026",
       sourceCategoryId: "heritage",
-      description:
-        "Journey to the ruins of the ancient Cham Kingdom — a UNESCO World Heritage Site hidden in a jungle valley 70 km from Da Nang. See centuries-old Hindu towers and learn about one of Southeast Asia's most fascinating lost civilisations.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1524613032530-449a5d94c285?w=600&q=80", isPrimary: true },
-      ],
+      description: "Journey to the ruins of the ancient Cham Kingdom — a UNESCO World Heritage Site hidden in a jungle valley 70 km from Da Nang. See centuries-old Hindu towers and learn about one of Southeast Asia's most fascinating lost civilisations.",
+      images: [{ url: "https://images.unsplash.com/photo-1524613032530-449a5d94c285?w=600&q=80", isPrimary: true }],
       duration: "Full Day (8 hrs)",
       durationMinutes: 480,
       meetingPoint: "Hotel lobby pick-up (6:30 AM)",
@@ -135,19 +144,19 @@ const TOURS_BY_DESTINATION = {
       price: 2500,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 2500 },
-        { id: "child",  label: "Child (5–11)", price: 1800 },
+        opt("adult", "Adult (12+)",  2500, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_48H }),
+        opt("child", "Child (5–11)", 1800, { ageFrom: 5, ageTo: 11, cancellationPolicy: FREE_CANCEL_48H }),
       ],
       inclusions: ["Full-day transfer", "English/Filipino guide", "Entrance fee", "Lunch", "Bottled water"],
       exclusions: ["Tips", "Personal expenses"],
-      importantNotes: ["Bring sunscreen and insect repellent — outdoor site.", "Dress modestly — active temple site."],
-      cancellationPolicy: "Free cancellation up to 48 hours before departure.",
       requiresBookingDate: false,
       availability: [],
+      isCancellable: true,
+      isInstantConfirmation: false,
     },
   ],
 
-  // ── HONG KONG ────────────────────────────────────────────────────────────
+  // ── HONG KONG ─────────────────────────────────────────────────────────────────
   "hongkong": [
     {
       id: "hk-tour-0",
@@ -156,11 +165,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "gtx_HK_001",
       sourceProductCode: "GTX-HK-MAC-2026",
       sourceCategoryId: "day-trips",
-      description:
-        "Take a high-speed ferry to Macau — the Vegas of Asia — and explore its Portuguese colonial heritage, the Ruins of St. Paul, and the glittering casino strip. Return to Hong Kong the same evening.",
-      images: [
-        { url: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/eb748ba68_MACAU.png", isPrimary: true },
-      ],
+      description: "Take a high-speed ferry to Macau — the Vegas of Asia — and explore its Portuguese colonial heritage, the Ruins of St. Paul, and the glittering casino strip. Return to Hong Kong the same evening.",
+      images: [{ url: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/eb748ba68_MACAU.png", isPrimary: true }],
       duration: "Full Day (10 hrs)",
       durationMinutes: 600,
       meetingPoint: "Hong Kong–Macau Ferry Terminal, Sheung Wan",
@@ -169,15 +175,15 @@ const TOURS_BY_DESTINATION = {
       price: 3500,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 3500 },
-        { id: "child",  label: "Child (3–11)", price: 2800 },
+        opt("adult", "Adult (12+)",  3500, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_72H }),
+        opt("child", "Child (3–11)", 2800, { ageFrom: 3, ageTo: 11, cancellationPolicy: FREE_CANCEL_72H }),
       ],
       inclusions: ["Round-trip TurboJet ferry", "English-speaking guide", "Ruins of St. Paul entrance", "Macau city tour"],
       exclusions: ["Lunch", "Casino activities", "Visa fee (if required)", "Personal expenses"],
-      importantNotes: ["Philippine citizens require a separate Macau visa — apply in advance.", "Departure at 8:00 AM from ferry terminal."],
-      cancellationPolicy: "Free cancellation up to 72 hours before departure.",
       requiresBookingDate: true,
       availability: [],
+      isCancellable: true,
+      isInstantConfirmation: false,
     },
     {
       id: "hk-tour-1",
@@ -186,11 +192,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "gtx_HK_002",
       sourceProductCode: "GTX-HK-OCP-2026",
       sourceCategoryId: "theme-parks",
-      description:
-        "Hong Kong's iconic marine-theme park with thrilling roller coasters, a giant panda habitat, an aquarium, and spectacular cable-car views of the South China Sea — a full-day adventure for all ages.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80", isPrimary: true },
-      ],
+      description: "Hong Kong's iconic marine-theme park with thrilling roller coasters, a giant panda habitat, an aquarium, and spectacular cable-car views of the South China Sea — a full-day adventure for all ages.",
+      images: [{ url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80", isPrimary: true }],
       duration: "Full Day (8 hrs)",
       durationMinutes: 480,
       meetingPoint: "Ocean Park Main Gate, Aberdeen, HK",
@@ -199,15 +202,16 @@ const TOURS_BY_DESTINATION = {
       price: 3000,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 3000 },
-        { id: "child",  label: "Child (3–11)", price: 2200 },
-        { id: "infant", label: "Infant (0–2)", price: 0 },
+        opt("adult",  "Adult (12+)",  3000, { ageFrom: 12, cancellationPolicy: NON_REFUNDABLE }),
+        opt("child",  "Child (3–11)", 2200, { ageFrom: 3, ageTo: 11, cancellationPolicy: NON_REFUNDABLE }),
+        opt("infant", "Infant (0–2)", 0,    { ageTo: 2 }),
       ],
       inclusions: ["Full-day admission ticket", "Cable car access", "All rides & attractions"],
       exclusions: ["Hotel transfer", "Meals & beverages", "Souvenir purchases"],
-      cancellationPolicy: "Non-refundable. Reschedule up to 24 hours before visit.",
       requiresBookingDate: true,
       availability: [],
+      isCancellable: false,
+      isInstantConfirmation: true,
     },
     {
       id: "hk-tour-2",
@@ -216,11 +220,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "lbh_HK_003",
       sourceProductCode: "LBH-HK-NP360",
       sourceCategoryId: "scenic",
-      description:
-        "Ride the 5.7 km cable car across Lantau Island to the Ngong Ping plateau, home of the iconic Tian Tan Big Buddha — with breathtaking views of the ocean, mountains, and Hong Kong Airport.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1512452935861-f17bb7c2c8b4?w=600&q=80", isPrimary: true },
-      ],
+      description: "Ride the 5.7 km cable car across Lantau Island to the Ngong Ping plateau, home of the iconic Tian Tan Big Buddha — with breathtaking views of the ocean, mountains, and Hong Kong Airport.",
+      images: [{ url: "https://images.unsplash.com/photo-1512452935861-f17bb7c2c8b4?w=600&q=80", isPrimary: true }],
       duration: "Half Day (4 hrs)",
       durationMinutes: 240,
       meetingPoint: "Tung Chung Cable Car Station (MTR Tung Chung Exit B)",
@@ -229,16 +230,16 @@ const TOURS_BY_DESTINATION = {
       price: 2500,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 2500 },
-        { id: "child",  label: "Child (3–11)", price: 1800 },
-        { id: "crystal", label: "Crystal Cabin Upgrade", price: 3200 },
+        opt("standard", "Standard Cabin",        2500, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child",    "Child Cabin (3–11)",    1800, { ageFrom: 3, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("crystal",  "Crystal Cabin Upgrade", 3200, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
       ],
       inclusions: ["Round-trip cable car ticket", "Big Buddha base access", "Village of Wisdom walk"],
       exclusions: ["Monastery entrance", "Meals", "Hotel transfer"],
-      importantNotes: ["Crystal cabin upgrade shows the floor — ideal for photos.", "Cable car may close in bad weather."],
-      cancellationPolicy: "Free cancellation up to 24 hours before departure.",
       requiresBookingDate: true,
       availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
     },
     {
       id: "hk-tour-3",
@@ -247,11 +248,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "gtx_HK_004",
       sourceProductCode: "GTX-HK-HBR-2026",
       sourceCategoryId: "cruises",
-      description:
-        "Cruise Victoria Harbour as the Symphony of Lights — the world's largest permanent light-and-sound show — illuminates the Hong Kong skyline. A must-see for first-time visitors.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&q=80", isPrimary: true },
-      ],
+      description: "Cruise Victoria Harbour as the Symphony of Lights — the world's largest permanent light-and-sound show — illuminates the Hong Kong skyline. A must-see for first-time visitors.",
+      images: [{ url: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&q=80", isPrimary: true }],
       duration: "Evening Tour (2 hrs)",
       durationMinutes: 120,
       meetingPoint: "Tsim Sha Tsui Pier 1, Kowloon",
@@ -260,14 +258,15 @@ const TOURS_BY_DESTINATION = {
       price: 1800,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 1800 },
-        { id: "child",  label: "Child (3–11)", price: 1200 },
+        opt("adult", "Adult (12+)",  1800, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (3–11)", 1200, { ageFrom: 3, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
       ],
       inclusions: ["Harbour cruise (2 hrs)", "Welcome drink", "Light show viewing deck"],
       exclusions: ["Dinner", "Hotel transfer"],
-      cancellationPolicy: "Free cancellation up to 24 hours before departure.",
       requiresBookingDate: true,
       availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
     },
     {
       id: "hk-tour-4",
@@ -276,11 +275,8 @@ const TOURS_BY_DESTINATION = {
       sourceId: "lbh_HK_005",
       sourceProductCode: "LBH-HK-MKN-EVE",
       sourceCategoryId: "markets",
-      description:
-        "Explore the vibrant street markets of Mong Kok at night — the Ladies' Market, Flower Market, Goldfish Market, and the neon-lit Fa Yuen Street with a knowledgeable local guide.",
-      images: [
-        { url: "https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=600&q=80", isPrimary: true },
-      ],
+      description: "Explore the vibrant street markets of Mong Kok at night — the Ladies' Market, Flower Market, Goldfish Market, and the neon-lit Fa Yuen Street with a knowledgeable local guide.",
+      images: [{ url: "https://images.unsplash.com/photo-1527631746610-bca00a040d60?w=600&q=80", isPrimary: true }],
       duration: "Evening Tour (3 hrs)",
       durationMinutes: 180,
       meetingPoint: "Mong Kok MTR Station Exit E2",
@@ -289,33 +285,377 @@ const TOURS_BY_DESTINATION = {
       price: 1500,
       currency: "PHP",
       bookingOptions: [
-        { id: "adult",  label: "Adult (12+)",  price: 1500 },
-        { id: "child",  label: "Child (5–11)", price: 1000 },
+        opt("adult", "Adult (12+)",  1500, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (5–11)", 1000, { ageFrom: 5, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
       ],
       inclusions: ["English/Filipino guide", "Market walking tour", "Street food tasting"],
       exclusions: ["Shopping budget", "Transport to/from meeting point"],
-      cancellationPolicy: "Free cancellation up to 24 hours before departure.",
       requiresBookingDate: false,
       availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+  ],
+
+  // ── SINGAPORE ─────────────────────────────────────────────────────────────────
+  // DEMO MODE ONLY — Replace with Globaltix Singapore products when available
+  "singapore": [
+    {
+      id: "sg-tour-0",
+      name: "Gardens by the Bay — Garden Rhapsody Night Show",
+      source: "globaltix",
+      sourceId: "gtx_SGP_001",
+      sourceProductCode: "GTX-SGP-GBB-2026",
+      sourceCategoryId: "attractions",
+      description: "Experience the magical Garden Rhapsody light and music show at the iconic Supertree Grove — 18-storey tree-like structures that come alive with colour every evening after dark.",
+      images: [{ url: "https://images.unsplash.com/photo-1565967511849-76a60a516170?w=600&q=80", isPrimary: true }],
+      duration: "Evening (2 hrs)",
+      durationMinutes: 120,
+      meetingPoint: "Gardens by the Bay, Bayfront Ave (near MRT Bayfront)",
+      category: "Attractions",
+      tags: ["gardens", "light show", "iconic", "night"],
+      price: 1500,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (13+)", 1500, { ageFrom: 13, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (3–12)", 1000, { ageFrom: 3, ageTo: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("infant", "Infant (0–2)", 0, { ageTo: 2 }),
+      ],
+      inclusions: ["Entry to Flower Dome + Cloud Forest", "Garden Rhapsody light show viewing", "Supertree Grove access"],
+      exclusions: ["Hotel transfer", "Meals", "OCBC Skyway"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "sg-tour-1",
+      name: "Universal Studios Singapore (USS) Day Pass",
+      source: "globaltix",
+      sourceId: "gtx_SGP_002",
+      sourceProductCode: "GTX-SGP-USS-2026",
+      sourceCategoryId: "theme-parks",
+      description: "Southeast Asia's only Universal Studios theme park, featuring Jurassic World, Transformers, Puss in Boots, and over 24 rides and shows across 7 themed zones on Sentosa Island.",
+      images: [{ url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80", isPrimary: true }],
+      duration: "Full Day (9 hrs)",
+      durationMinutes: 540,
+      meetingPoint: "Universal Studios Singapore, Resorts World Sentosa, Sentosa Island",
+      category: "Theme Parks",
+      tags: ["theme park", "family", "rides", "Sentosa"],
+      price: 4200,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (13+)",  4200, { ageFrom: 13, cancellationPolicy: NON_REFUNDABLE }),
+        opt("child", "Child (4–12)", 3200, { ageFrom: 4, ageTo: 12, cancellationPolicy: NON_REFUNDABLE }),
+        opt("senior", "Senior (60+)", 3200, { ageFrom: 60, cancellationPolicy: NON_REFUNDABLE }),
+      ],
+      inclusions: ["Full-day park admission", "All rides and shows", "Access to all 7 zones"],
+      exclusions: ["Meals", "Hotel transfer", "Express Pass", "Costume rental"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: false,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "sg-tour-2",
+      name: "Singapore River Cruise (Bumboat)",
+      source: "lakbayhub",
+      sourceId: "lbh_SGP_003",
+      sourceProductCode: "LBH-SGP-RVR-2026",
+      sourceCategoryId: "cruises",
+      description: "Hop aboard a traditional bumboat for a 40-minute cruise along the Singapore River — past colonial shophouses, the Merlion, Marina Bay Sands, and the gleaming CBD skyline.",
+      images: [{ url: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600&q=80", isPrimary: true }],
+      duration: "40 min cruise",
+      durationMinutes: 40,
+      meetingPoint: "Clarke Quay, Singapore (Singapore River Cruise kiosk)",
+      category: "Cruises",
+      tags: ["river", "scenic", "historic", "Merlion"],
+      price: 1200,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (13+)",  1200, { ageFrom: 13, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (3–12)", 800,  { ageFrom: 3, ageTo: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("infant", "Infant (0–2)", 0,   { ageTo: 2 }),
+      ],
+      inclusions: ["40-min bumboat river cruise", "Commentary on landmarks"],
+      exclusions: ["Hotel transfer", "Meals"],
+      requiresBookingDate: false,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "sg-tour-3",
+      name: "Sentosa Island Full-Day Pass",
+      source: "globaltix",
+      sourceId: "gtx_SGP_004",
+      sourceProductCode: "GTX-SGP-SNT-2026",
+      sourceCategoryId: "attractions",
+      description: "Singapore's premier leisure destination — access Adventure Cove Waterpark, cable car, Madame Tussauds, and S.E.A. Aquarium, all on one tropical island playground.",
+      images: [{ url: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600&q=80", isPrimary: true }],
+      duration: "Full Day (8 hrs)",
+      durationMinutes: 480,
+      meetingPoint: "Sentosa Express Station, VivoCity (Level 3)",
+      category: "Attractions",
+      tags: ["island", "beach", "family", "cable car"],
+      price: 3500,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (13+)",  3500, { ageFrom: 13, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (4–12)", 2800, { ageFrom: 4, ageTo: 12, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Sentosa Express island pass", "Adventure Cove Waterpark admission", "Cable car ride"],
+      exclusions: ["S.E.A. Aquarium", "Madame Tussauds", "Meals", "Hotel transfer"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+  ],
+
+  // ── KOREA (SEOUL) ────────────────────────────────────────────────────────────
+  // DEMO MODE ONLY — Replace with Globaltix Seoul products when available
+  "korea": [
+    {
+      id: "kr-tour-0",
+      name: "Nami Island + Petite France Day Trip",
+      source: "globaltix",
+      sourceId: "gtx_KR_001",
+      sourceProductCode: "GTX-KR-NAMI-2026",
+      sourceCategoryId: "day-trips",
+      description: "Escape Seoul on a scenic day trip to the fairy-tale Nami Island — famous for its tree-lined avenues and 'Winter Sonata' drama filming locations — then visit the charming French-themed Petite France village.",
+      images: [{ url: "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=600&q=80", isPrimary: true }],
+      duration: "Full Day (10 hrs)",
+      durationMinutes: 600,
+      meetingPoint: "Myeongdong Station Exit 8, Seoul (8:00 AM)",
+      category: "Day Trips",
+      tags: ["Nami Island", "nature", "scenic", "drama"],
+      price: 2800,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (13+)",  2800, { ageFrom: 13, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (3–12)", 1900, { ageFrom: 3, ageTo: 12, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Round-trip transport from Seoul", "Nami Island ferry + entry", "Petite France entry", "English-speaking guide"],
+      exclusions: ["Meals", "Personal shopping", "Tips"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "kr-tour-1",
+      name: "Everland Theme Park Full Day",
+      source: "globaltix",
+      sourceId: "gtx_KR_002",
+      sourceProductCode: "GTX-KR-EVL-2026",
+      sourceCategoryId: "theme-parks",
+      description: "Korea's largest theme park, home to the world-class T-Express wooden roller coaster, a safari park, seasonal flower festivals, and family-friendly rides for all ages.",
+      images: [{ url: "https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?w=600&q=80", isPrimary: true }],
+      duration: "Full Day (9 hrs)",
+      durationMinutes: 540,
+      meetingPoint: "Gangnam Station Exit 10, Seoul → Everland shuttle (included)",
+      category: "Theme Parks",
+      tags: ["rides", "family", "roller coaster", "safari"],
+      price: 3200,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult",  "Adult (13–64)",  3200, { ageFrom: 13, ageTo: 64, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child",  "Child (3–12)",   2500, { ageFrom: 3, ageTo: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("senior", "Senior (65+)",   2200, { ageFrom: 65, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Full-day park admission", "Round-trip shuttle from Gangnam", "All rides & attractions", "Safari park access"],
+      exclusions: ["Meals", "Locker rental", "Specialty rides with extra charge"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "kr-tour-2",
+      name: "Seoul City Highlights Tour",
+      source: "lakbayhub",
+      sourceId: "lbh_KR_003",
+      sourceProductCode: "LBH-KR-SEOULCITY",
+      sourceCategoryId: "cultural",
+      description: "See the best of Seoul in a day — Gyeongbokgung Palace with guard-changing ceremony, Bukchon Hanok Village, Insadong cultural street, and the bustling Myeongdong shopping district.",
+      images: [{ url: "https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=600&q=80", isPrimary: true }],
+      duration: "Full Day (8 hrs)",
+      durationMinutes: 480,
+      meetingPoint: "Gwanghwamun Station Exit 2 (9:00 AM)",
+      category: "Cultural Tours",
+      tags: ["palace", "hanok", "culture", "shopping"],
+      price: 1800,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (13+)",  1800, { ageFrom: 13, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (5–12)", 1200, { ageFrom: 5, ageTo: 12, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["English/Filipino guide", "Gyeongbokgung Palace entry", "Hanbok rental (1 hr)", "Insadong walking tour"],
+      exclusions: ["Lunch", "Myeongdong shopping budget", "Tips"],
+      requiresBookingDate: false,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+  ],
+
+  // ── BANGKOK ──────────────────────────────────────────────────────────────────
+  // DEMO MODE ONLY — Replace with Globaltix Bangkok products when available
+  "bangkok": [
+    {
+      id: "bkk-tour-0",
+      name: "Ayutthaya UNESCO World Heritage Day Tour",
+      source: "globaltix",
+      sourceId: "gtx_BKK_001",
+      sourceProductCode: "GTX-BKK-AYU-2026",
+      sourceCategoryId: "heritage",
+      description: "Journey 80 km north of Bangkok to Ayutthaya — Thailand's ancient capital and UNESCO World Heritage Site. Explore towering temple ruins, a floating market, and the iconic Buddha head entwined in bodhi tree roots.",
+      images: [{ url: "https://images.unsplash.com/photo-1519861531473-9200262188bf?w=600&q=80", isPrimary: true }],
+      duration: "Full Day (9 hrs)",
+      durationMinutes: 540,
+      meetingPoint: "Hotel pick-up — central Bangkok (8:00 AM)",
+      category: "Heritage Tours",
+      tags: ["UNESCO", "temples", "ancient", "history"],
+      price: 2200,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (12+)",  2200, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (5–11)", 1600, { ageFrom: 5, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Return hotel transfer", "English-speaking guide", "Ayutthaya temple entries", "Floating market visit", "Lunch"],
+      exclusions: ["Tuk-tuk ride (optional, ~฿50)", "Tips"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "bkk-tour-1",
+      name: "Chao Phraya Evening Dinner Cruise",
+      source: "globaltix",
+      sourceId: "gtx_BKK_002",
+      sourceProductCode: "GTX-BKK-CPC-2026",
+      sourceCategoryId: "cruises",
+      description: "Glide down the Chao Phraya River on a luxury cruise as Bangkok's temples and city lights shimmer on the water. Savour a Thai buffet dinner with live cultural performances on board.",
+      images: [{ url: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=80", isPrimary: true }],
+      duration: "Evening (2.5 hrs)",
+      durationMinutes: 150,
+      meetingPoint: "River City Pier, Si Phraya Rd (7:00 PM)",
+      category: "Cruises",
+      tags: ["dinner cruise", "river", "cultural show", "night"],
+      price: 2500,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (12+)",  2500, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (3–11)", 1800, { ageFrom: 3, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Dinner cruise (2.5 hrs)", "Thai buffet dinner", "Live cultural performance", "Welcome drink"],
+      exclusions: ["Hotel transfer", "Alcoholic beverages"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "bkk-tour-2",
+      name: "Floating Market + Tuk-Tuk City Tour",
+      source: "lakbayhub",
+      sourceId: "lbh_BKK_003",
+      sourceProductCode: "LBH-BKK-FMT-2026",
+      sourceCategoryId: "cultural",
+      description: "Start the morning at the Damnoen Saduak Floating Market, then zip through Bangkok's Old City by tuk-tuk visiting Wat Pho (reclining Buddha), Wat Arun, and the Grand Palace district.",
+      images: [{ url: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&q=80", isPrimary: true }],
+      duration: "Half Day (5 hrs)",
+      durationMinutes: 300,
+      meetingPoint: "Hotel pick-up — central Bangkok (7:30 AM)",
+      category: "Cultural Tours",
+      tags: ["floating market", "tuk-tuk", "temples", "local"],
+      price: 1800,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (12+)",  1800, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (5–11)", 1200, { ageFrom: 5, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Return hotel transfer", "Floating market guided tour", "Tuk-tuk city tour", "Wat Pho entrance", "English guide"],
+      exclusions: ["Grand Palace entrance (optional)", "Meals", "Shopping budget"],
+      requiresBookingDate: false,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+  ],
+
+  // Bangkok + Pattaya uses the same Bangkok tour set for demo purposes
+  "bangkok-pattaya": [
+    {
+      id: "bkk-pat-tour-0",
+      name: "Pattaya Coral Island Speedboat Tour",
+      source: "globaltix",
+      sourceId: "gtx_PAT_001",
+      sourceProductCode: "GTX-PAT-COR-2026",
+      sourceCategoryId: "water-sports",
+      description: "Speed across turquoise waters to Koh Larn (Coral Island) — 30 min from Pattaya — for crystal-clear snorkelling, beach time, and a fresh seafood lunch on the beach.",
+      images: [{ url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80", isPrimary: true }],
+      duration: "Full Day (7 hrs)",
+      durationMinutes: 420,
+      meetingPoint: "Bali Hai Pier, Pattaya (8:30 AM)",
+      category: "Water Sports",
+      tags: ["island", "snorkelling", "beach", "speedboat"],
+      price: 2000,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (12+)",  2000, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (4–11)", 1400, { ageFrom: 4, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Speedboat transfer", "Snorkelling gear", "Beach time (3 hrs)", "Seafood lunch"],
+      exclusions: ["Water sports rentals on island", "Tips"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "bkk-pat-tour-1",
+      name: "Chao Phraya Evening Dinner Cruise",
+      source: "globaltix",
+      sourceId: "gtx_BKK_002",
+      sourceProductCode: "GTX-BKK-CPC-2026",
+      sourceCategoryId: "cruises",
+      description: "Glide down the Chao Phraya River on a luxury cruise as Bangkok's temples and city lights shimmer on the water. Savour a Thai buffet dinner with live cultural performances on board.",
+      images: [{ url: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=80", isPrimary: true }],
+      duration: "Evening (2.5 hrs)",
+      durationMinutes: 150,
+      meetingPoint: "River City Pier, Si Phraya Rd, Bangkok (7:00 PM)",
+      category: "Cruises",
+      tags: ["dinner cruise", "river", "cultural show"],
+      price: 2500,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult (12+)",  2500, { ageFrom: 12, cancellationPolicy: FREE_CANCEL_24H }),
+        opt("child", "Child (3–11)", 1800, { ageFrom: 3, ageTo: 11, cancellationPolicy: FREE_CANCEL_24H }),
+      ],
+      inclusions: ["Dinner cruise", "Thai buffet", "Live cultural performance", "Welcome drink"],
+      exclusions: ["Hotel transfer", "Alcoholic beverages"],
+      requiresBookingDate: true,
+      availability: [],
+      isCancellable: true,
+      isInstantConfirmation: true,
     },
   ],
 };
 
 /**
- * Returns the mock tours for a given destination slug.
- * Falls back to an empty array if the slug has no tours registered.
+ * Returns demo mock tours for a given destination slug.
+ * Falls back to an empty array if the slug has no data registered.
  *
- * TODO: Globaltix API Integration
- *   Replace this function body with:
- *   const response = await fetch(`https://api.globaltix.com/products?destinationId=${id}`);
- *   return response.json().map(mapGlobtixToTour);
- *
- * TODO: LakbayHub API Integration
- *   Merge LakbayHub results with Globaltix results and sort by price.
+ * DEMO MODE ONLY — Replace this function body with live API integration:
+ *   Globaltix: await getToursForDestination(slug)  (already in toursService.js)
+ *   LakbayHub: merge results when API is available
  *
  * @param {string} slug - destination slug, e.g. "danang-vietnam"
  * @returns {import("../../types/addons").Tour[]}
  */
 export function getToursByDestination(slug) {
-  return TOURS_BY_DESTINATION[slug] || [];
+  return TOURS_BY_DESTINATION[slug] ?? [];
 }

@@ -5,9 +5,8 @@ import { Check } from "lucide-react";
 const ORANGE = "#FF8C00";
 
 export default function TravelChecklist({ items = [], storageKey, theme }) {
-  const { bgCard, bgAlt, border, textPrimary, textSecondary, isDark } = theme;
+  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
 
-  // Load initial state from localStorage
   const [checked, setChecked] = useState(() => {
     try {
       const saved = localStorage.getItem(storageKey);
@@ -17,18 +16,15 @@ export default function TravelChecklist({ items = [], storageKey, theme }) {
     }
   });
 
-  // Persist to localStorage whenever checked state changes
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify(checked));
-    } catch {
-      // localStorage unavailable (e.g. private browsing) — silently ignore
-    }
+    } catch {}
   }, [checked, storageKey]);
 
   const completedCount = items.filter((item) => checked[item.id]).length;
   const totalCount = items.length;
-  const allDone = completedCount === totalCount;
+  const allDone = completedCount === totalCount && totalCount > 0;
 
   function toggle(id) {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -40,7 +36,7 @@ export default function TravelChecklist({ items = [], storageKey, theme }) {
 
   return (
     <div>
-      {/* Progress header */}
+      {/* ── Progress header ─────────────────────────────────────────────── */}
       <div
         className="flex items-center justify-between px-5 py-4 rounded-2xl mb-4 border"
         style={{
@@ -55,11 +51,13 @@ export default function TravelChecklist({ items = [], storageKey, theme }) {
             className="font-condensed font-black text-lg"
             style={{ color: allDone ? "#22C55E" : ORANGE }}
           >
-            {allDone ? "✅ All Done! You're Ready to Travel." : `${completedCount} of ${totalCount} completed`}
+            {allDone
+              ? "✅ All set! You're ready to travel."
+              : `${completedCount} of ${totalCount} confirmed`}
           </p>
           {!allDone && (
             <p className="font-body text-xs mt-0.5" style={{ color: textSecondary }}>
-              Tap each item to mark it as done. Progress is saved automatically.
+              Tap each item to mark as ready. Progress saves automatically.
             </p>
           )}
         </div>
@@ -74,56 +72,66 @@ export default function TravelChecklist({ items = [], storageKey, theme }) {
         )}
       </div>
 
-      {/* Progress bar */}
+      {/* ── Progress bar ────────────────────────────────────────────────── */}
       <div
-        className="w-full h-2 rounded-full mb-5 overflow-hidden"
+        className="w-full h-1.5 rounded-full mb-5 overflow-hidden"
         style={{ backgroundColor: isDark ? "#2A2A2A" : "#E5E5E5" }}
       >
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{
-            width: `${(completedCount / totalCount) * 100}%`,
+            width: totalCount > 0 ? `${(completedCount / totalCount) * 100}%` : "0%",
             backgroundColor: allDone ? "#22C55E" : ORANGE,
           }}
         />
       </div>
 
-      {/* Checklist items */}
-      <div className="space-y-2">
+      {/* ── Checklist rows ──────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {items.map((item) => {
           const isChecked = !!checked[item.id];
           return (
             <button
               key={item.id}
               onClick={() => toggle(item.id)}
-              className="w-full flex items-start gap-3 px-4 py-3.5 rounded-xl border text-left transition-all"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left transition-all active:scale-[0.98] hover:opacity-90"
               style={{
                 backgroundColor: isChecked
-                  ? isDark ? "#0D1F10" : "#F0FFF4"
+                  ? isDark ? "#0A1E0D" : "#F0FFF4"
                   : bgCard,
                 borderColor: isChecked ? "#22C55E" : border,
               }}
             >
-              {/* Checkbox indicator */}
+              {/* Checkbox circle */}
               <div
-                className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 border-2 transition-all"
+                className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200"
                 style={{
                   backgroundColor: isChecked ? "#22C55E" : "transparent",
-                  borderColor: isChecked ? "#22C55E" : (isDark ? "#555" : "#CCC"),
+                  borderColor: isChecked ? "#22C55E" : isDark ? "#555" : "#CCC",
                 }}
               >
-                {isChecked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                {isChecked && (
+                  <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                )}
               </div>
-              <span
-                className="font-body text-sm leading-relaxed"
+
+              {/* Icon */}
+              {item.icon && (
+                <span className="text-base leading-none shrink-0" aria-hidden>
+                  {item.icon}
+                </span>
+              )}
+
+              {/* Label */}
+              <p
+                className="font-body text-sm leading-snug"
                 style={{
-                  color: isChecked ? (isDark ? "#86EFAC" : "#15803D") : textPrimary,
-                  textDecoration: isChecked ? "line-through" : "none",
-                  opacity: isChecked ? 0.75 : 1,
+                  color: isChecked ? "#22C55E" : textPrimary,
+                  opacity: isChecked ? 0.72 : 1,
                 }}
               >
                 {item.label}
-              </span>
+              </p>
             </button>
           );
         })}
