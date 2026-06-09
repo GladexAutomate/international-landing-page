@@ -1,54 +1,27 @@
 // @ts-nocheck
-import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 
 const ORANGE = "#FF8C00";
 
 function FAQItem({ q, a, theme }) {
-  const [open, setOpen] = useState(false);
-  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  const { border, textPrimary, textSecondary } = theme;
 
   return (
     <div
-      className="border-b last:border-b-0"
+      className="border-b last:border-b-0 py-4"
       style={{ borderColor: border }}
     >
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-start justify-between py-4 text-left gap-4"
+      <p
+        className="font-body text-sm font-semibold leading-snug mb-2"
+        style={{ color: textPrimary }}
       >
-        <span
-          className="font-body text-sm font-semibold leading-snug"
-          style={{ color: textPrimary }}
-        >
-          {q}
-        </span>
-        {open ? (
-          <ChevronUp className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ORANGE }} />
-        ) : (
-          <ChevronDown className="w-4 h-4 shrink-0 mt-0.5" style={{ color: textSecondary }} />
-        )}
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="answer"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <p
-              className="font-body text-sm leading-relaxed pb-4"
-              style={{ color: textSecondary }}
-            >
-              {a}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {q}
+      </p>
+      <p
+        className="font-body text-sm leading-relaxed"
+        style={{ color: textSecondary }}
+      >
+        {a}
+      </p>
     </div>
   );
 }

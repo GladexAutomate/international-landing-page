@@ -1,6 +1,7 @@
 import base44 from "@base44/vite-plugin"
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { briefingImagesPlugin } from './scripts/vite-plugin-briefing-images.js'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,5 +17,6 @@ export default defineConfig({
       visualEditAgent: true
     }),
     react(),
+    briefingImagesPlugin(),
   ]
 });

@@ -82,7 +82,7 @@ export default function ReferralSection({ theme }) {
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-3">
             <motion.a
-              href="https://m.me/gladextours"
+              href={`https://wa.me/?text=${encodeURIComponent(SHARE_TEXT)}`}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.02 }}

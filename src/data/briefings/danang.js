@@ -49,7 +49,8 @@ export const danangBriefing = {
   ],
 
   // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
-  // Shape: { day, title, activities[] } — consumed by ItineraryTimeline component
+  // Shape: { day, title, activities[], galleryImages[] }
+  // galleryImages: add image paths here, e.g. "/images/briefings/danang/day1/photo1.jpg"
   itinerary: [
     {
       day: 1,
@@ -63,6 +64,10 @@ export const danangBriefing = {
         "Dinner at a group restaurant, then transfer to the hotel and check in.",
         "Overnight stay in Da Nang.",
       ],
+      galleryImages: [
+        // "/images/briefings/danang/day1/photo1.jpg",
+        // "/images/briefings/danang/day1/photo2.jpg",
+      ],
     },
     {
       day: 2,
@@ -75,6 +80,10 @@ export const danangBriefing = {
         "Enjoy breathtaking panoramic mountain and coastal views from the summit.",
         "Quick stop at a local mini supermarket for personal shopping on the way back.",
         "Dinner, then transfer back to the hotel for overnight stay.",
+      ],
+      galleryImages: [
+        // "/images/briefings/danang/day2/photo1.jpg",
+        // "/images/briefings/danang/day2/photo2.jpg",
       ],
     },
     {
@@ -90,6 +99,10 @@ export const danangBriefing = {
         "Shopping stop for local souvenirs and specialty finds.",
         "Dinner, then transfer back to the hotel for overnight stay.",
       ],
+      galleryImages: [
+        // "/images/briefings/danang/day3/photo1.jpg",
+        // "/images/briefings/danang/day3/photo2.jpg",
+      ],
     },
     {
       day: 4,
@@ -102,6 +115,10 @@ export const danangBriefing = {
         "Last-minute shopping stop at a jewelry boutique.",
         "Transfer back to Da Nang. Dinner and overnight stay at the hotel.",
       ],
+      galleryImages: [
+        // "/images/briefings/danang/day4/photo1.jpg",
+        // "/images/briefings/danang/day4/photo2.jpg",
+      ],
     },
     {
       day: 5,
@@ -112,6 +129,9 @@ export const danangBriefing = {
         "Complete airport check-in and immigration procedures for your return flight.",
         "Board VietJet Air flight back to Manila.",
         "Arrive in Manila with unforgettable memories from Vietnam.",
+      ],
+      galleryImages: [
+        // "/images/briefings/danang/day5/photo1.jpg",
       ],
     },
   ],

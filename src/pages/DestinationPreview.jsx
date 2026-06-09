@@ -55,8 +55,18 @@ function WelcomeSection({ briefing, pkg, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   const { welcomeMessage } = briefing;
 
+  // Normalize: support both object {title, body:[]} and legacy plain-string format
+  const title = (welcomeMessage && typeof welcomeMessage === "object" && welcomeMessage.title)
+    ? welcomeMessage.title
+    : "Official Travel Briefing";
+  const body = (welcomeMessage && typeof welcomeMessage === "object" && Array.isArray(welcomeMessage.body))
+    ? welcomeMessage.body
+    : typeof welcomeMessage === "string"
+      ? [welcomeMessage]
+      : [];
+
   return (
-    <BriefingSection label="Official Briefing" title={welcomeMessage.title} theme={theme}>
+    <BriefingSection label="Official Briefing" title={title} theme={theme}>
       <div
         className="rounded-2xl border p-6 space-y-4"
         style={{ backgroundColor: bgCard, borderColor: border }}
@@ -77,7 +87,7 @@ function WelcomeSection({ briefing, pkg, theme }) {
             </span>
           </div>
         )}
-        {welcomeMessage.body.map((para, i) => (
+        {body.map((para, i) => (
           <p
             key={i}
             className="font-body text-sm leading-relaxed"
@@ -171,58 +181,64 @@ function InclusionsSection({ pkg, briefing, theme }) {
 
 // ─── 5. TRAVEL INFORMATION CENTER ────────────────────────────────────────────
 function TravelInfoCenter({ briefing, theme }) {
-  const { bgCard, bgAlt, border, textPrimary, textSecondary, isDark } = theme;
-  const [activeTab, setActiveTab] = useState("before");
+  const { bgCard, border, textSecondary } = theme;
   const { travelInformation } = briefing;
   if (!travelInformation) return null;
 
-  const tabs = [
-    { key: "before", label: "Before Departure" },
-    { key: "arrival", label: "Upon Arrival" },
-  ];
+  // Normalize: support both {beforeDeparture, uponArrival} object and legacy flat-array format
+  let beforeItems, afterItems;
+  if (Array.isArray(travelInformation)) {
+    beforeItems = travelInformation.map((item) =>
+      typeof item === "string" ? item
+      : (item.label && item.value) ? `${item.label}: ${item.value}`
+      : typeof item === "object" ? Object.values(item).filter(Boolean).join(": ")
+      : String(item)
+    );
+    afterItems = [];
+  } else {
+    beforeItems = travelInformation.beforeDeparture || [];
+    afterItems  = travelInformation.uponArrival     || [];
+  }
 
-  const items = activeTab === "before"
-    ? travelInformation.beforeDeparture
-    : travelInformation.uponArrival;
+  if (!beforeItems.length && !afterItems.length) return null;
+
+  const ItemList = ({ items }) => (
+    <ul className="space-y-2.5">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-start gap-3 px-4 py-3 rounded-xl border"
+          style={{ backgroundColor: bgCard, borderColor: border }}>
+          <span className="font-condensed font-black text-sm shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white"
+            style={{ backgroundColor: ORANGE }}>
+            {i + 1}
+          </span>
+          <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <BriefingSection label="Travel Information Center" title="Before & After Your Flight" theme={theme}>
-      {/* Tabs */}
-      <div className="flex border-b mb-5 text-sm font-semibold" style={{ borderColor: border }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className="px-5 py-2.5 border-b-2 transition-colors font-body whitespace-nowrap"
-            style={{
-              borderColor: activeTab === tab.key ? ORANGE : "transparent",
-              color: activeTab === tab.key ? ORANGE : textSecondary,
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {beforeItems.length > 0 && (
+          <div>
+            <p className="font-condensed font-bold text-sm uppercase tracking-widest mb-3"
+              style={{ color: ORANGE }}>
+              📋 Before Departure
+            </p>
+            <ItemList items={beforeItems} />
+          </div>
+        )}
+        {afterItems.length > 0 && (
+          <div>
+            <p className="font-condensed font-bold text-sm uppercase tracking-widest mb-3"
+              style={{ color: ORANGE }}>
+              🛬 Upon Arrival
+            </p>
+            <ItemList items={afterItems} />
+          </div>
+        )}
       </div>
-
-      <ul className="space-y-3">
-        {items.map((item, i) => (
-          <li
-            key={i}
-            className="flex items-start gap-3 px-4 py-3 rounded-xl border"
-            style={{ backgroundColor: bgCard, borderColor: border }}
-          >
-            <span
-              className="font-condensed font-black text-sm shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white"
-              style={{ backgroundColor: ORANGE }}
-            >
-              {i + 1}
-            </span>
-            <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
-              {item}
-            </span>
-          </li>
-        ))}
-      </ul>
     </BriefingSection>
   );
 }
@@ -236,38 +252,51 @@ function ArrivalSection({ briefing, theme }) {
   return (
     <BriefingSection label="Step by Step" title="Arrival Instructions" theme={theme}>
       <div className="space-y-4">
-        {arrivalInstructions.map((block, i) => (
-          <div
-            key={i}
-            className="rounded-2xl border overflow-hidden"
-            style={{ borderColor: border, backgroundColor: bgCard }}
-          >
+        {arrivalInstructions.map((block, i) => {
+          // Normalize: support both {icon, step, details:[]} and legacy {step, text} formats
+          const blockTitle = typeof block === "string" ? block
+            : (typeof block.step === "string" ? block.step : `Step ${i + 1}`);
+          const blockIcon  = (typeof block === "object" && block.icon) ? block.icon : "✈️";
+          const details    = Array.isArray(block?.details) ? block.details
+            : typeof block?.text === "string" ? [block.text]
+            : typeof block === "string" ? []
+            : [];
+
+          return (
             <div
-              className="flex items-center gap-3 px-5 py-3.5 border-b"
-              style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
+              key={i}
+              className="rounded-2xl border overflow-hidden"
+              style={{ borderColor: border, backgroundColor: bgCard }}
             >
-              <span className="text-xl">{block.icon}</span>
-              <h4 className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>
-                {block.step}
-              </h4>
+              <div
+                className="flex items-center gap-3 px-5 py-3.5 border-b"
+                style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
+              >
+                <span className="text-xl">{blockIcon}</span>
+                <h4 className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>
+                  {blockTitle}
+                </h4>
+              </div>
+              {details.length > 0 && (
+                <ul className="px-5 py-4 space-y-2.5">
+                  {details.map((detail, j) => (
+                    <li key={j} className="flex items-start gap-2.5">
+                      <span
+                        className="font-condensed font-black text-xs shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white mt-0.5"
+                        style={{ backgroundColor: ORANGE }}
+                      >
+                        {j + 1}
+                      </span>
+                      <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                        {detail}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            <ul className="px-5 py-4 space-y-2.5">
-              {block.details.map((detail, j) => (
-                <li key={j} className="flex items-start gap-2.5">
-                  <span
-                    className="font-condensed font-black text-xs shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-white mt-0.5"
-                    style={{ backgroundColor: ORANGE }}
-                  >
-                    {j + 1}
-                  </span>
-                  <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
-                    {detail}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </BriefingSection>
   );
@@ -315,10 +344,10 @@ function HotelSection({ briefing, theme }) {
             className="rounded-2xl border px-5 py-4"
             style={{ borderColor: border, backgroundColor: isDark ? "#0D1A0D" : "#F0FFF4" }}
           >
-            <p className="font-body text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#22C55E" }}>
+            <p className="font-body text-xs font-medium uppercase tracking-widest mb-1" style={{ color: "#22C55E" }}>
               Check-In
             </p>
-            <p className="font-condensed font-black text-lg" style={{ color: textPrimary }}>
+            <p className="font-body text-sm leading-relaxed" style={{ color: textPrimary }}>
               {hotelInformation.checkIn}
             </p>
           </div>
@@ -326,10 +355,10 @@ function HotelSection({ briefing, theme }) {
             className="rounded-2xl border px-5 py-4"
             style={{ borderColor: border, backgroundColor: isDark ? "#1C0808" : "#FFF5F5" }}
           >
-            <p className="font-body text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#EF4444" }}>
+            <p className="font-body text-xs font-medium uppercase tracking-widest mb-1" style={{ color: "#EF4444" }}>
               Check-Out
             </p>
-            <p className="font-condensed font-black text-lg" style={{ color: textPrimary }}>
+            <p className="font-body text-sm leading-relaxed" style={{ color: textPrimary }}>
               {hotelInformation.checkOut}
             </p>
           </div>
@@ -395,18 +424,23 @@ function RemindersSection({ briefing, theme }) {
   return (
     <BriefingSection label="Before Each Tour Day" title="Tour Reminders" theme={theme}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {reminders.map((item, i) => (
-          <div
-            key={i}
-            className="flex items-start gap-3 px-4 py-3.5 rounded-xl border"
-            style={{ backgroundColor: bgCard, borderColor: border }}
-          >
-            <span className="text-lg shrink-0">{item.icon}</span>
-            <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
-              {item.text}
-            </span>
-          </div>
-        ))}
+        {reminders.map((item, i) => {
+          // Normalize: support both {icon, text} objects and legacy plain strings
+          const text = typeof item === "string" ? item : (item.text || "");
+          const icon = typeof item === "object" && item.icon ? item.icon : null;
+          return (
+            <div
+              key={i}
+              className="flex items-start gap-3 px-4 py-3.5 rounded-xl border"
+              style={{ backgroundColor: bgCard, borderColor: border }}
+            >
+              {icon && <span className="text-lg shrink-0">{icon}</span>}
+              <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                {text}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </BriefingSection>
   );
@@ -414,9 +448,28 @@ function RemindersSection({ briefing, theme }) {
 
 // ─── 11. SHOPPING ADVISORY ───────────────────────────────────────────────────
 function ShoppingAdvisorySection({ briefing, pkg, theme }) {
-  const { border, textPrimary, textSecondary, isDark } = theme;
+  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   const advisory = briefing?.shoppingAdvisory;
   if (!advisory) return null;
+
+  // Legacy format: flat array of tip strings
+  if (Array.isArray(advisory)) {
+    if (!advisory.length) return null;
+    return (
+      <BriefingSection label="Shopping Tips" title="Shopping Advisory" theme={theme}>
+        <div className="rounded-2xl border overflow-hidden" style={{ borderColor: border, backgroundColor: bgCard }}>
+          <ul className="px-5 py-4 space-y-3">
+            {advisory.map((tip, i) => (
+              <li key={i} className="flex items-start gap-2.5">
+                <span className="font-body text-sm shrink-0 mt-0.5" style={{ color: ORANGE }}>•</span>
+                <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </BriefingSection>
+    );
+  }
 
   return (
     <BriefingSection label="Please Read Carefully" title={advisory.title} theme={theme}>
@@ -542,17 +595,31 @@ function ConnectivitySection({ briefing, theme }) {
   const guide = briefing?.connectivityGuide;
   if (!guide) return null;
 
+  // Normalize: support both {options:[]} and legacy {simOptions:[]} formats
+  const options = guide.options || (guide.simOptions || []).map((sim) => ({
+    icon: "📶",
+    title: sim.provider || sim.name || "SIM Option",
+    description: [sim.type, sim.data && `Data: ${sim.data}`, sim.validity && `Valid: ${sim.validity}`]
+      .filter(Boolean).join(" — "),
+    cost: sim.price || sim.cost,
+    providers: sim.notes ? [{ name: "Note", note: sim.notes }] : undefined,
+    recommended: sim.recommended || false,
+  }));
+
+  const introText = guide.intro || guide.overview || null;
+
   return (
     <BriefingSection label="Stay Connected" title="Connectivity Guide" theme={theme}>
       <div className="space-y-4">
-        {guide.intro && (
+        {introText && (
           <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
-            {guide.intro}
+            {introText}
           </p>
         )}
 
+        {options.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {guide.options.map((opt, i) => (
+          {options.map((opt, i) => (
             <div
               key={i}
               className="rounded-2xl border overflow-hidden"
@@ -610,6 +677,7 @@ function ConnectivitySection({ briefing, theme }) {
             </div>
           ))}
         </div>
+        )}
 
         {guide.tips?.length > 0 && (
           <div
@@ -624,6 +692,25 @@ function ConnectivitySection({ briefing, theme }) {
                 <span style={{ color: ORANGE }}>›</span> {tip}
               </p>
             ))}
+          </div>
+        )}
+
+        {/* Legacy wifi / recommendations fields */}
+        {(guide.wifi || guide.recommendations) && (
+          <div
+            className="rounded-xl px-4 py-3 border space-y-2"
+            style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
+          >
+            {guide.wifi && (
+              <p className="font-body text-xs leading-relaxed flex items-start gap-1.5" style={{ color: textSecondary }}>
+                <span style={{ color: ORANGE }}>›</span> <strong style={{ color: textPrimary }}>Free WiFi:</strong> {guide.wifi}
+              </p>
+            )}
+            {guide.recommendations && (
+              <p className="font-body text-xs leading-relaxed flex items-start gap-1.5" style={{ color: textSecondary }}>
+                <span style={{ color: ORANGE }}>›</span> {guide.recommendations}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -825,281 +912,189 @@ function PhotoSlider({ items, theme }) {
 // ─── 17. DESTINATION GUIDE ───────────────────────────────────────────────────
 function DestinationGuideSection({ briefing, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
-  const [activeTab, setActiveTab] = useState(0);
   const guide = briefing?.destinationGuide;
   const currencyGuide = briefing?.currencyGuide;
   if (!guide) return null;
 
-  const TABS = [
-    {
-      key: "places",
-      label: "Best Places",
-      icon: "🗺️",
-      type: "places",
-      items: (guide.highlights || []).map((h) => ({ icon: h.icon, name: h.name, desc: h.description, img: h.img })),
-    },
-    {
-      key: "food",
-      label: "Best Food",
-      icon: "🍜",
-      type: "food",
-      items: guide.bestFood || [],
-    },
-    {
-      key: "photos",
-      label: "Photo Spots",
-      icon: "📸",
-      type: "photos",
-      items: guide.photoSpots || [],
-    },
-    {
-      key: "tips",
-      label: "Local Tips",
-      icon: "💡",
-      type: "tips",
-      items: guide.localTips || [],
-    },
-    {
-      key: "weather",
-      label: "Weather & Info",
-      icon: "🌤️",
-      type: "weather",
-      items: [],
-    },
-    {
-      key: "currency",
-      label: "Currency",
-      icon: "💱",
-      type: "currency",
-      items: [],
-    },
-    {
-      key: "safety",
-      label: "Safety Tips",
-      icon: "🛡️",
-      type: "tips",
-      items: guide.safetyTips || [],
-    },
-  ].filter((tab) => {
-    if (tab.type === "places") return (guide.highlights || []).length > 0;
-    if (tab.type === "food" || tab.type === "photos") return tab.items.length > 0;
-    if (tab.type === "tips") return tab.items.length > 0;
-    if (tab.type === "weather") return (guide.practicalInfo || []).length > 0;
-    if (tab.type === "currency") return !!currencyGuide;
-    return false;
-  });
+  const highlights = (guide.highlights || []).map((h) => ({
+    icon: h.icon, name: h.name, desc: h.description, img: h.img,
+  }));
 
-  const clampedIndex = Math.min(activeTab, TABS.length - 1);
-  const tab = TABS[clampedIndex];
+  const SubHeading = ({ emoji, label }) => (
+    <p className="font-condensed font-bold text-sm uppercase tracking-widest mb-4 flex items-center gap-2 pt-2"
+      style={{ color: ORANGE }}>
+      {emoji} {label}
+    </p>
+  );
 
-  const renderContent = () => {
-    if (!tab) return null;
-
-    // ── Best Places: horizontal image carousel ─────────────────────────────
-    if (tab.type === "places") {
-      return (
-        <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
-          {tab.items.map((item, i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 snap-start w-64 sm:w-auto rounded-2xl overflow-hidden border group"
-              style={{ backgroundColor: bgCard, borderColor: border }}
-            >
-              <div
-                className="relative overflow-hidden"
-                style={{ aspectRatio: "4/3", backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}
-              >
-                {item.img ? (
-                  <img
-                    src={item.img}
-                    alt={item.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "/images/placeholder.svg";
-                    }}
-                  />
-                ) : null}
-                <div
-                  className="absolute inset-0 items-center justify-center text-5xl"
-                  style={{ display: item.img ? "none" : "flex" }}
-                >
-                  {item.icon}
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent pointer-events-none" />
-                <p className="absolute bottom-3 left-3 right-3 font-condensed font-black text-white text-base leading-tight z-10 drop-shadow">
-                  {item.name}
-                </p>
-              </div>
-              <div className="px-4 py-3">
-                <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
-              </div>
-            </div>
-          ))}
+  const TipList = ({ items }) => (
+    <div className="space-y-2">
+      {items.map((item, i) => (
+        <div key={i} className="flex items-start gap-3 px-4 py-3.5 rounded-2xl border"
+          style={{ backgroundColor: bgCard, borderColor: border }}>
+          {item.icon && <span className="text-xl shrink-0">{item.icon}</span>}
+          <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+            {item.tip || item.text || (typeof item === "string" ? item : "")}
+          </p>
         </div>
-      );
-    }
-
-    // ── Best Food: horizontal card carousel ───────────────────────────────
-    if (tab.type === "food") {
-      return (
-        <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
-          {tab.items.map((item, i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 snap-start w-60 sm:w-auto rounded-2xl overflow-hidden border group"
-              style={{ backgroundColor: bgCard, borderColor: border }}
-            >
-              <div
-                className="aspect-video overflow-hidden"
-                style={{ backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}
-              >
-                <img
-                  src={item.img}
-                  alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
-                />
-              </div>
-              <div className="px-4 py-3">
-                <p className="font-condensed font-bold text-base leading-tight mb-1" style={{ color: textPrimary }}>{item.name}</p>
-                <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    // ── Photo Spots: full-width single-image slider ───────────────────────
-    if (tab.type === "photos") {
-      return <PhotoSlider items={tab.items} theme={theme} />;
-    }
-
-    if (tab.type === "tips") {
-      return (
-        <div className="space-y-2">
-          {tab.items.map((item, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-3 px-4 py-3.5 rounded-2xl border"
-              style={{ backgroundColor: bgCard, borderColor: border }}
-            >
-              <span className="text-xl shrink-0">{item.icon}</span>
-              <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{item.tip}</p>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    if (tab.type === "weather") {
-      return (
-        <div className="space-y-3">
-          {(guide.practicalInfo || []).map((info, i) => (
-            <div
-              key={i}
-              className="px-4 py-3.5 rounded-2xl border"
-              style={{ backgroundColor: bgCard, borderColor: border }}
-            >
-              <p className="font-condensed font-bold text-sm mb-1" style={{ color: textPrimary }}>{info.label}</p>
-              <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{info.value}</p>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    if (tab.type === "currency" && currencyGuide) {
-      return (
-        <div className="space-y-3">
-          <div className="px-5 py-4 rounded-2xl border" style={{ backgroundColor: bgCard, borderColor: border }}>
-            <p className="font-condensed font-black text-lg mb-1" style={{ color: textPrimary }}>
-              {currencyGuide.currency} ({currencyGuide.symbol})
-            </p>
-            <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
-              {currencyGuide.exchangeRate}
-            </p>
-          </div>
-          {currencyGuide.roughPrices?.length > 0 && (
-            <div className="rounded-2xl border overflow-hidden" style={{ borderColor: border, backgroundColor: bgCard }}>
-              <div className="px-5 py-3 border-b" style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}>
-                <p className="font-condensed font-bold text-sm" style={{ color: textPrimary }}>Price Reference</p>
-              </div>
-              <div>
-                {currencyGuide.roughPrices.map((rp, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start justify-between gap-4 px-5 py-3 border-b last:border-0"
-                    style={{ borderColor: border }}
-                  >
-                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{rp.item}</p>
-                    <p className="font-body text-xs font-bold shrink-0" style={{ color: ORANGE }}>{rp.price}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          {currencyGuide.tips?.length > 0 && (
-            <div className="space-y-2">
-              {currencyGuide.tips.map((tip, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-2 px-4 py-3 rounded-xl border"
-                  style={{ backgroundColor: bgCard, borderColor: border }}
-                >
-                  <span className="font-bold mt-0.5 shrink-0" style={{ color: ORANGE }}>✓</span>
-                  <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{tip}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return null;
-  };
+      ))}
+    </div>
+  );
 
   return (
     <BriefingSection label="Know Your Destination" title="Destination Guide" theme={theme}>
       {guide.intro && (
-        <p className="font-body text-sm leading-relaxed mb-5" style={{ color: textSecondary }}>{guide.intro}</p>
+        <p className="font-body text-sm leading-relaxed mb-6" style={{ color: textSecondary }}>
+          {guide.intro}
+        </p>
       )}
 
-      {/* Category Tabs */}
-      <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
-        {TABS.map((t, i) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(i)}
-            className="flex items-center gap-1.5 whitespace-nowrap font-body font-bold text-sm px-4 py-2 rounded-xl transition-all shrink-0"
-            style={{
-              backgroundColor: clampedIndex === i ? ORANGE : (isDark ? "rgba(255,255,255,0.06)" : "#F5F5F5"),
-              color: clampedIndex === i ? "#080808" : textSecondary,
-              border: clampedIndex === i ? "none" : `1px solid ${border}`,
-            }}
-          >
-            <span>{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <div className="space-y-10">
+        {/* Best Places */}
+        {highlights.length > 0 && (
+          <div>
+            <SubHeading emoji="🗺️" label="Best Places to Visit" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {highlights.map((item, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden border group"
+                  style={{ backgroundColor: bgCard, borderColor: border }}>
+                  <div className="relative overflow-hidden"
+                    style={{ aspectRatio: "4/3", backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}>
+                    {item.img ? (
+                      <img src={item.img} alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 items-center justify-center text-5xl"
+                      style={{ display: item.img ? "none" : "flex" }}>
+                      {item.icon}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent pointer-events-none" />
+                    <p className="absolute bottom-3 left-3 right-3 font-condensed font-black text-white text-base leading-tight z-10 drop-shadow">
+                      {item.name}
+                    </p>
+                  </div>
+                  <div className="px-4 py-3">
+                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* Tab Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={clampedIndex}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.22 }}
-        >
-          {renderContent()}
-        </motion.div>
-      </AnimatePresence>
+        {/* Best Food */}
+        {(guide.bestFood || []).length > 0 && (
+          <div>
+            <SubHeading emoji="🍜" label="Best Food & Dining" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(guide.bestFood || []).map((item, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden border group"
+                  style={{ backgroundColor: bgCard, borderColor: border }}>
+                  <div className="aspect-video overflow-hidden"
+                    style={{ backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}>
+                    <img src={item.img} alt={item.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
+                    />
+                  </div>
+                  <div className="px-4 py-3">
+                    <p className="font-condensed font-bold text-base leading-tight mb-1" style={{ color: textPrimary }}>{item.name}</p>
+                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Photo Spots */}
+        {(guide.photoSpots || []).length > 0 && (
+          <div>
+            <SubHeading emoji="📸" label="Best Photo Spots" />
+            <PhotoSlider items={guide.photoSpots} theme={theme} />
+          </div>
+        )}
+
+        {/* Local Tips */}
+        {(guide.localTips || []).length > 0 && (
+          <div>
+            <SubHeading emoji="💡" label="Local Tips" />
+            <TipList items={guide.localTips} />
+          </div>
+        )}
+
+        {/* Safety Tips */}
+        {(guide.safetyTips || []).length > 0 && (
+          <div>
+            <SubHeading emoji="🛡️" label="Safety Tips" />
+            <TipList items={guide.safetyTips} />
+          </div>
+        )}
+
+        {/* Weather & Practical Info */}
+        {(guide.practicalInfo || []).length > 0 && (
+          <div>
+            <SubHeading emoji="🌤️" label="Weather & Practical Info" />
+            <div className="space-y-3">
+              {(guide.practicalInfo || []).map((info, i) => (
+                <div key={i} className="px-4 py-3.5 rounded-2xl border"
+                  style={{ backgroundColor: bgCard, borderColor: border }}>
+                  <p className="font-condensed font-bold text-sm mb-1" style={{ color: textPrimary }}>{info.label}</p>
+                  <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{info.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Currency Guide */}
+        {currencyGuide && (
+          <div>
+            <SubHeading emoji="💱" label="Currency Guide" />
+            <div className="space-y-3">
+              <div className="px-5 py-4 rounded-2xl border" style={{ backgroundColor: bgCard, borderColor: border }}>
+                <p className="font-condensed font-black text-lg mb-1" style={{ color: textPrimary }}>
+                  {currencyGuide.currency} ({currencyGuide.symbol})
+                </p>
+                <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                  {currencyGuide.exchangeRate}
+                </p>
+              </div>
+              {currencyGuide.roughPrices?.length > 0 && (
+                <div className="rounded-2xl border overflow-hidden" style={{ borderColor: border, backgroundColor: bgCard }}>
+                  <div className="px-5 py-3 border-b" style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}>
+                    <p className="font-condensed font-bold text-sm" style={{ color: textPrimary }}>Price Reference</p>
+                  </div>
+                  <div>
+                    {currencyGuide.roughPrices.map((rp, i) => (
+                      <div key={i} className="flex items-start justify-between gap-4 px-5 py-3 border-b last:border-0"
+                        style={{ borderColor: border }}>
+                        <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{rp.item}</p>
+                        <p className="font-body text-xs font-bold shrink-0" style={{ color: ORANGE }}>{rp.price}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {currencyGuide.tips?.length > 0 && (
+                <div className="space-y-2">
+                  {currencyGuide.tips.map((tip, i) => (
+                    <div key={i} className="flex items-start gap-2 px-4 py-3 rounded-xl border"
+                      style={{ backgroundColor: bgCard, borderColor: border }}>
+                      <span className="font-bold mt-0.5 shrink-0" style={{ color: ORANGE }}>✓</span>
+                      <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </BriefingSection>
   );
 }
@@ -2274,19 +2269,6 @@ function PreviewContent() {
             ],
           },
 
-          // ── 5. Flight Information ───────────────────────────────────────────
-          {
-            title: "Flight Information",
-            icon: <Briefcase className="w-4 h-4" />,
-            fields: [
-              { label: "Airline",           value: fmtValue(booking.airlineName) || fmtValue(booking.name_of_airline) },
-              { label: "Booking Ref / PNR", value: fmtValue(booking.pnr) },
-              { label: "Departing Flight",  value: fmtValue(booking.flightDeparture) },
-              { label: "Returning Flight",  value: fmtValue(booking.flightReturn) },
-              { label: "Flight Cost",       value: fmtCurrency(booking.flightCost) || fmtCurrency(booking.airline_cost) },
-            ],
-          },
-
           // ── 6. Tour Information ─────────────────────────────────────────────
           {
             title: "Tour Information",
@@ -2306,21 +2288,6 @@ function PreviewContent() {
             fields: [
               { label: "Transfer Details",  value: fmtValue(booking.transferInfo) },
               { label: "Transfer Provider", value: fmtValue(booking.transfer_provider) },
-            ],
-          },
-
-          // ── 8. Payment Information ──────────────────────────────────────────
-          {
-            title: "Payment Information",
-            icon: <DollarSign className="w-4 h-4" />,
-            fields: [
-              { label: "Package Price (SRP)",   value: fmtCurrency(booking.total_package_price_srp) },
-              { label: "Amount Paid",           value: fmtCurrency(booking.amountPaid) },
-              { label: "Remaining Balance",     value: fmtCurrency(booking.remainingBalance) },
-              { label: "Refund",                value: fmtCurrency(booking.refundAmount) },
-              { label: "Total Cost",            value: fmtCurrency(booking.total_cost) },
-              { label: "Land Arrangement Cost", value: fmtCurrency(booking.total_land_arrangement_cost) },
-              { label: "Visa Cost",             value: fmtCurrency(booking.total_visa_cost) },
             ],
           },
 
@@ -2488,7 +2455,7 @@ function PreviewContent() {
                         className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
                         style={{ backgroundColor: isDark ? ORANGE : "#FFFFFF", color: isDark ? "#080808" : ORANGE }}
                       >
-                        <Download className="w-4 h-4" /> Download Voucher
+                        <Download className="w-4 h-4" /> View Your Voucher
                       </a>
                     )}
                     {itineraryDoc?.status === "url" && itineraryDoc.url && (
@@ -2499,18 +2466,9 @@ function PreviewContent() {
                         className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
                         style={{ backgroundColor: isDark ? "rgba(255,140,0,0.15)" : "rgba(255,255,255,0.25)", color: isDark ? ORANGE : "#FFFFFF", border: `1px solid ${isDark ? "rgba(255,140,0,0.35)" : "rgba(255,255,255,0.45)"}` }}
                       >
-                        <FileText className="w-4 h-4" /> Download Itinerary
+                        <FileText className="w-4 h-4" /> View Itinerary
                       </a>
                     )}
-                    <a
-                      href="https://m.me/gladextours"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-80 active:scale-95"
-                      style={{ backgroundColor: "transparent", color: isDark ? "rgba(255,200,100,0.8)" : "rgba(255,255,255,0.85)", border: `1px solid ${isDark ? "rgba(255,140,0,0.3)" : "rgba(255,255,255,0.4)"}` }}
-                    >
-                      💬 Contact Support
-                    </a>
                   </div>
                 </div>
               </motion.div>
@@ -2638,129 +2596,69 @@ function PreviewContent() {
                   </div>
                 ))}
 
-                {/* ── Additional Booking Information (dynamic fallback) ────── */}
-                {additionalFields.length > 0 && (
-                  <div>
-                    <div
-                      className="flex items-center gap-2 px-5 py-2.5 border-b"
-                      style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)" }}
-                    >
-                      <MoreHorizontal className="w-4 h-4" style={{ color: textSecondary }} />
-                      <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: textSecondary }}>
-                        Additional Booking Information
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2">
-                      {additionalFields.map((f, i) => (
-                        <div
-                          key={f.label}
-                          className="flex items-start gap-3 px-5 py-3.5 border-b transition-colors duration-150"
-                          style={{
-                            borderColor: border,
-                            borderRight: (i % 2 === 0) ? `1px solid ${border}` : "none",
-                          }}
-                        >
-                          <div className="min-w-0">
-                            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] mb-0.5" style={{ color: textSecondary }}>
-                              {f.label}
-                            </p>
-                            <p className="font-body text-sm break-words leading-snug" style={{ color: textPrimary }}>
-                              {f.value}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-
-              {/* ── TRAVEL DOCUMENTS (resolved from Fusioo) ───────────────── */}
-              {(voucherDoc.status !== "idle" || itineraryDoc.status !== "idle") && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
-                  className="rounded-2xl border overflow-hidden"
-                  style={{ backgroundColor: bgCard, borderColor: border }}
-                >
-                  {/* Header */}
+                {/* ── TRAVEL DOCUMENTS — always visible inside booking card ── */}
+                <div>
                   <div
-                    className="px-6 py-4 border-b"
-                    style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
+                    className="flex items-center gap-2 px-5 py-2.5 border-b"
+                    style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)" }}
                   >
-                    <p className="font-condensed font-black text-lg leading-tight" style={{ color: textPrimary }}>
+                    <FileText className="w-4 h-4" style={{ color: ORANGE }} />
+                    <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
                       Travel Documents
                     </p>
-                    <p className="font-body text-xs mt-0.5" style={{ color: textSecondary }}>
-                      Access the documents associated with your booking.
-                    </p>
                   </div>
+                  <div className="px-5 py-4 flex flex-wrap gap-3">
 
-                  <div className="px-6 py-5">
-                    <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-
-                      {/* ── Voucher button ─────────────────────────── */}
-                      {voucherDoc.status === "loading" && (
-                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
-                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
-                          <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
-                          Loading Voucher…
-                        </button>
-                      )}
-                      {voucherDoc.status === "url" && (
-                        <a href={voucherDoc.url} target="_blank" rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                          style={{ backgroundColor: ORANGE, color: "#080808" }}>
-                          <Download className="w-4 h-4" />
-                          Download Voucher
-                        </a>
-                      )}
-                      {voucherDoc.status === "unavailable" && (
-                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
-                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.6 }}>
-                          <Download className="w-4 h-4" />
-                          Voucher Not Available
-                        </button>
-                      )}
-
-                      {/* ── Itinerary button ──────────────────────── */}
-                      {itineraryDoc.status === "loading" && (
-                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
-                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
-                          <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
-                          Loading Itinerary…
-                        </button>
-                      )}
-                      {itineraryDoc.status === "url" && (
-                        <a href={itineraryDoc.url} target="_blank" rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border transition-all hover:opacity-80 active:scale-95"
-                          style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: isDark ? "transparent" : "#FFF8F0" }}>
-                          <FileText className="w-4 h-4" />
-                          Download Itinerary
-                        </a>
-                      )}
-                      {itineraryDoc.status === "unavailable" && (
-                        <button disabled className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
-                          style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.6 }}>
-                          <FileText className="w-4 h-4" />
-                          Itinerary Not Available
-                        </button>
-                      )}
-
-                    </div>
-
-                    {/* Explanatory note when unavailable */}
-                    {(voucherDoc.status === "unavailable" || itineraryDoc.status === "unavailable") && (
-                      <p className="font-body text-xs mt-4" style={{ color: textSecondary }}>
-                        Some documents are not yet available for direct download. Please contact your travel consultant for assistance.
-                      </p>
+                    {/* Voucher */}
+                    {voucherDoc.status === "loading" && (
+                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
+                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
+                        <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
+                        Loading Voucher…
+                      </button>
                     )}
+                    {voucherDoc.status === "url" && (
+                      <a href={voucherDoc.url} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95"
+                        style={{ backgroundColor: ORANGE, color: "#080808" }}>
+                        <Download className="w-4 h-4" /> View Your Voucher
+                      </a>
+                    )}
+                    {(voucherDoc.status === "idle" || voucherDoc.status === "unavailable") && (
+                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
+                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.5 }}>
+                        <Download className="w-4 h-4" /> View Your Voucher
+                      </button>
+                    )}
+
+                    {/* Itinerary */}
+                    {itineraryDoc.status === "loading" && (
+                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
+                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
+                        <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
+                        Loading Itinerary…
+                      </button>
+                    )}
+                    {itineraryDoc.status === "url" && (
+                      <a href={itineraryDoc.url} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border transition-all hover:opacity-80 active:scale-95"
+                        style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: isDark ? "transparent" : "#FFF8F0" }}>
+                        <FileText className="w-4 h-4" /> View Itinerary
+                      </a>
+                    )}
+                    {(itineraryDoc.status === "idle" || itineraryDoc.status === "unavailable") && (
+                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
+                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.5 }}>
+                        <FileText className="w-4 h-4" /> View Itinerary
+                      </button>
+                    )}
+
                   </div>
-                </motion.div>
-              )}
+                </div>
+
+              </motion.div>
 
             </div>
           </div>
@@ -2875,7 +2773,7 @@ function PreviewContent() {
               <>
                 <div className={sectionGap}>
                   <BriefingSection label="Day by Day" title="Itinerary Timeline" theme={theme}>
-                    <ItineraryTimeline itinerary={pkg.itinerary} theme={theme} />
+                    <ItineraryTimeline itinerary={pkg.itinerary} theme={theme} slug={slug} />
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />
@@ -3013,64 +2911,6 @@ function PreviewContent() {
             </div>
             <SectionDivider theme={theme} />
 
-            {/* ════════════════════════════════════════════════════════════════
-                ADD-ONS MODULE
-                ════════════════════════════════════════════════════════════════ */}
-
-            {/* ── OPTIONAL TOURS (live Globaltix) ── */}
-            {!toursLoading && globaltixTours.length > 0 && (
-              <>
-                <div className={sectionGap}>
-                  <OptionalToursSection
-                    tours={globaltixTours}
-                    cartTourIds={cart.tours.map((t) => t.tour?.id)}
-                    onAdd={(tour) => setBookingModalTour(tour)}
-                    theme={theme}
-                  />
-                </div>
-                <SectionDivider theme={theme} />
-              </>
-            )}
-
-            {/* ── TRAVEL INSURANCE ── */}
-            {/* TODO: Starr Insurance API Integration — replace getInsurancePlans() in mockInsurance.js */}
-            <div className={sectionGap}>
-              <TravelInsuranceSection
-                plans={getInsurancePlans()}
-                selectedInsurance={cart.insurance?.plan || cart.insurance}
-                onSelect={selectInsurance}
-                theme={theme}
-              />
-            </div>
-            <SectionDivider theme={theme} />
-
-            {/* ── CART SUMMARY ── */}
-            <div className={sectionGap}>
-              <CartSummarySection
-                cart={cart}
-                total={cartTotal}
-                onRemoveTour={removeTourFromCart}
-                onRemoveInsurance={removeInsurance}
-                theme={theme}
-              />
-            </div>
-            <SectionDivider theme={theme} />
-
-            {/* ── CHECKOUT ── */}
-            {/* TODO: Xendit Checkout Integration */}
-            <div className={sectionGap}>
-              <CheckoutSection
-                cart={cart}
-                total={cartTotal}
-                theme={theme}
-              />
-            </div>
-            <SectionDivider theme={theme} />
-
-            {/* ════════════════════════════════════════════════════════════════
-                END ADD-ONS MODULE
-                ════════════════════════════════════════════════════════════════ */}
-
             {/* ── FAQ ── */}
             {briefing.faqs?.length > 0 && (
               <>
@@ -3118,20 +2958,13 @@ function PreviewContent() {
 
       {/* ── NAVIGATION FOOTER ── */}
       <div className="py-12 px-4 border-t transition-colors duration-300" style={{ backgroundColor: bgAlt, borderColor: border }}>
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="max-w-4xl mx-auto flex items-center justify-center">
           <button
             onClick={() => navigate(-1)}
             className="inline-flex items-center gap-2 font-body font-semibold text-sm px-6 py-3 rounded-full border transition-all hover:opacity-80"
             style={{ borderColor: border, color: textPrimary, backgroundColor: bgCard }}
           >
             ← Back
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            className="inline-flex items-center gap-2 font-body font-bold text-sm px-8 py-3.5 rounded-full text-white transition-all hover:opacity-90"
-            style={{ backgroundColor: ORANGE }}
-          >
-            All Destinations
           </button>
         </div>
       </div>

@@ -47,6 +47,88 @@ export const hongkongBriefing = {
     "Other Personal Expenses",
   ],
 
+  // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
+  // Shape: { day, title, activities[], galleryImages[] }
+  // galleryImages: add image paths here, e.g. "/images/briefings/hongkong/day1/photo1.jpg"
+  itinerary: [
+    {
+      day: 1,
+      title: "Manila to Hong Kong — Arrival · Airport Transfer · Hotel Check-In",
+      activities: [
+        "Depart from Manila and fly to Hong Kong International Airport (HKIA).",
+        "Upon landing, proceed to the Immigration counter — Philippine passport holders enter visa-free for up to 14 days.",
+        "Collect your checked baggage at the designated carousel after immigration clearance.",
+        "Proceed to the Arrivals Hall and look for your Gladex representative at Pole 01 or Pole 02 — they will be holding a placard with the Lead Guest's name.",
+        "Board your included Seat-In-Coach (SIC) transfer from HKIA to your hotel in Kowloon (approx. 30–50 minutes).",
+        "Hotel check-in — standard time is 2:00–3:00 PM. If rooms are not yet ready, luggage storage is available.",
+        "Receive your breakfast coupons (HK$20/pax/day) at the front desk — keep them for daily morning use.",
+        "Free time in the evening — explore the Tsim Sha Tsui waterfront, Nathan Road, and the Avenue of Stars.",
+        "Do not miss the Symphony of Lights show along Victoria Harbour at 8:00 PM — best viewed from the Tsim Sha Tsui promenade.",
+        "Overnight stay in Hong Kong.",
+      ],
+      galleryImages: [
+        // "/images/briefings/hongkong/day1/photo1.jpg",
+        // "/images/briefings/hongkong/day1/photo2.jpg",
+      ],
+    },
+    {
+      day: 2,
+      title: "Hong Kong Morning City Tour — Aberdeen · Repulse Bay · Victoria Peak · Shopping Stops",
+      activities: [
+        "After breakfast (use your HK$20 breakfast coupon at the hotel restaurant), prepare for the included Morning City Tour.",
+        "Be in the hotel lobby at the scheduled time — the group departs promptly on the Seat-In-Coach bus.",
+        "First stop: Aberdeen Fishing Village — see the iconic typhoon shelter and traditional fishing boats along the harbour.",
+        "Next: Repulse Bay — visit the Tin Hau Temple and enjoy the scenic southern coastline of Hong Kong Island.",
+        "Ascend to Victoria Peak — enjoy breathtaking panoramic views of Hong Kong's iconic skyline and Victoria Harbour from The Peak.",
+        "Designated shopping stops are included as part of the tour program — browsing is expected but purchasing is entirely voluntary.",
+        "Remember: compulsory tipping of HKD 50/pax for your guide and driver is required on tour days — prepare HKD cash in advance.",
+        "Return to the hotel in the afternoon — free time for the rest of the day.",
+        "Evening options: Mong Kok Night Market (Ladies' Market, Temple Street), Causeway Bay shopping, or a harbour dinner cruise.",
+        "Overnight stay in Hong Kong.",
+      ],
+      galleryImages: [
+        // "/images/briefings/hongkong/day2/photo1.jpg",
+        // "/images/briefings/hongkong/day2/photo2.jpg",
+      ],
+    },
+    {
+      day: 3,
+      title: "Free Day — Optional: Disneyland · Ocean Park · Macau · Ngong Ping 360",
+      activities: [
+        "After breakfast (use your HK$20 breakfast coupon), enjoy a full free day to explore at your own pace.",
+        "This day is ideal for optional tours — not included in the package and arranged separately at your own expense.",
+        "Option A — Hong Kong Disneyland: Take the MTR Tung Chung Line to Sunny Bay, then transfer to the Disneyland Resort Line.",
+        "Option B — Ocean Park: Take a taxi or bus to the Aberdeen Tunnel area. Full-day marine and adventure theme park.",
+        "Option C — Macau Day Trip: Take the TurboJET ferry from China Ferry Terminal, Tsim Sha Tsui (approx. 1 hour). Explore Senado Square, the Ruins of St. Paul's, and Cotai Strip casinos.",
+        "Option D — Ngong Ping 360 Cable Car: Take the MTR to Tung Chung station, then board the cable car to Lantau Island. Visit the Tian Tan (Big) Buddha and Po Lin Monastery.",
+        "Option E — Independent exploration: Wander Victoria Harbour, Sham Shui Po flea markets, Cat Street antiques, or Hong Kong Museum of History (free admission).",
+        "An Octopus Card (available at 7-Eleven or the airport) is strongly recommended for easy MTR and bus payment throughout the day.",
+        "Return to the hotel in the evening. Overnight stay in Hong Kong.",
+      ],
+      galleryImages: [
+        // "/images/briefings/hongkong/day3/photo1.jpg",
+        // "/images/briefings/hongkong/day3/photo2.jpg",
+      ],
+    },
+    {
+      day: 4,
+      title: "Hong Kong to Manila — Check-Out · Airport Transfer · Departure",
+      activities: [
+        "After breakfast (last use of your HK$20 breakfast coupon), complete hotel check-out by 11:00 AM–12:00 Noon.",
+        "Confirm your departure pick-up time with the hotel front desk or your tour guide the evening before.",
+        "Board your included Seat-In-Coach (SIC) transfer from the hotel to Hong Kong International Airport.",
+        "Arrive at HKIA with sufficient time — check-in counters typically open 2–3 hours before departure.",
+        "Complete airline check-in, baggage drop, and immigration clearance at the departure hall.",
+        "Proceed to your boarding gate and wait for the boarding announcement.",
+        "Board your return flight to Manila.",
+        "Arrive in Manila carrying unforgettable memories of Hong Kong.",
+      ],
+      galleryImages: [
+        // "/images/briefings/hongkong/day4/photo1.jpg",
+      ],
+    },
+  ],
+
   // ─── 5. TRAVEL INFORMATION CENTER ────────────────────────────────────────
   travelInformation: {
     beforeDeparture: [
@@ -257,21 +339,17 @@ export const hongkongBriefing = {
 
   // ─── 13. TRAVEL READINESS CHECKLIST ──────────────────────────────────────
   checklist: [
-    { id: "passport", label: "Passport validity confirmed (min. 6 months beyond return date)" },
-    { id: "etravel", label: "eTravel Philippines registered (etravel.gov.ph)" },
-    { id: "novisa", label: "Confirmed: No Hong Kong visa required for Philippine passport holders (14 days visa-free)" },
-    { id: "insurance", label: "Compulsory travel insurance secured and documents saved" },
-    { id: "flights", label: "Flight e-tickets downloaded or printed (with flight number and seat)" },
-    { id: "voucher", label: "Booking voucher / hotel confirmation saved on phone" },
-    { id: "emergency", label: "Emergency contacts saved: Gladex hotline, local operator, Hong Kong emergency (999)" },
-    { id: "currency", label: "HKD cash prepared (recommend HKD 2,000–3,000 for personal expenses and tipping)" },
-    { id: "tipping", label: "HKD 50/pax tipping confirmed and prepared (compulsory for guide and driver)" },
-    { id: "octopus", label: "Octopus card or plan to purchase at airport — needed for MTR and buses" },
-    { id: "maps", label: "Offline maps downloaded: Hong Kong, Kowloon, and Tsim Sha Tsui areas" },
-    { id: "packing", label: "Packing completed (see What to Bring section)" },
-    { id: "checkin", label: "Online check-in completed (opens 24–48 hours before departure)" },
-    { id: "departure", label: "Airport arrival time planned — arrive 3 hours before international departure" },
-    { id: "briefing", label: "This entire Hong Kong briefing page read and saved on phone" },
+    { id: "passport",      icon: "🛂", label: "Valid ID / Passport" },
+    { id: "voucher",       icon: "📄", label: "Travel Voucher" },
+    { id: "ticket",        icon: "✈️", label: "Flight Ticket" },
+    { id: "hotel_voucher", icon: "🏨", label: "Hotel Voucher" },
+    { id: "cash",          icon: "💵", label: "Cash" },
+    { id: "powerbank",     icon: "🔋", label: "Powerbank" },
+    { id: "mobile_data",   icon: "📶", label: "Mobile Data" },
+    { id: "chargers",      icon: "🔌", label: "Chargers" },
+    { id: "medicines",     icon: "💊", label: "Medicines" },
+    { id: "sunscreen",     icon: "🌞", label: "Sunscreen" },
+    { id: "clothing",      icon: "👗", label: "Appropriate Clothing" },
   ],
 
   // ─── 14. WHAT TO BRING ───────────────────────────────────────────────────
@@ -394,31 +472,73 @@ export const hongkongBriefing = {
         icon: "⭐",
         name: "Avenue of Stars, Tsim Sha Tsui",
         description: "Hong Kong's tribute to its film legends, located along the Kowloon waterfront with stunning views of Victoria Harbour and the Hong Kong skyline.",
+        img: "/images/destinations/hongkong/places/avenue-of-stars-tsim-sha-tsui.jpg",
       },
       {
         icon: "🌊",
         name: "Victoria Harbour",
         description: "One of the world's great natural harbours and Hong Kong's iconic centrepiece. The Symphony of Lights show takes place nightly at 8 PM along the harbour.",
+        img: "/images/destinations/hongkong/places/victoria-harbour.jpg",
       },
       {
         icon: "🏛️",
         name: "West Kowloon Cultural District",
         description: "Hong Kong's new arts hub — home to M+ Museum and the Hong Kong Palace Museum, showcasing art and cultural heritage in a stunning waterfront setting.",
+        img: "/images/destinations/hongkong/places/west-kowloon-cultural-district.jpg",
       },
       {
         icon: "🏯",
         name: "Hong Kong Palace Museum",
         description: "A world-class museum at West Kowloon, displaying imperial Chinese treasures and cultural artifacts from the Palace Museum collection in Beijing.",
+        img: "/images/destinations/hongkong/places/hong-kong-palace-museum.jpg",
       },
       {
         icon: "🛍️",
         name: "Tsim Sha Tsui",
         description: "The heart of tourist Hong Kong — Nathan Road, Harbour City shopping mall, night market, and the iconic Kowloon waterfront. Walkable from most hotels.",
+        img: "/images/destinations/hongkong/places/tsim-sha-tsui.jpg",
       },
       {
         icon: "🏰",
         name: "Hong Kong Disneyland",
         description: "Asia's most magical theme park featuring seven themed lands. Included in the Disneyland package or available as an optional tour for Free & Easy bookings.",
+        img: "/images/destinations/hongkong/places/hong-kong-disneyland.jpg",
+      },
+      {
+        icon: "🚡",
+        name: "Victoria Peak (The Peak)",
+        description: "Hong Kong's most visited attraction — ride the historic Peak Tram to the summit for a breathtaking 360° panorama over the city, harbour, and surrounding islands.",
+        img: "/images/destinations/hongkong/places/victoria-peak.jpg",
+      },
+      {
+        icon: "🛕",
+        name: "Wong Tai Sin Temple",
+        description: "One of Hong Kong's most famous Taoist temples, renowned for its colourful architecture and the belief that prayers made here are always answered. A vibrant cultural experience.",
+        img: "/images/destinations/hongkong/places/wong-tai-sin-temple.jpg",
+      },
+      {
+        icon: "🌿",
+        name: "Nan Lian Garden",
+        description: "A stunning Tang-dynasty style classical Chinese garden in Diamond Hill, featuring immaculately manicured trees, pavilions, a lotus pond, and the beautiful Chi Lin Nunnery next door.",
+        img: "/images/destinations/hongkong/places/nan-lian-garden.jpg",
+      },
+      {
+        icon: "🗿",
+        name: "Tian Tan Buddha (Lantau Island)",
+        description: "The world's largest seated outdoor bronze Buddha, located on Lantau Island and reachable via the spectacular Ngong Ping 360 cable car. Surrounded by a striking monastery complex.",
+        img: "/images/destinations/hongkong/places/tian-tan-buddha.jpg",
+      },
+      {
+        icon: "🌃",
+        name: "Temple Street Night Market",
+        description: "Kowloon's most famous night market — rows of stalls selling antiques, jade, street food, and souvenirs. Cantonese opera performers and fortune tellers add to the vibrant atmosphere.",
+        img: "/images/destinations/hongkong/places/temple-street-night-market.jpg",
+      },
+      {
+        icon: "🚂",
+        name: "Star Ferry",
+        description: "Hong Kong's beloved 125-year-old ferry service crossing Victoria Harbour between Tsim Sha Tsui and Central. Offers one of the world's great scenic harbour crossings for just HKD 3.40.",
+        img: "/images/destinations/hongkong/places/star-ferry.jpg",
       },
     ],
     practicalInfo: [
@@ -446,6 +566,76 @@ export const hongkongBriefing = {
         label: "Emergency Number",
         value: "999 — covers Police, Fire, and Ambulance in Hong Kong. English-speaking operators available.",
       },
+    ],
+    bestFood: [
+      {
+        name: "Dim Sum",
+        desc: "Hong Kong's most iconic culinary tradition — bite-sized steamed and fried dumplings, buns, and rolls served in bamboo steamers with hot tea (yum cha). Best enjoyed at a busy local teahouse for breakfast or lunch.",
+        img: "/images/destinations/hongkong/food/dim-sum.jpg",
+      },
+      {
+        name: "Egg Tarts (Dan Tat)",
+        desc: "A beloved Hong Kong pastry — silky, lightly sweet egg custard in a flaky or crumbly pastry shell, best eaten fresh from the oven at legendary bakeries like Tai Cheong or Hon's Wun Tun Noodle.",
+        img: "/images/destinations/hongkong/food/egg-tarts.jpg",
+      },
+      {
+        name: "Wonton Noodle Soup",
+        desc: "A quintessential Hong Kong comfort food — thin, springy egg noodles in a clear, flavourful prawn and pork broth topped with plump wontons. A staple of traditional Hong Kong cha chaan tengs.",
+        img: "/images/destinations/hongkong/food/wonton-noodle-soup.jpg",
+      },
+      {
+        name: "Pineapple Bun (Bo Lo Bao)",
+        desc: "Despite the name, this classic Hong Kong bakery bread contains no pineapple — its golden, crinkled sugar crust simply resembles a pineapple skin. Best enjoyed warm with a thick slab of cold butter inside.",
+        img: "/images/destinations/hongkong/food/pineapple-bun.jpg",
+      },
+      {
+        name: "Roast Goose",
+        desc: "Hong Kong's most celebrated roasted meat — crispy, lacquered skin over succulent, flavourful meat. Yung Kee in Central is legendary, but local roast meat shops throughout Kowloon serve exceptional versions.",
+        img: "/images/destinations/hongkong/food/roast-goose.jpg",
+      },
+    ],
+    photoSpots: [
+      {
+        name: "Victoria Peak Panorama",
+        desc: "The skyline view from The Peak — a sweeping panorama of skyscrapers rising from the harbour against the Kowloon hills — is one of the world's most spectacular urban vistas, especially at dusk.",
+        img: "/images/destinations/hongkong/photo-spots/victoria-peak-panorama.jpg",
+      },
+      {
+        name: "Tsim Sha Tsui Promenade (Kowloon Skyline)",
+        desc: "The waterfront promenade in Tsim Sha Tsui looking back at the Hong Kong Island skyline across Victoria Harbour is the city's most iconic daytime and nighttime photography spot.",
+        img: "/images/destinations/hongkong/photo-spots/tsim-sha-tsui-promenade.jpg",
+      },
+      {
+        name: "Wong Tai Sin Temple",
+        desc: "The vivid yellow, red, and gold architecture of Wong Tai Sin Temple against a clear sky — especially during morning incense offering hours — creates a rich, colourful, and atmospheric photograph.",
+        img: "/images/destinations/hongkong/photo-spots/wong-tai-sin-temple.jpg",
+      },
+      {
+        name: "Tian Tan Buddha, Lantau Island",
+        desc: "The 34-metre bronze Buddha emerging from the mountain mist above Po Lin Monastery, approached via 268 steps, creates one of Hong Kong's most majestic and serene photographic subjects.",
+        img: "/images/destinations/hongkong/photo-spots/tian-tan-buddha.jpg",
+      },
+      {
+        name: "Nan Lian Garden",
+        desc: "The perfectly composed classical Chinese garden — ancient-style pavilions, pine trees, and a still lotus pond — provides a tranquil, painterly contrast to Hong Kong's urban skyline visible in the distance.",
+        img: "/images/destinations/hongkong/photo-spots/nan-lian-garden.jpg",
+      },
+    ],
+    localTips: [
+      { icon: "💡", tip: "Purchase an Octopus Card at HKIA upon arrival — it works on the MTR, buses, trams, Star Ferry, and for payment at 7-Eleven, Circle K, and many restaurants." },
+      { icon: "💡", tip: "On escalators, stand on the right side and keep the left lane clear for people walking. This is a firm Hong Kong custom and locals take it seriously." },
+      { icon: "💡", tip: "Bargaining is acceptable at Temple Street Night Market and Ladies' Market in Mong Kok — start at 50-60% of the asking price and negotiate politely." },
+      { icon: "💡", tip: "Many Hong Kong restaurants and cha chaan tengs stay open until 1:00–2:00 AM — late-night meals are a normal part of local life." },
+      { icon: "💡", tip: "The MTR is the fastest, most reliable, and most affordable way to travel around Hong Kong — use it over taxis whenever possible." },
+      { icon: "💡", tip: "Avoid the Peak Tram on weekends and public holidays — queues can exceed 2 hours. Take a taxi or minibus to the Peak instead, or visit on a weekday morning." },
+    ],
+    safetyTips: [
+      { icon: "🛡️", tip: "Hong Kong is one of the world's safest cities — violent crime against tourists is extremely rare and petty crime is uncommon." },
+      { icon: "🛡️", tip: "Be mindful of your belongings in heavily crowded tourist areas like Mong Kok street markets and busy MTR stations during peak hours." },
+      { icon: "🛡️", tip: "Stay hydrated — Hong Kong's summer humidity (April–September) is extreme and heat-related illness is a real risk for tourists not acclimatised to tropical heat." },
+      { icon: "🛡️", tip: "Typhoon season runs May to November. Pay attention to typhoon signal announcements — if Signal T8 or above is raised, all businesses, transport, and attractions close. Your hotel will keep you informed." },
+      { icon: "🛡️", tip: "Avoid confrontations of any kind — while safe, Hong Kong has firm public order laws and any disturbance can result in police attention." },
+      { icon: "🛡️", tip: "In case of emergency, call 999 — it covers Police, Fire, and Ambulance. English-speaking operators are always available." },
     ],
   },
 
