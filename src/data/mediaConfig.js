@@ -73,7 +73,7 @@ export const mediaConfig = {
   "hongkong": {
     heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
     cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
-    video: "https://drive.google.com/file/d/1V6iFsPCQURF_RTUYVLQhNq9qLg_SGNb_/preview",
+    video: "https://youtu.be/xduac823yJ0",
     gallery: [],
   },
 

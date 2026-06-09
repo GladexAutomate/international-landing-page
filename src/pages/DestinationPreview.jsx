@@ -40,6 +40,20 @@ import ReferralSection from "../components/ReferralSection";
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const ORANGE = "#FF8C00";
 
+// Converts any supported video URL to an embeddable iframe src.
+// Handles: youtu.be short links, youtube.com/watch, Google Drive /preview
+function toVideoEmbedUrl(url) {
+  if (!url) return "";
+  // youtu.be/VIDEO_ID
+  const short = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+  if (short) return `https://www.youtube.com/embed/${short[1]}`;
+  // youtube.com/watch?v=VIDEO_ID
+  const watch = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
+  if (watch) return `https://www.youtube.com/embed/${watch[1]}`;
+  // Google Drive /preview — already embeddable
+  return url;
+}
+
 // ─── SECTION DIVIDER ─────────────────────────────────────────────────────────
 function SectionDivider({ theme }) {
   return (
@@ -2685,26 +2699,26 @@ function PreviewContent() {
           </p>
         </div>
 
-        <div className="relative z-10 flex justify-center">
+        <div className="relative z-10 flex justify-center px-4 w-full">
           {dest.videoUrl ? (
             <motion.div
-              whileHover={{ scale: 1.01 }}
+              whileHover={{ scale: 1.005 }}
               transition={{ duration: 0.3 }}
               className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl w-full"
-              style={{
-                maxWidth: 360,
-                aspectRatio: "9/16",
-                background: "linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-              }}
+              style={{ maxWidth: 768 }}
             >
-              <video
-                controls
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ backgroundColor: "#000" }}
-              >
-                <source src={dest.videoUrl} type="video/mp4" />
-              </video>
-              <div className="absolute top-4 left-4 pointer-events-none">
+              {/* 16:9 responsive wrapper */}
+              <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                <iframe
+                  src={toVideoEmbedUrl(dest.videoUrl)}
+                  title={`${dest.name} Travel Briefing Video`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                  style={{ border: "none", backgroundColor: "#000" }}
+                />
+              </div>
+              <div className="absolute top-4 left-4 pointer-events-none z-10">
                 <div
                   className="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-[0.25em] uppercase backdrop-blur-md border"
                   style={{ background: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.15)", color: "#fff" }}
