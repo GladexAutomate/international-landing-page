@@ -10,14 +10,13 @@ export default function RateMyService({ theme, gdxReference }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
 
   const [loading,        setLoading]        = useState(true);
-  const [existingReview, setExistingReview] = useState(null); // { rating, comment } | null
+  const [existingReview, setExistingReview] = useState(null);
   const [hovered,        setHovered]        = useState(0);
   const [selected,       setSelected]       = useState(0);
   const [comment,        setComment]        = useState("");
   const [submitting,     setSubmitting]     = useState(false);
   const [error,          setError]          = useState(null);
 
-  // Fetch existing review whenever the GDX reference changes
   useEffect(() => {
     if (!gdxReference) { setLoading(false); return; }
 
@@ -33,6 +32,9 @@ export default function RateMyService({ theme, gdxReference }) {
       .eq("gdx_reference", gdxReference)
       .maybeSingle()
       .then(({ data, error: fetchError }) => {
+        if (fetchError) {
+          console.error("[RateMyService] fetch error:", fetchError.code, fetchError.message);
+        }
         if (!fetchError && data) setExistingReview(data);
         setLoading(false);
       });
@@ -50,7 +52,14 @@ export default function RateMyService({ theme, gdxReference }) {
     });
 
     if (insertError) {
-      setError("Something went wrong. Please try again.");
+      console.error("[RateMyService] insert error:", insertError.code, insertError.message);
+
+      // Specific message when the table doesn't exist yet
+      const msg = insertError.code === "PGRST205" || insertError.message?.includes("reviews")
+        ? "Review table is not set up yet. Please contact Gladex support."
+        : "Something went wrong. Please try again.";
+
+      setError(msg);
       setSubmitting(false);
       return;
     }
