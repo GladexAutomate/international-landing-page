@@ -1,12 +1,15 @@
 /**
- * Vite plugin — auto-discovers images under public/images/briefings/
- * and exposes them as a virtual module: virtual:briefing-images
+ * Vite plugin — auto-discovers images under:
+ *   public/images/briefings/<dest>/day<N>/       → briefingImages
+ *   public/images/destinations/<dest>/<section>/ → destinationImages
  *
- * Generated manifest shape:
- * {
- *   danang:   { 1: ["/images/briefings/danang/day1/photo1.jpg", ...], 2: [...], ... },
- *   hongkong: { 1: [...], ... },
- * }
+ * Exposed as virtual module: virtual:briefing-images
+ *
+ * briefingImages shape:
+ *   { danang: { 1: ["/images/briefings/danang/day1/photo1.jpg", ...], 2: [...] }, ... }
+ *
+ * destinationImages shape:
+ *   { danang: { places: [...], food: [...], "photo-spots": [...] }, hongkong: {...} }
  *
  * Images are sorted with natural-number ordering (photo2 before photo10).
  * Supported formats: .jpg .jpeg .png .webp (case-insensitive).
@@ -19,7 +22,11 @@ const VIRTUAL_ID = "virtual:briefing-images";
 const RESOLVED_ID = "\0" + VIRTUAL_ID;
 const IMAGE_RE = /\.(jpe?g|png|webp)$/i;
 
-function buildManifest(projectRoot) {
+function naturalSort(a, b) {
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+}
+
+function buildBriefingManifest(projectRoot) {
   const briefingsDir = join(projectRoot, "public", "images", "briefings");
   const manifest = {};
 
@@ -38,13 +45,36 @@ function buildManifest(projectRoot) {
       const dayDir = join(destDir, dayFolder);
       if (!statSync(dayDir).isDirectory()) continue;
 
-      const images = readdirSync(dayDir)
+      manifest[dest][dayNum] = readdirSync(dayDir)
         .filter((f) => IMAGE_RE.test(f))
-        // Natural sort: photo2.jpg before photo10.jpg
-        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }))
+        .sort(naturalSort)
         .map((f) => `/images/briefings/${dest}/${dayFolder}/${f}`);
+    }
+  }
 
-      manifest[dest][dayNum] = images;
+  return manifest;
+}
+
+function buildDestinationManifest(projectRoot) {
+  const destsDir = join(projectRoot, "public", "images", "destinations");
+  const manifest = {};
+
+  if (!existsSync(destsDir)) return manifest;
+
+  for (const dest of readdirSync(destsDir)) {
+    const destDir = join(destsDir, dest);
+    if (!statSync(destDir).isDirectory()) continue;
+
+    manifest[dest] = {};
+
+    for (const section of readdirSync(destDir)) {
+      const sectionDir = join(destDir, section);
+      if (!statSync(sectionDir).isDirectory()) continue;
+
+      manifest[dest][section] = readdirSync(sectionDir)
+        .filter((f) => IMAGE_RE.test(f))
+        .sort(naturalSort)
+        .map((f) => `/images/destinations/${dest}/${section}/${f}`);
     }
   }
 
@@ -67,17 +97,29 @@ export function briefingImagesPlugin() {
 
     load(id) {
       if (id !== RESOLVED_ID) return;
-      const manifest = buildManifest(projectRoot);
-      return `export const briefingImages = ${JSON.stringify(manifest)};`;
+      const briefing     = buildBriefingManifest(projectRoot);
+      const destination  = buildDestinationManifest(projectRoot);
+      return [
+        `export const briefingImages    = ${JSON.stringify(briefing)};`,
+        `export const destinationImages = ${JSON.stringify(destination)};`,
+      ].join("\n");
     },
 
     configureServer(server) {
-      // Watch the briefings folder so HMR triggers when images are added/removed
-      const watchDir = join(projectRoot, "public", "images", "briefings");
-      if (existsSync(watchDir)) server.watcher.add(watchDir);
+      const watchDirs = [
+        join(projectRoot, "public", "images", "briefings"),
+        join(projectRoot, "public", "images", "destinations"),
+      ];
+      for (const dir of watchDirs) {
+        if (existsSync(dir)) server.watcher.add(dir);
+      }
 
       function invalidate(changedPath) {
-        if (!changedPath.replace(/\\/g, "/").includes("images/briefings")) return;
+        const normalized = changedPath.replace(/\\/g, "/");
+        if (
+          !normalized.includes("images/briefings") &&
+          !normalized.includes("images/destinations")
+        ) return;
 
         // Vite 6: getModuleById can miss virtual modules — scan idToModuleMap as fallback
         const byId = server.moduleGraph.getModuleById(RESOLVED_ID);
@@ -91,7 +133,6 @@ export function briefingImagesPlugin() {
           }
         }
 
-        // Always trigger a full reload so the browser fetches the regenerated manifest
         server.ws.send({ type: "full-reload" });
       }
 

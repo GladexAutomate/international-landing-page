@@ -36,6 +36,7 @@ import OutfitGuide from "../components/OutfitGuide";
 import BriefingTestimonials from "../components/BriefingTestimonials";
 import RateMyService from "../components/RateMyService";
 import ReferralSection from "../components/ReferralSection";
+import { getDestinationImage } from "../utils/destinationImages";
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const ORANGE = "#FF8C00";
@@ -924,14 +925,27 @@ function PhotoSlider({ items, theme }) {
 }
 
 // ─── 17. DESTINATION GUIDE ───────────────────────────────────────────────────
-function DestinationGuideSection({ briefing, theme }) {
+function DestinationGuideSection({ briefing, slug, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   const guide = briefing?.destinationGuide;
   const currencyGuide = briefing?.currencyGuide;
   if (!guide) return null;
 
   const highlights = (guide.highlights || []).map((h) => ({
-    icon: h.icon, name: h.name, desc: h.description, img: h.img,
+    icon: h.icon,
+    name: h.name,
+    desc: h.description,
+    img: getDestinationImage(slug, "places", h.name) ?? h.img ?? null,
+  }));
+
+  const foods = (guide.bestFood || []).map((item) => ({
+    ...item,
+    img: getDestinationImage(slug, "food", item.name) ?? item.img ?? null,
+  }));
+
+  const photoSpots = (guide.photoSpots || []).map((item) => ({
+    ...item,
+    img: getDestinationImage(slug, "photo-spots", item.name) ?? item.img ?? null,
   }));
 
   const SubHeading = ({ emoji, label }) => (
@@ -1000,24 +1014,28 @@ function DestinationGuideSection({ briefing, theme }) {
         )}
 
         {/* Best Food */}
-        {(guide.bestFood || []).length > 0 && (
+        {foods.length > 0 && (
           <div>
             <SubHeading emoji="🍜" label="Best Food & Dining" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(guide.bestFood || []).map((item, i) => (
+              {foods.map((item, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden border group"
                   style={{ backgroundColor: bgCard, borderColor: border }}>
-                  <div className="aspect-video overflow-hidden"
+                  <div className="aspect-video overflow-hidden flex items-center justify-center text-5xl"
                     style={{ backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}>
-                    <img src={item.img} alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
-                    />
+                    {item.img ? (
+                      <img src={item.img} alt={item.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
+                      />
+                    ) : (
+                      <span>{item.icon || "🍽️"}</span>
+                    )}
                   </div>
                   <div className="px-4 py-3">
                     <p className="font-condensed font-bold text-base leading-tight mb-1" style={{ color: textPrimary }}>{item.name}</p>
-                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
+                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc || item.description}</p>
                   </div>
                 </div>
               ))}
@@ -1026,10 +1044,10 @@ function DestinationGuideSection({ briefing, theme }) {
         )}
 
         {/* Photo Spots */}
-        {(guide.photoSpots || []).length > 0 && (
+        {photoSpots.length > 0 && (
           <div>
             <SubHeading emoji="📸" label="Best Photo Spots" />
-            <PhotoSlider items={guide.photoSpots} theme={theme} />
+            <PhotoSlider items={photoSpots} theme={theme} />
           </div>
         )}
 
@@ -2915,7 +2933,7 @@ function PreviewContent() {
 
             {/* ── 15. DESTINATION GUIDE ── */}
             <div className={sectionGap}>
-              <DestinationGuideSection briefing={briefing} theme={theme} />
+              <DestinationGuideSection briefing={briefing} slug={slug} theme={theme} />
             </div>
             <SectionDivider theme={theme} />
 
