@@ -41,7 +41,7 @@ export const mediaConfig = {
   "danang-vietnam": {
     heroImage: "https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?w=1600&q=80",
     cardImage: "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=800&q=80",
-    video: "https://drive.google.com/file/d/1yeltD8t0ibNSt5ATW6efk1HGDoSmB1Y7/preview",
+    video: "https://youtu.be/8z4kBSX8PdA",
     gallery: [],
   },
 
