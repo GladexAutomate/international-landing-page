@@ -43,15 +43,16 @@ const ORANGE = "#FF8C00";
 
 // Converts any supported video URL to an embeddable iframe src.
 // Handles: youtu.be short links, youtube.com/watch, Google Drive /preview
+// YouTube params: rel=0 (no related), modestbranding=1 (minimal logo),
+//   playsinline=1 (inline iOS), iv_load_policy=3 (no annotations),
+//   cc_load_policy=0 (no auto-captions)
+const YT_PARAMS = "rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&cc_load_policy=0";
 function toVideoEmbedUrl(url) {
   if (!url) return "";
-  // youtu.be/VIDEO_ID
   const short = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
-  if (short) return `https://www.youtube.com/embed/${short[1]}`;
-  // youtube.com/watch?v=VIDEO_ID
+  if (short) return `https://www.youtube.com/embed/${short[1]}?${YT_PARAMS}`;
   const watch = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
-  if (watch) return `https://www.youtube.com/embed/${watch[1]}`;
-  // Google Drive /preview — already embeddable
+  if (watch) return `https://www.youtube.com/embed/${watch[1]}?${YT_PARAMS}`;
   return url;
 }
 
@@ -2720,17 +2721,17 @@ function PreviewContent() {
         <div className="relative z-10 flex justify-center px-4 w-full">
           {dest.videoUrl ? (
             <motion.div
-              whileHover={{ scale: 1.005 }}
+              whileHover={{ scale: 1.008 }}
               transition={{ duration: 0.3 }}
-              className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl w-full"
-              style={{ maxWidth: 768 }}
+              className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl w-full"
+              style={{ maxWidth: 380 }}
             >
-              {/* 16:9 responsive wrapper */}
-              <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+              {/* 9:16 portrait wrapper */}
+              <div className="relative w-full" style={{ paddingBottom: "177.78%" }}>
                 <iframe
                   src={toVideoEmbedUrl(dest.videoUrl)}
                   title={`${dest.name} Travel Briefing Video`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="absolute inset-0 w-full h-full"
                   style={{ border: "none", backgroundColor: "#000" }}
