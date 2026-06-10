@@ -131,8 +131,8 @@ function OutfitCategoryCard({ category, theme }) {
     >
       {/* ── Image mini-carousel ─────────────────────────────────────────── */}
       <div
-        className="relative overflow-hidden h-72 sm:h-96 cursor-grab active:cursor-grabbing"
-        style={{ backgroundColor: isDark ? "#1A1A1A" : "#EBEBEB" }}
+        className="relative overflow-hidden h-[28rem] sm:h-[36rem] cursor-grab active:cursor-grabbing"
+        style={{ backgroundColor: isDark ? "#111" : "#E8E8E8" }}
         onTouchStart={onInnerTouchStart}
         onTouchEnd={onInnerTouchEnd}
       >
@@ -141,7 +141,7 @@ function OutfitCategoryCard({ category, theme }) {
             key={`${category.key}-${variantIdx}-${imgIdx}`}
             src={photoList[imgIdx]}
             alt={`${category.label} — ${variant.label} ${imgIdx + 1}`}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain"
             loading="lazy"
             onError={handleImgError}
             initial={{ opacity: 0, x: direction * 28 }}
