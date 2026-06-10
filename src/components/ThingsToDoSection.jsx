@@ -172,15 +172,6 @@ export default function ThingsToDoSection({ isDark, textPrimary, textSecondary, 
             <span style={{ color: textSecondary }}>({data.reviewCount} traveler reviews) • {data.totalBooked} travelers</span>
           </div>
         </div>
-        {slug && (
-          <button
-            onClick={() => navigate(`/tour-packages/${slug}`)}
-            className="shrink-0 px-4 py-2 rounded-full text-xs font-bold tracking-wide text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: ORANGE }}
-          >
-            View Full Guide →
-          </button>
-        )}
       </div>
 
       {/* Tabs */}

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Play, Camera } from "lucide-react";
-import { destinations } from "../data/destinations";
+import { getDestinations } from "../data/destinations";
 import VideoPreviewModal from "./VideoPreviewModal";
 
-const mediaHighlights = destinations.slice(0, 6);
+const mediaHighlights = getDestinations().slice(0, 6);
 
 export default function MediaShowcase() {
   const [previewDestination, setPreviewDestination] = useState(null);
