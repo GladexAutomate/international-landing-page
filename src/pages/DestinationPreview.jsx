@@ -2,7 +2,7 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2, Download, FileText, User, CalendarDays, Hotel, Plane, Users, Tag, BadgeCheck, Mail, DollarSign, Briefcase, UserCheck, Car, MoreHorizontal, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2, Download, FileText, User, CalendarDays, Hotel, Plane, Users, Tag, BadgeCheck, Mail, DollarSign, Briefcase, UserCheck, Car, MoreHorizontal, ChevronLeft, ChevronRight, Maximize2, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
@@ -66,6 +66,8 @@ function BriefingVideo({ videoUrl, name }) {
   const [playing,   setPlaying]   = useState(false);
   const [fsPlaying, setFsPlaying] = useState(true);  // FS autoplays
   const [isFS,      setIsFS]      = useState(false);
+  const [muted,     setMuted]     = useState(false);
+  const [fsMuted,   setFsMuted]   = useState(false);
 
   // Reset normal play button when video ends
   useEffect(() => {
@@ -108,6 +110,24 @@ function BriefingVideo({ videoUrl, name }) {
       JSON.stringify({ event: "command", func: next ? "playVideo" : "pauseVideo", args: [] }), "*"
     );
     setFsPlaying(next);
+  }
+
+  function toggleMute(e) {
+    e.stopPropagation();
+    const next = !muted;
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func: next ? "mute" : "unMute", args: [] }), "*"
+    );
+    setMuted(next);
+  }
+
+  function toggleFsMute(e) {
+    e.stopPropagation();
+    const next = !fsMuted;
+    fsIframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func: next ? "mute" : "unMute", args: [] }), "*"
+    );
+    setFsMuted(next);
   }
 
   function openFS() {
@@ -173,6 +193,16 @@ function BriefingVideo({ videoUrl, name }) {
           </div>
         </div>
 
+        {/* Mute/unmute button — bottom-left */}
+        <button
+          onClick={toggleMute}
+          className="absolute bottom-3 left-3 z-40 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.28)", color: "#fff" }}
+          aria-label={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </button>
+
         {/* Full-view open button — bottom-right */}
         <button
           onClick={openFS}
@@ -215,6 +245,28 @@ function BriefingVideo({ videoUrl, name }) {
                 </div>
               </div>
             )}
+
+            {/* Mute/unmute button — bottom-left of the video, always on top */}
+            <button
+              onClick={toggleFsMute}
+              className="absolute flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+              style={{
+                bottom: 20,
+                left: 16,
+                zIndex: 30,
+                backgroundColor: "rgba(0,0,0,0.72)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "2px solid rgba(255,255,255,0.4)",
+                borderRadius: 12,
+                color: "#fff",
+                width: 44,
+                height: 44,
+              }}
+              aria-label={fsMuted ? "Unmute" : "Mute"}
+            >
+              {fsMuted ? <VolumeX style={{ width: 20, height: 20 }} /> : <Volume2 style={{ width: 20, height: 20 }} />}
+            </button>
 
             {/* Close / Exit Full View button — top-right of the video, always on top */}
             <button

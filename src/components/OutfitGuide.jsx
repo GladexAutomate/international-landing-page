@@ -236,7 +236,6 @@ function OutfitCategoryCard({ category, theme }) {
 
           {/* Category name */}
           <div className="flex items-center gap-2">
-            <span className="text-xl leading-none">{category.icon}</span>
             <p className="font-condensed font-black text-white text-2xl leading-none drop-shadow-lg">
               {category.label}
             </p>
@@ -274,7 +273,7 @@ function OutfitCategoryCard({ category, theme }) {
           className="font-body text-xs leading-relaxed"
           style={{ color: textSecondary }}
         >
-          💡 {category.tip}
+          {category.tip}
         </p>
       </div>
     </div>
@@ -323,7 +322,7 @@ export default function OutfitGuide({ theme }) {
   const translatePct = catIdx * (100 / total);
 
   return (
-    <BriefingSection label="Style Guide" title="Outfit Inspiration 👗" theme={theme}>
+    <BriefingSection label="Style Guide" title="Outfit Inspiration" theme={theme}>
       <p
         className="font-body text-sm leading-relaxed mb-6"
         style={{ color: textSecondary }}
