@@ -115,13 +115,6 @@ export default function TravelChecklist({ items = [], storageKey, theme }) {
                 )}
               </div>
 
-              {/* Icon */}
-              {item.icon && (
-                <span className="text-base leading-none shrink-0" aria-hidden>
-                  {item.icon}
-                </span>
-              )}
-
               {/* Label */}
               <p
                 className="font-body text-sm leading-snug"

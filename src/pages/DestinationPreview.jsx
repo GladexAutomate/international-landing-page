@@ -1,13 +1,15 @@
 ﻿// @ts-nocheck
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2, Download, FileText, User, CalendarDays, Hotel, Plane, Users, Tag, BadgeCheck, Mail, DollarSign, Briefcase, UserCheck, Car, MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2, Download, FileText, User, CalendarDays, Hotel, Plane, Users, Tag, BadgeCheck, Mail, DollarSign, Briefcase, UserCheck, Car, MoreHorizontal, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { resolveVoucher, resolveItinerary, resolveFirstId } from "../services/fusiooDocumentService";
+import { generateItineraryPDF } from "../utils/generateItineraryPDF";
 import {
   getInsurancePlans,
   createCart,
@@ -42,11 +44,10 @@ const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6
 const ORANGE = "#FF8C00";
 
 // Converts any supported video URL to an embeddable iframe src.
-// Handles: youtu.be short links, youtube.com/watch, Google Drive /preview
-// YouTube params: rel=0 (no related), modestbranding=1 (minimal logo),
-//   playsinline=1 (inline iOS), iv_load_policy=3 (no annotations),
-//   cc_load_policy=0 (no auto-captions)
-const YT_PARAMS = "rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&cc_load_policy=0";
+// enablejsapi=1  → allows postMessage play/pause control
+// controls=0     → hides ALL YouTube UI (logo, progress bar, Watch on YouTube)
+// disablekb=1    → disables keyboard shortcuts on the player
+const YT_PARAMS = "enablejsapi=1&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&cc_load_policy=0&disablekb=1";
 function toVideoEmbedUrl(url) {
   if (!url) return "";
   const short = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
@@ -54,6 +55,198 @@ function toVideoEmbedUrl(url) {
   const watch = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
   if (watch) return `https://www.youtube.com/embed/${watch[1]}?${YT_PARAMS}`;
   return url;
+}
+
+// ─── BRIEFING VIDEO PLAYER ───────────────────────────────────────────────────
+// Normal mode: portrait player in the page.
+// Full-view mode: React fixed overlay — guaranteed centered, black background.
+function BriefingVideo({ videoUrl, name }) {
+  const iframeRef   = useRef(null);  // normal player
+  const fsIframeRef = useRef(null);  // fullscreen overlay player
+  const [playing,   setPlaying]   = useState(false);
+  const [fsPlaying, setFsPlaying] = useState(true);  // FS autoplays
+  const [isFS,      setIsFS]      = useState(false);
+
+  // Reset normal play button when video ends
+  useEffect(() => {
+    function onMsg(e) {
+      try {
+        const d = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        if (d.event === "onStateChange" && d.info === 0) {
+          setPlaying(false);
+          setFsPlaying(false);
+        }
+      } catch {}
+    }
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
+  // Close FS on Escape key + lock body scroll while open
+  useEffect(() => {
+    document.body.style.overflow = isFS ? "hidden" : "";
+    function onKey(e) { if (e.key === "Escape") closeFS(); }
+    if (isFS) window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [isFS]);
+
+  function togglePlay() {
+    const next = !playing;
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func: next ? "playVideo" : "pauseVideo", args: [] }), "*"
+    );
+    setPlaying(next);
+  }
+
+  function toggleFsPlay(e) {
+    e.stopPropagation();
+    const next = !fsPlaying;
+    fsIframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func: next ? "playVideo" : "pauseVideo", args: [] }), "*"
+    );
+    setFsPlaying(next);
+  }
+
+  function openFS() {
+    // Pause the normal player before opening overlay
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func: "pauseVideo", args: [] }), "*"
+    );
+    setPlaying(false);
+    setFsPlaying(true);
+    setIsFS(true);
+  }
+
+  function closeFS() {
+    setIsFS(false);
+    setFsPlaying(true);  // reset for next open
+  }
+
+  // Full-view embed autoplays with audio (user just tapped — browser allows it)
+  const fsEmbedUrl = toVideoEmbedUrl(videoUrl)
+    ? toVideoEmbedUrl(videoUrl) + "&autoplay=1"
+    : "";
+
+  const playBtnStyle = {
+    backgroundColor: "rgba(0,0,0,0.6)",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+    border: "2px solid rgba(255,255,255,0.3)",
+  };
+
+  return (
+    <>
+      {/* ── Normal portrait player ──────────────────────────────────────── */}
+      <div
+        className="relative rounded-3xl overflow-hidden shadow-2xl w-full"
+        style={{ maxWidth: 460, border: "1px solid rgba(0,0,0,0.12)" }}
+      >
+        {/* 9:16 portrait */}
+        <div className="relative w-full" style={{ paddingBottom: "177.78%" }}>
+          <iframe
+            ref={iframeRef}
+            src={toVideoEmbedUrl(videoUrl)}
+            title={`${name} Travel Briefing Video`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+            style={{ border: "none", backgroundColor: "#000" }}
+          />
+          <div className="absolute inset-0 z-10 cursor-pointer" onClick={togglePlay} />
+          {!playing && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+              <div className="w-24 h-24 rounded-full flex items-center justify-center shadow-2xl" style={playBtnStyle}>
+                <Play className="w-10 h-10 text-white ml-1" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Travel Briefing badge */}
+        <div className="absolute top-3 left-3 pointer-events-none z-30">
+          <div className="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-[0.25em] uppercase backdrop-blur-md border"
+            style={{ background: "rgba(0,0,0,0.55)", borderColor: "rgba(255,255,255,0.18)", color: "#fff" }}>
+            Travel Briefing
+          </div>
+        </div>
+
+        {/* Full-view open button — bottom-right */}
+        <button
+          onClick={openFS}
+          className="absolute bottom-3 right-3 z-40 w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", border: "1.5px solid rgba(255,255,255,0.28)", color: "#fff" }}
+          aria-label="Full view"
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* ── Full-view overlay — rendered into document.body via portal so it ──
+           escapes every stacking context (framer-motion, sticky header, etc.) */}
+      {isFS && createPortal(
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ backgroundColor: "#000", zIndex: 999999 }}
+        >
+          {/* Portrait video box — 9:16, centered horizontally on any screen */}
+          <div
+            className="relative"
+            style={{ height: "100vh", width: "calc(100vh * 9 / 16)", maxWidth: "100vw" }}
+          >
+            <iframe
+              ref={fsIframeRef}
+              src={fsEmbedUrl}
+              title={`${name} Travel Briefing Video`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+              style={{ border: "none", backgroundColor: "#000" }}
+            />
+            {/* Overlay — blocks YouTube clicks; toggles play/pause */}
+            <div className="absolute inset-0 cursor-pointer" style={{ zIndex: 10 }} onClick={toggleFsPlay} />
+            {/* Play button when FS video is paused */}
+            {!fsPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 20 }}>
+                <div className="w-28 h-28 rounded-full flex items-center justify-center shadow-2xl" style={playBtnStyle}>
+                  <Play className="w-12 h-12 text-white ml-1" />
+                </div>
+              </div>
+            )}
+
+            {/* Close / Exit Full View button — top-right of the video, always on top */}
+            <button
+              onClick={closeFS}
+              className="absolute flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+              style={{
+                top: 16,
+                right: 16,
+                zIndex: 30,
+                backgroundColor: "rgba(0,0,0,0.72)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "2px solid rgba(255,255,255,0.4)",
+                borderRadius: 999,
+                color: "#fff",
+                padding: "10px 18px 10px 14px",
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "var(--font-condensed)",
+                letterSpacing: "0.08em",
+              }}
+              aria-label="Exit full view"
+            >
+              <X style={{ width: 16, height: 16 }} />
+              EXIT FULL VIEW
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
+  );
 }
 
 // ─── SECTION DIVIDER ─────────────────────────────────────────────────────────
@@ -441,16 +634,19 @@ function RemindersSection({ briefing, theme }) {
     <BriefingSection label="Before Each Tour Day" title="Tour Reminders" theme={theme}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {reminders.map((item, i) => {
-          // Normalize: support both {icon, text} objects and legacy plain strings
           const text = typeof item === "string" ? item : (item.text || "");
-          const icon = typeof item === "object" && item.icon ? item.icon : null;
           return (
             <div
               key={i}
               className="flex items-start gap-3 px-4 py-3.5 rounded-xl border"
               style={{ backgroundColor: bgCard, borderColor: border }}
             >
-              {icon && <span className="text-lg shrink-0">{icon}</span>}
+              <span
+                className="font-condensed font-black text-sm shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5"
+                style={{ backgroundColor: ORANGE + "20", color: ORANGE }}
+              >
+                {i + 1}
+              </span>
               <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
                 {text}
               </span>
@@ -1148,10 +1344,9 @@ function EmergencyContactsSection({ briefing, theme }) {
             style={{ borderColor: border, backgroundColor: bgCard }}
           >
             <div
-              className="flex items-center gap-2 px-4 py-3 border-b"
+              className="px-4 py-3 border-b"
               style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
             >
-              <span className="text-lg">{group.icon}</span>
               <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>
                 {group.category}
               </p>
@@ -2684,12 +2879,20 @@ function PreviewContent() {
                         <FileText className="w-4 h-4" /> View Itinerary
                       </a>
                     )}
-                    {(itineraryDoc.status === "idle" || itineraryDoc.status === "unavailable") && (
+                    {(itineraryDoc.status === "idle" || itineraryDoc.status === "unavailable") && (briefing?.itinerary?.length || pkg?.itinerary?.length) ? (
+                      <button
+                        onClick={() => generateItineraryPDF({ dest, briefing, pkg, booking })}
+                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border transition-all hover:opacity-80 active:scale-95"
+                        style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: isDark ? "transparent" : "#FFF8F0" }}
+                      >
+                        <Download className="w-4 h-4" /> Download Itinerary
+                      </button>
+                    ) : (itineraryDoc.status === "idle" || itineraryDoc.status === "unavailable") ? (
                       <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
                         style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.5 }}>
                         <FileText className="w-4 h-4" /> View Itinerary
                       </button>
-                    )}
+                    ) : null}
 
                   </div>
                 </div>
@@ -2706,53 +2909,24 @@ function PreviewContent() {
 
       {/* ── PORTRAIT VIDEO SECTION (destination page only) ── */}
       {dest && (
-      <div className="bg-black py-16 px-4 lg:px-10 relative overflow-hidden">
+      <div className="bg-white py-16 px-4 lg:px-10 relative overflow-hidden">
         <div
-          className="absolute inset-0 opacity-20"
-          style={{ background: "radial-gradient(circle at center, rgba(255,140,0,0.18) 0%, transparent 70%)" }}
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(circle at center, rgba(255,140,0,0.06) 0%, transparent 70%)" }}
         />
         <div className="max-w-4xl mx-auto text-center mb-8 relative z-10">
           <p className="text-xs font-bold tracking-[0.3em] uppercase mb-2" style={{ color: ORANGE }}>
             Destination Briefing Video
           </p>
-          <h2 className="font-condensed font-black text-white text-3xl lg:text-4xl">Watch Before You Travel</h2>
-          <p className="text-white/60 text-sm mt-2 max-w-md mx-auto">
+          <h2 className="font-condensed font-black text-[#111] text-3xl lg:text-4xl">Watch Before You Travel</h2>
+          <p className="text-sm mt-2 max-w-md mx-auto" style={{ color: "#666" }}>
             Your official travel briefing video — watch to prepare for your upcoming trip.
           </p>
         </div>
 
         <div className="relative z-10 flex justify-center px-4 w-full">
           {dest.videoUrl ? (
-            <motion.div
-              whileHover={{ scale: 1.008 }}
-              transition={{ duration: 0.3 }}
-              className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl w-full"
-              style={{ maxWidth: 380 }}
-            >
-              {/* 9:16 portrait wrapper */}
-              <div className="relative w-full" style={{ paddingBottom: "177.78%" }}>
-                <iframe
-                  src={toVideoEmbedUrl(dest.videoUrl)}
-                  title={`${dest.name} Travel Briefing Video`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
-                  style={{ border: "none", backgroundColor: "#000" }}
-                />
-                {/* Block YouTube top bar — covers channel name, Watch on YouTube link */}
-                <div className="absolute top-0 inset-x-0 z-10" style={{ height: 52 }} />
-                {/* Block YouTube logo in bottom-right controls */}
-                <div className="absolute bottom-0 right-0 z-10" style={{ width: 88, height: 42 }} />
-              </div>
-              <div className="absolute top-4 left-4 pointer-events-none z-10">
-                <div
-                  className="px-3 py-1.5 rounded-full text-[10px] font-bold tracking-[0.25em] uppercase backdrop-blur-md border"
-                  style={{ background: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.15)", color: "#fff" }}
-                >
-                  Travel Briefing
-                </div>
-              </div>
-            </motion.div>
+            <BriefingVideo videoUrl={dest.videoUrl} name={dest.name} />
           ) : (
             <motion.div
               whileHover={{ scale: 1.01 }}

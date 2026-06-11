@@ -1,9 +1,7 @@
 // @ts-nocheck
-import { Check } from "lucide-react";
-
 const ORANGE = "#FF8C00";
 
-function TravelerTypeCard({ type, icon, requirements, note, theme }) {
+function TravelerTypeCard({ type, requirements, note, theme }) {
   const { bgCard, bgAlt, border, textPrimary, textSecondary, isDark } = theme;
 
   return (
@@ -12,10 +10,9 @@ function TravelerTypeCard({ type, icon, requirements, note, theme }) {
       style={{ borderColor: border, backgroundColor: bgCard }}
     >
       <div
-        className="flex items-center gap-3 px-5 py-4 border-b"
+        className="px-5 py-4 border-b"
         style={{ borderColor: border, backgroundColor: isDark ? "#1A1500" : "#FFF8F0" }}
       >
-        <span className="text-xl shrink-0">{icon}</span>
         <span
           className="font-condensed font-bold text-base lg:text-lg tracking-wide"
           style={{ color: textPrimary }}
@@ -38,7 +35,7 @@ function TravelerTypeCard({ type, icon, requirements, note, theme }) {
           <ul className="space-y-2">
             {requirements.map((req, i) => (
               <li key={i} className="flex items-start gap-2.5">
-                <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: ORANGE }} />
+                <span className="font-body text-sm font-bold shrink-0" style={{ color: ORANGE }}>·</span>
                 <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
                   {req}
                 </span>
@@ -76,7 +73,6 @@ export default function ImmigrationAdvisory({ advisory = [], theme }) {
         <TravelerTypeCard
           key={i}
           type={item.type}
-          icon={item.icon}
           requirements={item.requirements}
           note={item.note}
           theme={theme}
