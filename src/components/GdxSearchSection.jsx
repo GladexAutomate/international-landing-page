@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useTheme } from "../lib/ThemeContext";
 import { getFullBookingFromFusioo } from "../services/fusiooService";
 import { resolveDestinationSlug } from "../utils/destinationResolver";
+import { getCachedGdx, setCachedGdx } from "../services/gdxCacheService";
 
 const ORANGE     = "#FF8C00";
 const LOGO_URL   = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
@@ -17,7 +18,8 @@ const STATUS = {
   IDLE:       "idle",
   SEARCHING:  "searching",
   FOUND:      "found",    // Supabase confirmed — Fusioo loading
-  READY:      "ready",    // Fusioo loaded — show View My Trip button
+  CACHED:     "cached",   // Retrieved instantly from gdx_cache table
+  READY:      "ready",    // Loaded — show View My Trip button
   NOT_FOUND:  "not_found",
   ERROR:      "error",
 };
@@ -69,6 +71,13 @@ function StatusMessage({ status, gdxInput, isDark }) {
       color:  ORANGE,
       bg:     isDark ? "rgba(255,140,0,0.08)" : "rgba(255,140,0,0.07)",
       border: "rgba(255,140,0,0.3)",
+    },
+    [STATUS.CACHED]: {
+      icon:   <CheckCircle className="w-5 h-5" style={{ color: "#22C55E" }} />,
+      text:   "Booking loaded instantly from cache! Click View My Trip below.",
+      color:  "#22C55E",
+      bg:     isDark ? "rgba(34,197,94,0.08)" : "rgba(34,197,94,0.07)",
+      border: "rgba(34,197,94,0.3)",
     },
     [STATUS.READY]: {
       icon:   <CheckCircle className="w-5 h-5" style={{ color: "#22C55E" }} />,
@@ -132,7 +141,8 @@ export default function GdxSearchSection() {
   const textPrimary   = isDark ? "#FFFFFF" : "#111111";
   const textSecondary = isDark ? "#A0A0A0" : "#555555";
 
-  const isLoading = status === STATUS.SEARCHING || status === STATUS.FOUND;
+  const isLoading  = status === STATUS.SEARCHING || status === STATUS.FOUND;
+  const isReady    = status === STATUS.READY || status === STATUS.CACHED;
 
   const handleSearch = async () => {
     const query = gdxInput.trim();
@@ -147,23 +157,29 @@ export default function GdxSearchSection() {
     setBooking(null);
 
     try {
-      console.log("[GDX] Searching:", query);
+      // ── 1. Check gdx_cache first ─────────────────────────────────────────
+      const cached = await getCachedGdx(query);
+      if (cached) {
+        setBooking(cached.booking);
+        setStatus(STATUS.CACHED);
+        return;
+      }
 
+      // ── 2. Cache miss — read from bookings table ──────────────────────────
+      console.log("[GDX] Cache miss — querying Supabase:", query);
       const { data, error: supaError } = await supabase
         .from("bookings_6fbdd6b2")
         .select("*")
         .eq("gdx", query);
-
-      console.log("[GDX] Response:", data);
-      console.log("[GDX] Error:", supaError);
 
       if (supaError || !data || data.length === 0) {
         setStatus(STATUS.NOT_FOUND);
         return;
       }
 
+      // ── 3. Enrich with Fusioo ─────────────────────────────────────────────
       const rawBooking = data[0];
-      setStatus(STATUS.FOUND); // Show "Loading your trip details…" while Fusioo loads
+      setStatus(STATUS.FOUND); // Show "Loading your trip details…"
 
       const fullBooking = await getFullBookingFromFusioo(rawBooking);
       console.log("[GDX] Full booking loaded:", {
@@ -177,8 +193,12 @@ export default function GdxSearchSection() {
         amountPaid:      fullBooking?.amountPaid,
       });
 
+      // ── 4. Store in gdx_cache (fire-and-forget, won't slow the user down) ─
+      const resolvedSlug = resolveDestinationSlug(fullBooking);
+      setCachedGdx(query, fullBooking, resolvedSlug);
+
       setBooking(fullBooking);
-      setStatus(STATUS.READY); // Show "View My Trip" button
+      setStatus(STATUS.READY);
 
     } catch (err) {
       console.error("[GDX] Unexpected error:", err);
@@ -191,6 +211,7 @@ export default function GdxSearchSection() {
     sessionStorage.setItem("gdx_booking", JSON.stringify(booking));
     navigate(`/destination/${slug || "_booking"}`, { state: { booking } });
   };
+
 
   return (
     <div
@@ -313,9 +334,9 @@ export default function GdxSearchSection() {
             </AnimatePresence>
           </motion.div>
 
-          {/* View My Trip button — navigates to destination briefing page */}
+          {/* View My Trip button — shows on READY (fresh) or CACHED (instant) */}
           <AnimatePresence>
-            {status === STATUS.READY && (
+            {isReady && (
               <motion.button
                 className="w-full mt-4 inline-flex items-center justify-center gap-2 font-body font-bold text-base py-4 rounded-2xl"
                 style={{ backgroundColor: ORANGE, color: "#080808" }}
