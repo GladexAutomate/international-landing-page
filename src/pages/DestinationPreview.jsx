@@ -2135,6 +2135,9 @@ function PreviewContent() {
   const dest    = getDestinationBySlug(slug);
   const briefing = getBriefingBySlug(slug);
 
+  // Scroll to top whenever the slug changes (mobile browser may preserve prior scroll)
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [slug]);
+
   // ── Read enriched booking passed from GDX search (or sessionStorage fallback) ─
   const booking = location.state?.booking ?? (() => {
     try { return JSON.parse(sessionStorage.getItem("gdx_booking")); } catch { return null; }
@@ -2346,9 +2349,9 @@ function PreviewContent() {
   // should always reach their booking dashboard even if the destination slug is unknown.
   if (!dest && !booking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <p className="font-condensed text-2xl font-bold text-gray-400 mb-4">Destination not found</p>
+      <div className="min-h-screen flex items-center justify-center transition-colors duration-300" style={{ backgroundColor: isDark ? "#111111" : "#F5F5F5" }}>
+        <div className="text-center px-4">
+          <p className="font-condensed text-2xl font-bold mb-4" style={{ color: isDark ? "#A0A0A0" : "#555555" }}>Destination not found</p>
           <button onClick={() => navigate("/")} className="font-body text-sm underline" style={{ color: ORANGE }}>
             ← Back to Home
           </button>
@@ -2381,8 +2384,8 @@ function PreviewContent() {
 
       {/* ── HERO (destination page only) ── */}
       {dest && (
-        <div className="relative overflow-hidden" style={{ height: "60vh", minHeight: 340 }}>
-          <img src={dest.heroImage} alt={dest.name} className="w-full h-full object-cover" />
+        <div className="relative overflow-hidden" style={{ height: "60vh", minHeight: 340, backgroundColor: "#111" }}>
+          <img src={dest.heroImage} alt={dest.name} className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
           <div className="absolute bottom-8 left-0 right-0 text-center px-4">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
@@ -2856,10 +2859,9 @@ function PreviewContent() {
                           initial={{ opacity: 0, x: -4 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.25, delay: 0.03 * (si * 4 + i) }}
-                          className="group flex items-start gap-3 px-5 py-3.5 border-b transition-colors duration-150"
+                          className={`group flex items-start gap-3 px-5 py-3.5 border-b transition-colors duration-150${i % 2 === 0 ? " sm:border-r" : ""}`}
                           style={{
                             borderColor: border,
-                            borderRight: (i % 2 === 0) ? `1px solid ${border}` : "none",
                             backgroundColor: "transparent",
                           }}
                           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)"; }}

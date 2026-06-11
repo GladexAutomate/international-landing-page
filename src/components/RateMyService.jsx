@@ -204,7 +204,7 @@ export default function RateMyService({ theme, gdxReference, onReviewSaved }) {
                     onClick={() => setSelected(i + 1)}
                     onMouseEnter={() => setHovered(i + 1)}
                     onMouseLeave={() => setHovered(0)}
-                    className="transition-transform hover:scale-110 focus:outline-none"
+                    className="transition-transform hover:scale-110 focus:outline-none min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label={`Rate ${i + 1} star${i === 0 ? "" : "s"}`}
                   >
                     <Star

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star, UserCircle } from "lucide-react";
 import BriefingSection from "./briefing/BriefingSection";
@@ -158,6 +158,16 @@ export default function BriefingTestimonials({ theme, clientReview }) {
   const prev = () => { setDir(-1); setActive((a) => (a - 1 + N) % N); };
   const next = () => { setDir(1);  setActive((a) => (a + 1) % N);     };
 
+  // Touch swipe support for mobile
+  const touchX = useRef(null);
+  function onTouchStart(e) { touchX.current = e.touches[0].clientX; }
+  function onTouchEnd(e) {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+    touchX.current = null;
+  }
+
   // Keep active index in range when N changes (e.g. client review added)
   const safeActive = active % N;
   const cards = [0, 1, 2].map((offset) => ALL[(safeActive + offset) % N]);
@@ -168,8 +178,12 @@ export default function BriefingTestimonials({ theme, clientReview }) {
       title="Real Gladex Travel Experiences 🧡"
       theme={theme}
     >
-      {/* Card area */}
-      <div className="overflow-hidden">
+      {/* Card area — touch swipe enabled on mobile */}
+      <div
+        className="overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         <AnimatePresence mode="wait" custom={dir}>
           <motion.div
             key={safeActive}

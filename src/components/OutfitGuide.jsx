@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import BriefingSection from "./briefing/BriefingSection";
@@ -247,7 +247,7 @@ function OutfitCategoryCard({ category, theme }) {
               <button
                 key={i}
                 onClick={() => selectVariant(i)}
-                className="font-body font-bold text-[11px] px-3 py-1 rounded-full transition-all"
+                className="font-body font-bold text-[11px] px-3 py-1.5 rounded-full transition-all"
                 style={{
                   backgroundColor:
                     i === variantIdx ? ORANGE : "rgba(255,255,255,0.16)",
@@ -292,7 +292,7 @@ export default function OutfitGuide({ theme }) {
   const outerTouchX = useRef(null);
 
   // Keep cardsPerView in sync on resize
-  useState(() => {
+  useEffect(() => {
     const update = () => {
       const cpv = window.innerWidth >= 640 ? 2 : 1;
       setCardsPerView(cpv);
@@ -300,7 +300,7 @@ export default function OutfitGuide({ theme }) {
     };
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  });
+  }, [total]);
 
   const maxIdx = total - cardsPerView;
 

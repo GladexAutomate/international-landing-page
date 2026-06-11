@@ -286,7 +286,7 @@ export default function GdxSearchSection() {
                 onClick={handleSearch}
                 disabled={isLoading || !gdxInput.trim()}
                 aria-label="Find my briefing"
-                className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-7 py-4 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-7 py-4 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0 w-full sm:w-auto"
                 style={{ backgroundColor: ORANGE, color: "#080808" }}
                 whileHover={{ scale: 1.03, boxShadow: "0 0 24px rgba(255,140,0,0.45)" }}
                 whileTap={{ scale: 0.97 }}

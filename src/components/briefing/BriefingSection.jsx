@@ -26,7 +26,7 @@ export default function BriefingSection({ label, title, children, theme }) {
             style={{ backgroundColor: ORANGE }}
           />
           <h2
-            className="font-condensed font-black text-2xl lg:text-3xl tracking-wide leading-tight"
+            className="font-condensed font-black text-xl sm:text-2xl lg:text-3xl tracking-wide leading-tight"
             style={{ color: textPrimary }}
           >
             {title}
