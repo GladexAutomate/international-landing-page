@@ -2054,6 +2054,9 @@ function PreviewContent() {
   // Booking modal state — null = closed, tour object = open
   const [bookingModalTour, setBookingModalTour] = useState(null);
 
+  // Client's own submitted review — passed to Testimonials so it appears as first card
+  const [clientReview, setClientReview] = useState(null);
+
   // Recompute totals whenever tours or insurance change
   const _updateTotals = (tours, insurance) => {
     const totals = calculateCartTotal(tours, insurance);
@@ -2736,6 +2739,10 @@ function PreviewContent() {
                   className="absolute inset-0 w-full h-full"
                   style={{ border: "none", backgroundColor: "#000" }}
                 />
+                {/* Block YouTube top bar — covers channel name, Watch on YouTube link */}
+                <div className="absolute top-0 inset-x-0 z-10" style={{ height: 52 }} />
+                {/* Block YouTube logo in bottom-right controls */}
+                <div className="absolute bottom-0 right-0 z-10" style={{ width: 88, height: 42 }} />
               </div>
               <div className="absolute top-4 left-4 pointer-events-none z-10">
                 <div
@@ -2970,7 +2977,7 @@ function PreviewContent() {
 
             {/* ── 22. TESTIMONIALS ── */}
             <div className={sectionGap}>
-              <BriefingTestimonials theme={theme} />
+              <BriefingTestimonials theme={theme} clientReview={clientReview} />
             </div>
             <SectionDivider theme={theme} />
 
@@ -2978,7 +2985,7 @@ function PreviewContent() {
             {booking?.gdx && (
               <>
                 <div className={sectionGap}>
-                  <RateMyService theme={theme} gdxReference={booking.gdx} />
+                  <RateMyService theme={theme} gdxReference={booking.gdx} onReviewSaved={setClientReview} />
                 </div>
                 <SectionDivider theme={theme} />
               </>

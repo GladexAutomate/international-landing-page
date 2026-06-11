@@ -6,7 +6,7 @@ import BriefingSection from "./briefing/BriefingSection";
 
 const ORANGE = "#FF8C00";
 
-export default function RateMyService({ theme, gdxReference }) {
+export default function RateMyService({ theme, gdxReference, onReviewSaved }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
 
   const [loading,        setLoading]        = useState(true);
@@ -38,7 +38,10 @@ export default function RateMyService({ theme, gdxReference }) {
         if (fetchError) {
           console.error("[RateMyService] fetch error:", fetchError.code, fetchError.message);
         }
-        if (!fetchError && data) setExistingReview(data);
+        if (!fetchError && data) {
+          setExistingReview(data);
+          onReviewSaved?.(data);
+        }
         setLoading(false);
       });
   }, [gdxReference]);
@@ -85,6 +88,7 @@ export default function RateMyService({ theme, gdxReference }) {
 
     const saved = { rating: selected, comment: comment.trim() || null };
     setExistingReview(saved);
+    onReviewSaved?.(saved);
     setIsEditing(false);
     setSelected(0);
     setComment("");
