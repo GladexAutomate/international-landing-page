@@ -168,17 +168,26 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
       .from("reviews")
       .upsert(payload, { onConflict: "gdx_reference" });
 
-    // Strip unknown columns and retry once
+    // Retry 1: strip whichever optional column Postgres flagged
     if (upsertError?.code === "42703") {
       const clean = { ...payload };
-      if (upsertError.message?.includes("destination")) delete clean.destination;
       if (upsertError.message?.includes("photos"))      delete clean.photos;
-      const retry = await supabase.from("reviews").upsert(clean, { onConflict: "gdx_reference" });
-      upsertError = retry.error;
+      if (upsertError.message?.includes("destination")) delete clean.destination;
+      const r2 = await supabase.from("reviews").upsert(clean, { onConflict: "gdx_reference" });
+      upsertError = r2.error;
+    }
+
+    // Retry 2: both optional columns missing — fall back to core fields only
+    if (upsertError?.code === "42703") {
+      const r3 = await supabase.from("reviews").upsert(
+        { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null },
+        { onConflict: "gdx_reference" }
+      );
+      upsertError = r3.error;
     }
 
     if (upsertError) {
-      console.error("[RateMyService] upsert:", upsertError.code, upsertError.message);
+      console.error("[RateMyService] upsert failed:", upsertError.code, upsertError.message);
       setError("Something went wrong. Please try again.");
       setSubmitting(false);
       return;
