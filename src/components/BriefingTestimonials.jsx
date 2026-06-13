@@ -222,27 +222,58 @@ function TestimonialCard({ t, theme }) {
           >
             Photos
           </p>
-          <div
-            className={`grid gap-1.5 mb-1 ${
-              photos.length === 1 ? "grid-cols-1" : photos.length === 2 ? "grid-cols-2" : "grid-cols-3"
-            }`}
-          >
-            {photos.map((url, i) => (
+          <div className="space-y-1.5 mb-1">
+            {/* 1 photo — full width, natural height */}
+            {photos.length === 1 && (
               <button
-                key={i}
-                onClick={() => setLightboxIndex(i)}
-                className={`overflow-hidden rounded-xl transition-transform hover:scale-[1.03] active:scale-95 focus:outline-none ${
-                  photos.length === 1 ? "w-full" : ""
-                }`}
-                aria-label={`View photo ${i + 1}`}
+                onClick={() => setLightboxIndex(0)}
+                className="w-full overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
+                aria-label="View photo"
               >
-                <img
-                  src={url}
-                  alt={`Photo ${i + 1}`}
-                  className={`w-full object-cover ${photos.length === 1 ? "max-h-40" : "aspect-square"}`}
-                />
+                <img src={photos[0]} alt="Photo 1" className="w-full h-auto block rounded-xl" />
               </button>
-            ))}
+            )}
+
+            {/* 2 photos — side by side, natural height */}
+            {photos.length === 2 && (
+              <div className="grid grid-cols-2 gap-1.5">
+                {photos.map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setLightboxIndex(i)}
+                    className="overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
+                    aria-label={`View photo ${i + 1}`}
+                  >
+                    <img src={url} alt={`Photo ${i + 1}`} className="w-full h-auto block rounded-xl" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* 3 photos — first full width, then 2 side by side */}
+            {photos.length >= 3 && (
+              <>
+                <button
+                  onClick={() => setLightboxIndex(0)}
+                  className="w-full overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
+                  aria-label="View photo 1"
+                >
+                  <img src={photos[0]} alt="Photo 1" className="w-full h-auto block rounded-xl" />
+                </button>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {photos.slice(1).map((url, i) => (
+                    <button
+                      key={i + 1}
+                      onClick={() => setLightboxIndex(i + 1)}
+                      className="overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
+                      aria-label={`View photo ${i + 2}`}
+                    >
+                      <img src={url} alt={`Photo ${i + 2}`} className="w-full h-auto block rounded-xl" />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </>
       )}

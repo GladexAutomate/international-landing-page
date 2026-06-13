@@ -273,23 +273,15 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
             </p>
           )}
 
-          {/* Photos */}
+          {/* Photos — full image, no cropping */}
           {existingReview.photos?.length > 0 && (
-            <div
-              className={`grid gap-2 ${
-                existingReview.photos.length === 1
-                  ? "grid-cols-1"
-                  : existingReview.photos.length === 2
-                  ? "grid-cols-2"
-                  : "grid-cols-3"
-              }`}
-            >
+            <div className="space-y-2">
               {existingReview.photos.map((url, i) => (
                 <img
                   key={i}
                   src={url}
                   alt={`Your photo ${i + 1}`}
-                  className={`w-full ${existingReview.photos.length === 1 ? "max-h-52 object-cover rounded-xl" : "aspect-square object-cover rounded-xl"}`}
+                  className="w-full h-auto block rounded-xl"
                 />
               ))}
             </div>
