@@ -39,7 +39,7 @@ function DayCard({ day, title, activities, galleryImages, theme }) {
             <li key={i} className="flex items-start gap-3">
               <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: ORANGE }} />
               <span
-                className="font-body text-sm leading-relaxed"
+                className="font-body text-base leading-relaxed"
                 style={{ color: textSecondary }}
               >
                 {activity}

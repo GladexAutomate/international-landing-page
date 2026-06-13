@@ -41,7 +41,7 @@ export default function DosAndDonts({ dos = [], donts = [], theme }) {
                 strokeWidth={2.5}
               />
               <span
-                className="font-body text-sm leading-relaxed"
+                className="font-body text-base leading-relaxed"
                 style={{ color: isDark ? "#86EFAC" : "#166534" }}
               >
                 {item}
@@ -82,7 +82,7 @@ export default function DosAndDonts({ dos = [], donts = [], theme }) {
                 strokeWidth={2.5}
               />
               <span
-                className="font-body text-sm leading-relaxed"
+                className="font-body text-base leading-relaxed"
                 style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}
               >
                 {item}

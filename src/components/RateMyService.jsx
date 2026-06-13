@@ -6,7 +6,7 @@ import BriefingSection from "./briefing/BriefingSection";
 
 const ORANGE = "#FF8C00";
 
-export default function RateMyService({ theme, gdxReference, onReviewSaved }) {
+export default function RateMyService({ theme, gdxReference, destination, onReviewSaved }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
 
   const [loading,        setLoading]        = useState(true);
@@ -68,12 +68,24 @@ export default function RateMyService({ theme, gdxReference, onReviewSaved }) {
     setSubmitting(true);
     setError(null);
 
-    const { error: upsertError } = await supabase
+    // Build payload — include destination if provided (column must exist in Supabase)
+    const payload = { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null };
+    if (destination) payload.destination = destination;
+
+    let { error: upsertError } = await supabase
       .from("reviews")
-      .upsert(
-        { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null },
-        { onConflict: "gdx_reference" }
-      );
+      .upsert(payload, { onConflict: "gdx_reference" });
+
+    // If destination column doesn't exist yet, retry without it
+    if (upsertError?.code === "42703" || upsertError?.message?.toLowerCase().includes("destination")) {
+      const retry = await supabase
+        .from("reviews")
+        .upsert(
+          { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null },
+          { onConflict: "gdx_reference" }
+        );
+      upsertError = retry.error;
+    }
 
     if (upsertError) {
       console.error("[RateMyService] upsert error:", upsertError.code, upsertError.message);
@@ -146,7 +158,7 @@ export default function RateMyService({ theme, gdxReference, onReviewSaved }) {
           {/* Comment */}
           {existingReview.comment && (
             <p
-              className="font-body text-sm leading-relaxed italic px-4 py-3 rounded-xl"
+              className="font-body text-base leading-relaxed italic px-4 py-3 rounded-xl"
               style={{
                 backgroundColor: isDark ? "rgba(255,140,0,0.07)" : "rgba(255,140,0,0.05)",
                 color: textSecondary,

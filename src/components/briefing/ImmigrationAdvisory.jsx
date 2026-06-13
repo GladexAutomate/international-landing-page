@@ -36,7 +36,7 @@ function TravelerTypeCard({ type, requirements, note, theme }) {
             {requirements.map((req, i) => (
               <li key={i} className="flex items-start gap-2.5">
                 <span className="font-body text-sm font-bold shrink-0" style={{ color: ORANGE }}>·</span>
-                <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
                   {req}
                 </span>
               </li>

@@ -10,7 +10,7 @@ export default function NeedAssistance({ contacts, theme }) {
 
   return (
     <div className="space-y-4">
-      <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+      <p className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
         Have a question before or during your trip? Our team is ready to assist. Choose your preferred channel below.
       </p>
 

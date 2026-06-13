@@ -17,7 +17,7 @@ function FAQItem({ q, a, theme }) {
         {q}
       </p>
       <p
-        className="font-body text-sm leading-relaxed"
+        className="font-body text-base leading-relaxed"
         style={{ color: textSecondary }}
       >
         {a}

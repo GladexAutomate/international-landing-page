@@ -3,11 +3,12 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2, Download, FileText, User, CalendarDays, Hotel, Plane, Users, Tag, BadgeCheck, Mail, DollarSign, Briefcase, UserCheck, Car, MoreHorizontal, ChevronLeft, ChevronRight, Maximize2, Volume2, VolumeX } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
+import ScrollControls from "../components/ScrollControls";
 import { resolveVoucher, resolveItinerary, resolveFirstId } from "../services/fusiooDocumentService";
 import { generateItineraryPDF } from "../utils/generateItineraryPDF";
 import {
@@ -39,6 +40,42 @@ import BriefingTestimonials from "../components/BriefingTestimonials";
 import RateMyService from "../components/RateMyService";
 import ReferralSection from "../components/ReferralSection";
 import { getDestinationImage } from "../utils/destinationImages";
+
+// ─── PAGE-LEVEL ERROR BOUNDARY ────────────────────────────────────────────────
+// Catches any uncaught render error and shows a recoverable fallback instead
+// of a blank/black screen.
+class PageErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err, info) { console.error("[PageErrorBoundary]", err, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#111", padding: "2rem", textAlign: "center" }}>
+          <p style={{ color: "#FF8C00", fontWeight: 700, fontSize: "1.25rem", marginBottom: "0.5rem" }}>Something went wrong loading this page.</p>
+          <p style={{ color: "#888", fontSize: "0.875rem", marginBottom: "1.5rem" }}>Please refresh the page or go back and try again.</p>
+          <button onClick={() => window.location.reload()} style={{ backgroundColor: "#FF8C00", color: "#000", padding: "0.75rem 1.5rem", borderRadius: "0.75rem", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "0.9rem" }}>
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ─── SECTION-LEVEL ERROR BOUNDARY ────────────────────────────────────────────
+// Wraps individual briefing sections — if one section fails, it renders nothing
+// for that section and the rest of the page continues to load.
+class SectionErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err, info) { console.error("[SectionErrorBoundary] Section failed to render:", err, info?.componentStack); }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const ORANGE = "#FF8C00";
@@ -311,6 +348,126 @@ function SectionDivider({ theme }) {
   );
 }
 
+// ─── CONTACT PANEL — important numbers, shown at top of briefing ─────────────
+function ContactPanel({ briefing, booking, theme }) {
+  const { textPrimary, textSecondary, bgCard, border, isDark } = theme;
+
+  // Gladex hotline from assistanceContacts
+  const gladexHotline = (() => {
+    const ac = briefing?.assistanceContacts;
+    if (!Array.isArray(ac)) return null;
+    for (const c of ac) {
+      if (c.phone) return c.phone;
+      if (c.whatsapp) return c.whatsapp;
+      if (c.value) return c.value;
+    }
+    return null;
+  })();
+
+  // Travel consultant from booking
+  const consultantName = (() => {
+    if (!booking) return null;
+    const raw = booking.name_of_agent_1 || booking.name_of_agent || booking.agent_name;
+    return raw && typeof raw === "string" ? raw.trim() : null;
+  })();
+
+  // Hotel contact from booking or briefing
+  const hotelContact = (() => {
+    if (booking?.hotelPhone) return String(booking.hotelPhone).trim();
+    const hotels = briefing?.hotelInformation?.hotels;
+    if (Array.isArray(hotels) && hotels[0]) {
+      const h = hotels[0];
+      return h.phone || h.contact || null;
+    }
+    return null;
+  })();
+
+  // Transfer & emergency contacts from briefing.emergencyContacts
+  const { transferContact, emergencyNumber } = (() => {
+    const ec = briefing?.emergencyContacts;
+    if (!Array.isArray(ec)) return { transferContact: null, emergencyNumber: null };
+    let transfer = null, emergency = null;
+    for (const group of ec) {
+      for (const c of (group.contacts || [])) {
+        const lbl = (c.label || "").toLowerCase();
+        if (!transfer && (lbl.includes("transfer") || lbl.includes("driver") || lbl.includes("ground") || lbl.includes("transport"))) {
+          transfer = c.value;
+        }
+        if (!emergency && (lbl.includes("ambulance") || lbl.includes("emergency hotline") || (lbl.includes("police") && !lbl.includes("immigration")))) {
+          emergency = c.value;
+        }
+      }
+    }
+    return { transferContact: transfer, emergencyNumber: emergency };
+  })();
+
+  const contactItems = [
+    gladexHotline   ? { Icon: Phone,         label: "Gladex Hotline",   value: gladexHotline }   : null,
+    consultantName  ? { Icon: User,           label: "Travel Consultant", value: consultantName }  : null,
+    transferContact ? { Icon: Car,            label: "Transfer Provider", value: transferContact } : null,
+    hotelContact    ? { Icon: Hotel,          label: "Hotel Contact",     value: hotelContact }    : null,
+    emergencyNumber ? { Icon: AlertTriangle,  label: "Emergency",         value: emergencyNumber } : null,
+  ].filter(Boolean);
+
+  if (contactItems.length === 0) return null;
+
+  const isPhone = (v) => /^\+?[\d\s\-\(\)]{6,}$/.test(String(v));
+
+  return (
+    <div
+      className="rounded-2xl border overflow-hidden"
+      style={{ borderColor: ORANGE + "50", backgroundColor: bgCard }}
+    >
+      {/* Header */}
+      <div
+        className="px-5 py-3 border-b"
+        style={{ borderColor: border, backgroundColor: isDark ? "#1A0A00" : "#FFF8F0" }}
+      >
+        <p className="font-condensed font-black text-sm tracking-widest uppercase" style={{ color: ORANGE }}>
+          Important Contact Numbers
+        </p>
+        <p className="font-body text-xs mt-0.5" style={{ color: textSecondary }}>
+          Save these before you travel
+        </p>
+      </div>
+
+      {/* Contact grid — gap-px creates hairline separators */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-px" style={{ backgroundColor: border }}>
+        {contactItems.map((c, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 px-4 py-3.5"
+            style={{ backgroundColor: bgCard }}
+          >
+            <c.Icon className="w-4 h-4 shrink-0" style={{ color: ORANGE }} />
+            <div className="min-w-0">
+              <p
+                className="font-body text-xs font-bold uppercase tracking-widest mb-0.5"
+                style={{ color: textSecondary }}
+              >
+                {c.label}
+              </p>
+              {isPhone(c.value) ? (
+                <a
+                  href={`tel:${String(c.value).replace(/\D/g, "")}`}
+                  className="font-condensed font-black text-sm hover:opacity-75 block truncate transition-opacity"
+                  style={{ color: textPrimary }}
+                >
+                  {c.value}
+                </a>
+              ) : (
+                <p className="font-condensed font-black text-sm truncate" style={{ color: textPrimary }}>
+                  {c.value}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── 1. WELCOME SECTION ──────────────────────────────────────────────────────
 function WelcomeSection({ briefing, pkg, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
@@ -351,7 +508,7 @@ function WelcomeSection({ briefing, pkg, theme }) {
         {body.map((para, i) => (
           <p
             key={i}
-            className="font-body text-sm leading-relaxed"
+            className="font-body text-base leading-relaxed"
             style={{ color: i === 0 ? textPrimary : textSecondary }}
           >
             {para}
@@ -387,7 +544,7 @@ function InclusionsSection({ pkg, briefing, theme }) {
                   style={{ color: "#22C55E" }}
                   strokeWidth={2.5}
                 />
-                <span className="font-body text-sm leading-relaxed" style={{ color: isDark ? "#86EFAC" : "#166534" }}>
+                <span className="font-body text-base leading-relaxed" style={{ color: isDark ? "#86EFAC" : "#166534" }}>
                   {item}
                 </span>
               </li>
@@ -410,7 +567,7 @@ function InclusionsSection({ pkg, briefing, theme }) {
                   style={{ color: "#EF4444" }}
                   strokeWidth={2.5}
                 />
-                <span className="font-body text-sm leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}>
+                <span className="font-body text-base leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}>
                   {item}
                 </span>
               </li>
@@ -472,7 +629,7 @@ function TravelInfoCenter({ briefing, theme }) {
             style={{ backgroundColor: ORANGE }}>
             {i + 1}
           </span>
-          <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{item}</span>
+          <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>{item}</span>
         </li>
       ))}
     </ul>
@@ -483,18 +640,18 @@ function TravelInfoCenter({ briefing, theme }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {beforeItems.length > 0 && (
           <div>
-            <p className="font-condensed font-bold text-sm uppercase tracking-widest mb-3"
+            <p className="font-condensed font-bold text-base uppercase tracking-widest mb-3"
               style={{ color: ORANGE }}>
-              📋 Before Departure
+              Before Departure
             </p>
             <ItemList items={beforeItems} />
           </div>
         )}
         {afterItems.length > 0 && (
           <div>
-            <p className="font-condensed font-bold text-sm uppercase tracking-widest mb-3"
+            <p className="font-condensed font-bold text-base uppercase tracking-widest mb-3"
               style={{ color: ORANGE }}>
-              🛬 Upon Arrival
+              Upon Arrival
             </p>
             <ItemList items={afterItems} />
           </div>
@@ -548,7 +705,7 @@ function ArrivalSection({ briefing, theme }) {
                       >
                         {j + 1}
                       </span>
-                      <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                      <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
                         {detail}
                       </span>
                     </li>
@@ -579,7 +736,7 @@ function TransferSection({ briefing, theme }) {
           {transferInstructions.map((item, i) => (
             <li key={i} className="flex items-start gap-3">
               <MapPin className="w-4 h-4 mt-0.5 shrink-0" style={{ color: ORANGE }} />
-              <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+              <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
                 {item}
               </span>
             </li>
@@ -608,7 +765,7 @@ function HotelSection({ briefing, theme }) {
             <p className="font-body text-xs font-medium uppercase tracking-widest mb-1" style={{ color: "#22C55E" }}>
               Check-In
             </p>
-            <p className="font-body text-sm leading-relaxed" style={{ color: textPrimary }}>
+            <p className="font-body text-base leading-relaxed" style={{ color: textPrimary }}>
               {hotelInformation.checkIn}
             </p>
           </div>
@@ -619,7 +776,7 @@ function HotelSection({ briefing, theme }) {
             <p className="font-body text-xs font-medium uppercase tracking-widest mb-1" style={{ color: "#EF4444" }}>
               Check-Out
             </p>
-            <p className="font-body text-sm leading-relaxed" style={{ color: textPrimary }}>
+            <p className="font-body text-base leading-relaxed" style={{ color: textPrimary }}>
               {hotelInformation.checkOut}
             </p>
           </div>
@@ -663,7 +820,7 @@ function HotelSection({ briefing, theme }) {
               {hotelInformation.policies.map((policy, i) => (
                 <li key={i} className="flex items-start gap-2.5">
                   <span className="text-sm shrink-0 mt-0.5">•</span>
-                  <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                  <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
                     {policy}
                   </span>
                 </li>
@@ -699,7 +856,7 @@ function RemindersSection({ briefing, theme }) {
               >
                 {i + 1}
               </span>
-              <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+              <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
                 {text}
               </span>
             </div>
@@ -726,7 +883,7 @@ function ShoppingAdvisorySection({ briefing, pkg, theme }) {
             {advisory.map((tip, i) => (
               <li key={i} className="flex items-start gap-2.5">
                 <span className="font-body text-sm shrink-0 mt-0.5" style={{ color: ORANGE }}>•</span>
-                <span className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{tip}</span>
+                <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>{tip}</span>
               </li>
             ))}
           </ul>
@@ -753,15 +910,15 @@ function ShoppingAdvisorySection({ briefing, pkg, theme }) {
         </div>
 
         <div className="px-5 py-5 space-y-4">
-          <p className="font-body text-sm leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}>
+          <p className="font-body text-base leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}>
             {advisory.body}
           </p>
 
           <ul className="space-y-2.5">
-            {advisory.rules.map((rule, i) => (
+            {(advisory.rules || []).map((rule, i) => (
               <li key={i} className="flex items-start gap-2.5">
                 <span className="font-body text-sm shrink-0 mt-0.5" style={{ color: "#EF4444" }}>•</span>
-                <span className="font-body text-sm leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}>
+                <span className="font-body text-base leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}>
                   {rule}
                 </span>
               </li>
@@ -807,7 +964,7 @@ function RequirementsSection({ pkg, theme }) {
                 >
                   {i + 1}
                 </div>
-                <span className="font-body text-sm leading-relaxed" style={{ color: textPrimary }}>
+                <span className="font-body text-base leading-relaxed" style={{ color: textPrimary }}>
                   {req}
                 </span>
               </li>
@@ -843,7 +1000,7 @@ function RequirementsSection({ pkg, theme }) {
             <p className="font-body text-xs font-bold uppercase tracking-widest mb-2" style={{ color: ORANGE }}>
               Visa Information
             </p>
-            <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+            <p className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
               {pkg.visaInfo}
             </p>
           </div>
@@ -876,7 +1033,7 @@ function ConnectivitySection({ briefing, theme }) {
     <BriefingSection label="Stay Connected" title="Connectivity Guide" theme={theme}>
       <div className="space-y-4">
         {introText && (
-          <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+          <p className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
             {introText}
           </p>
         )}
@@ -1197,10 +1354,10 @@ function DestinationGuideSection({ briefing, slug, theme }) {
     img: getDestinationImage(slug, "photo-spots", item.name) ?? item.img ?? null,
   }));
 
-  const SubHeading = ({ emoji, label }) => (
-    <p className="font-condensed font-bold text-sm uppercase tracking-widest mb-4 flex items-center gap-2 pt-2"
+  const SubHeading = ({ label }) => (
+    <p className="font-condensed font-bold text-base uppercase tracking-widest mb-4 pt-2"
       style={{ color: ORANGE }}>
-      {emoji} {label}
+      {label}
     </p>
   );
 
@@ -1209,8 +1366,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
       {items.map((item, i) => (
         <div key={i} className="flex items-start gap-3 px-4 py-3.5 rounded-2xl border"
           style={{ backgroundColor: bgCard, borderColor: border }}>
-          {item.icon && <span className="text-xl shrink-0">{item.icon}</span>}
-          <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+          <p className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
             {item.tip || item.text || (typeof item === "string" ? item : "")}
           </p>
         </div>
@@ -1221,7 +1377,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
   return (
     <BriefingSection label="Know Your Destination" title="Destination Guide" theme={theme}>
       {guide.intro && (
-        <p className="font-body text-sm leading-relaxed mb-6" style={{ color: textSecondary }}>
+        <p className="font-body text-base leading-relaxed mb-6" style={{ color: textSecondary }}>
           {guide.intro}
         </p>
       )}
@@ -1230,8 +1386,8 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {/* Best Places */}
         {highlights.length > 0 && (
           <div>
-            <SubHeading emoji="🗺️" label="Best Places to Visit" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SubHeading label="Best Places to Visit" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {highlights.map((item, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden border group"
                   style={{ backgroundColor: bgCard, borderColor: border }}>
@@ -1265,7 +1421,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {/* Best Food */}
         {foods.length > 0 && (
           <div>
-            <SubHeading emoji="🍜" label="Best Food & Dining" />
+            <SubHeading label="Best Food & Dining" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {foods.map((item, i) => (
                 <div key={i} className="rounded-2xl overflow-hidden border group"
@@ -1295,7 +1451,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {/* Photo Spots */}
         {photoSpots.length > 0 && (
           <div>
-            <SubHeading emoji="📸" label="Best Photo Spots" />
+            <SubHeading label="Best Photo Spots" />
             <PhotoSlider items={photoSpots} theme={theme} />
           </div>
         )}
@@ -1303,7 +1459,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {/* Local Tips */}
         {(guide.localTips || []).length > 0 && (
           <div>
-            <SubHeading emoji="💡" label="Local Tips" />
+            <SubHeading label="Local Tips" />
             <TipList items={guide.localTips} />
           </div>
         )}
@@ -1311,7 +1467,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {/* Safety Tips */}
         {(guide.safetyTips || []).length > 0 && (
           <div>
-            <SubHeading emoji="🛡️" label="Safety Tips" />
+            <SubHeading label="Safety Tips" />
             <TipList items={guide.safetyTips} />
           </div>
         )}
@@ -1319,13 +1475,13 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {/* Weather & Practical Info */}
         {(guide.practicalInfo || []).length > 0 && (
           <div>
-            <SubHeading emoji="🌤️" label="Weather & Practical Info" />
+            <SubHeading label="Weather & Practical Info" />
             <div className="space-y-3">
               {(guide.practicalInfo || []).map((info, i) => (
                 <div key={i} className="px-4 py-3.5 rounded-2xl border"
                   style={{ backgroundColor: bgCard, borderColor: border }}>
                   <p className="font-condensed font-bold text-sm mb-1" style={{ color: textPrimary }}>{info.label}</p>
-                  <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{info.value}</p>
+                  <p className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>{info.value}</p>
                 </div>
               ))}
             </div>
@@ -1335,13 +1491,13 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {/* Currency Guide */}
         {currencyGuide && (
           <div>
-            <SubHeading emoji="💱" label="Currency Guide" />
+            <SubHeading label="Currency Guide" />
             <div className="space-y-3">
               <div className="px-5 py-4 rounded-2xl border" style={{ backgroundColor: bgCard, borderColor: border }}>
                 <p className="font-condensed font-black text-lg mb-1" style={{ color: textPrimary }}>
                   {currencyGuide.currency} ({currencyGuide.symbol})
                 </p>
-                <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                <p className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
                   {currencyGuide.exchangeRate}
                 </p>
               </div>
@@ -1404,7 +1560,7 @@ function EmergencyContactsSection({ briefing, theme }) {
               </p>
             </div>
             <ul className="px-4 py-3 space-y-2.5">
-              {group.contacts.map((c, j) => (
+              {(group.contacts || []).map((c, j) => (
                 <li key={j} className="flex items-start justify-between gap-2">
                   <span className="font-body text-xs" style={{ color: textSecondary }}>{c.label}</span>
                   {c.url ? (
@@ -1417,15 +1573,15 @@ function EmergencyContactsSection({ briefing, theme }) {
                     >
                       {c.value}
                     </a>
-                  ) : (
+                  ) : c.value ? (
                     <a
-                      href={`tel:${c.value.replace(/\D/g, "")}`}
+                      href={`tel:${String(c.value).replace(/\D/g, "")}`}
                       className="font-body text-xs font-semibold hover:opacity-80 transition-opacity shrink-0"
                       style={{ color: ORANGE }}
                     >
                       {c.value}
                     </a>
-                  )}
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -1454,7 +1610,7 @@ function ImportantNoticesSection({ pkg, theme }) {
         }}
       >
         {pkg.importantNotices.map((notice, i) => (
-          <p key={i} className="font-body text-sm leading-relaxed flex items-start gap-2" style={{ color: textSecondary }}>
+          <p key={i} className="font-body text-base leading-relaxed flex items-start gap-2" style={{ color: textSecondary }}>
             <span style={{ color: ORANGE }}>›</span>
             {notice}
           </p>
@@ -1549,7 +1705,7 @@ function OptionalToursSection({ tours, cartTourIds, onAdd, theme }) {
               {/* Card body */}
               <div className="p-4 flex flex-col flex-1">
                 {tour.category && (
-                  <p className="font-body text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: ORANGE }}>
+                  <p className="font-body text-xs font-bold uppercase tracking-widest mb-1" style={{ color: ORANGE }}>
                     {tour.category}
                   </p>
                 )}
@@ -1576,7 +1732,7 @@ function OptionalToursSection({ tours, cartTourIds, onAdd, theme }) {
                 {/* Description (2 lines max) */}
                 {tour.description && (
                   <p
-                    className="font-body text-sm leading-relaxed mb-3"
+                    className="font-body text-base leading-relaxed mb-3"
                     style={{ color: textSecondary, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
                   >
                     {tour.description}
@@ -1655,7 +1811,7 @@ function TravelInsuranceSection({ plans, selectedInsurance, onSelect, theme }) {
           <h4 className="font-condensed font-black text-lg leading-tight mb-1" style={{ color: textPrimary }}>
             Protect Your Trip Before You Go
           </h4>
-          <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+          <p className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
             Travel insurance covers unexpected medical emergencies, trip cancellations, and lost baggage —
             a small cost for total peace of mind.
           </p>
@@ -1779,7 +1935,7 @@ function TravelInsuranceSection({ plans, selectedInsurance, onSelect, theme }) {
           </p>
         </div>
         <div className="px-5 py-4">
-          <p className="font-body text-sm leading-relaxed mb-4" style={{ color: textSecondary }}>
+          <p className="font-body text-base leading-relaxed mb-4" style={{ color: textSecondary }}>
             Travel insurance is optional but highly recommended. It protects you from unexpected costs that could ruin your entire trip:
           </p>
           <ul className="space-y-2.5">
@@ -2547,11 +2703,12 @@ function PreviewContent() {
             title: "Accommodation",
             icon: <Briefcase className="w-4 h-4" />,
             fields: [
-              { label: "Hotel",         value: fmtValue(booking.hotelName) || fmtValue(booking.hotel_name) },
-              { label: "Room Type",     value: fmtValue(booking.room_type) },
-              { label: "Check-in",      value: fmtDate(booking.check_in) || fmtDate(booking.checkin) },
-              { label: "Check-out",     value: fmtDate(booking.check_out) || fmtDate(booking.checkout) },
-              { label: "Nights",        value: fmtValue(booking.number_of_nights) },
+              { label: "Hotel",              value: fmtValue(booking.hotelName) || fmtValue(booking.hotel_name) },
+              { label: "Room Type",          value: fmtValue(booking.room_type) },
+              { label: "Check-in",           value: fmtDate(booking.check_in) || fmtDate(booking.checkin) },
+              { label: "Check-out",          value: fmtDate(booking.check_out) || fmtDate(booking.checkout) },
+              { label: "Nights",             value: fmtValue(booking.number_of_nights) },
+              { label: "Confirmation No.",   value: fmtValue(booking.hotel_confirmation) || fmtValue(booking.hotel_booking_details) },
             ],
           },
 
@@ -2572,8 +2729,9 @@ function PreviewContent() {
             title: "Transfer Information",
             icon: <Briefcase className="w-4 h-4" />,
             fields: [
-              { label: "Transfer Details",  value: fmtValue(booking.transferInfo) },
-              { label: "Transfer Provider", value: fmtValue(booking.transfer_provider) },
+              { label: "Transfer Details",   value: fmtValue(booking.transferInfo) },
+              { label: "Transfer Provider",  value: fmtValue(booking.transfer_provider) },
+              { label: "Confirmation No.",   value: fmtValue(booking.transfer_confirmation) || fmtValue(booking.transferConfirmation) },
             ],
           },
 
@@ -2652,10 +2810,10 @@ function PreviewContent() {
 
         return (
           <div
-            className="px-4 lg:px-10 py-10 transition-colors duration-300"
+            className="px-4 lg:px-8 py-10 transition-colors duration-300"
             style={{ backgroundColor: bg }}
           >
-            <div className="max-w-4xl mx-auto space-y-5">
+            <div className="max-w-[1500px] mx-auto space-y-5">
 
               {/* ── WELCOME HERO ──────────────────────────────────────────── */}
               <motion.div
@@ -2706,13 +2864,15 @@ function PreviewContent() {
                   {/* Trip stats grid */}
                   {(() => {
                     const stats = [
+                      fmtValue(booking.lead_name || booking.facebook_name) ? { icon: "👤", label: "Lead Name", value: fmtValue(booking.lead_name || booking.facebook_name) } : null,
+                      (fmtValue(booking.total_number_of_guests) || fmtValue(booking.no_of_person)) ? { icon: "👥", label: "No. of Pax", value: `${fmtValue(booking.total_number_of_guests) || fmtValue(booking.no_of_person)} pax` } : null,
+                      fmtValue(booking.gdx) ? { icon: "🔖", label: "GDX Number", value: fmtValue(booking.gdx) } : null,
                       fmtValue(booking.destinationName || booking.destination) ? { icon: "🌏", label: "Destination", value: fmtValue(booking.destinationName || booking.destination) } : null,
                       (fmtDate(booking.travel_date) || fmtDate(booking.arrivalDate || booking.arrival_date)) ? { icon: "📅", label: "Travel Date", value: fmtDate(booking.travel_date) || fmtDate(booking.arrivalDate || booking.arrival_date) } : null,
                       fmtValue(booking.hotelName || booking.hotel_name) ? { icon: "🏨", label: "Hotel", value: fmtValue(booking.hotelName || booking.hotel_name) } : null,
-                      (fmtValue(booking.total_number_of_guests) || fmtValue(booking.no_of_person)) ? { icon: "👥", label: "Guests", value: `${fmtValue(booking.total_number_of_guests) || fmtValue(booking.no_of_person)} pax` } : null,
-                    ].filter(Boolean).slice(0, 4);
+                    ].filter(Boolean);
                     return stats.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
                         {stats.map((stat, idx) => (
                           <div
                             key={idx}
@@ -2847,7 +3007,7 @@ function PreviewContent() {
                       style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)" }}
                     >
                       <span style={{ color: ORANGE }}>{section.icon}</span>
-                      <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
+                      <p className="font-body text-xs font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
                         {section.title}
                       </p>
                     </div>
@@ -2868,10 +3028,10 @@ function PreviewContent() {
                           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
                         >
                           <div className="min-w-0">
-                            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] mb-0.5" style={{ color: textSecondary }}>
+                            <p className="font-body text-xs font-bold uppercase tracking-[0.2em] mb-0.5" style={{ color: textSecondary }}>
                               {f.label}
                             </p>
-                            <p className="font-body text-sm font-semibold break-words leading-snug" style={{ color: textPrimary }}>
+                            <p className="font-body text-base font-semibold break-words leading-snug" style={{ color: textPrimary }}>
                               {f.value}
                             </p>
                           </div>
@@ -2888,7 +3048,7 @@ function PreviewContent() {
                     style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)" }}
                   >
                     <FileText className="w-4 h-4" style={{ color: ORANGE }} />
-                    <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
+                    <p className="font-body text-xs font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
                       Travel Documents
                     </p>
                   </div>
@@ -2968,7 +3128,7 @@ function PreviewContent() {
           className="absolute inset-0"
           style={{ background: "radial-gradient(circle at center, rgba(255,140,0,0.06) 0%, transparent 70%)" }}
         />
-        <div className="max-w-4xl mx-auto text-center mb-8 relative z-10">
+        <div className="max-w-[1500px] mx-auto text-center mb-8 relative z-10">
           <p className="text-xs font-bold tracking-[0.3em] uppercase mb-2" style={{ color: ORANGE }}>
             Destination Briefing Video
           </p>
@@ -3022,71 +3182,94 @@ function PreviewContent() {
           ══════════════════════════════════════════════════════════════════════ */}
       {briefing && (
         <div className="transition-colors duration-300" style={{ backgroundColor: bg }}>
-          <div className="max-w-4xl mx-auto px-4 lg:px-6">
+          <div className="max-w-[1700px] mx-auto px-4 lg:px-8">
+
+            {/* ── CONTACT PANEL — always first, most critical info ── */}
+            <SectionErrorBoundary>
+              <div className="pt-10 pb-6">
+                <ContactPanel briefing={briefing} booking={booking} theme={theme} />
+              </div>
+            </SectionErrorBoundary>
 
             {/* ── 1. WELCOME ── */}
-            <div className={sectionGap}>
-              <WelcomeSection briefing={briefing} pkg={pkg} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <WelcomeSection briefing={briefing} pkg={pkg} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 2 & 3. INCLUSIONS + EXCLUSIONS ── */}
-            <div className={sectionGap}>
-              <InclusionsSection pkg={pkg} briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <InclusionsSection pkg={pkg} briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 4. ITINERARY TIMELINE ── */}
             {pkg?.itinerary?.length > 0 && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <BriefingSection label="Day by Day" title="Itinerary Timeline" theme={theme}>
                     <ItineraryTimeline itinerary={pkg.itinerary} theme={theme} slug={slug} />
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 5. TRAVEL INFORMATION CENTER ── */}
-            <div className={sectionGap}>
-              <TravelInfoCenter briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <TravelInfoCenter briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 6. ARRIVAL INSTRUCTIONS ── */}
-            <div className={sectionGap}>
-              <ArrivalSection briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <ArrivalSection briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 7. TRANSFER INSTRUCTIONS ── */}
-            <div className={sectionGap}>
-              <TransferSection briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <TransferSection briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 8. HOTEL CHECK-IN ── */}
-            <div className={sectionGap}>
-              <HotelSection briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <HotelSection briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 9. TOUR REMINDERS ── */}
-            <div className={sectionGap}>
-              <RemindersSection briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <RemindersSection briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 10. EMERGENCY CONTACTS ── */}
-            <div className={sectionGap}>
-              <EmergencyContactsSection briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <EmergencyContactsSection briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 11. DO'S AND DON'TS ── */}
             {briefing.dosAndDonts && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={theme}>
                     <DosAndDonts
@@ -3097,16 +3280,16 @@ function PreviewContent() {
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 12. IMMIGRATION ADVISORY ── */}
             {briefing.immigrationAdvisory?.length > 0 && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <BriefingSection label="Philippine Immigration" title="Immigration Advisory" theme={theme}>
                     <div className="mb-4">
-                      <p className="font-body text-sm leading-relaxed" style={{ color: theme.textSecondary }}>
+                      <p className="font-body text-base leading-relaxed" style={{ color: theme.textSecondary }}>
                         Tap your traveler type below to see the documents required at Philippine immigration upon departure. Bring originals and photocopies of all documents.
                       </p>
                     </div>
@@ -3114,34 +3297,38 @@ function PreviewContent() {
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 11. SHOPPING ADVISORY ── */}
-            <div className={sectionGap}>
-              <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 12. REQUIREMENTS ── */}
-            <div className={sectionGap}>
-              <RequirementsSection pkg={pkg} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <RequirementsSection pkg={pkg} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 12b. IMPORTANT NOTICES ── */}
             {pkg?.importantNotices?.length > 0 && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <ImportantNoticesSection pkg={pkg} theme={theme} />
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 13. TRAVEL READINESS CHECKLIST ── */}
             {briefing.checklist?.length > 0 && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <BriefingSection label="Pre-Departure" title="Travel Readiness Checklist" theme={theme}>
                     <TravelChecklist
@@ -3152,94 +3339,95 @@ function PreviewContent() {
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 14. WHAT TO BRING ── */}
-            <div className={sectionGap}>
-              <WhatToBringCarousel items={briefing.whatToBring || []} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <WhatToBringCarousel items={briefing.whatToBring || []} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 14.5 OUTFIT GUIDE ── */}
-            <div className={sectionGap}>
-              <OutfitGuide theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <OutfitGuide theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 15. DESTINATION GUIDE ── */}
-            <div className={sectionGap}>
-              <DestinationGuideSection briefing={briefing} slug={slug} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <DestinationGuideSection briefing={briefing} slug={slug} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 16. CONNECTIVITY GUIDE ── */}
-            <div className={sectionGap}>
-              <ConnectivitySection briefing={briefing} theme={theme} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <ConnectivitySection briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── FAQ ── */}
             {briefing.faqs?.length > 0 && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <BriefingSection label="Common Questions" title="Frequently Asked Questions" theme={theme}>
                     <BriefingFAQ faqs={briefing.faqs} theme={theme} />
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 21. NEED ASSISTANCE ── */}
             {briefing.assistanceContacts && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <BriefingSection label="Contact Us" title="Need Assistance?" theme={theme}>
                     <NeedAssistance contacts={briefing.assistanceContacts} theme={theme} />
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 22. TESTIMONIALS ── */}
-            <div className={sectionGap}>
-              <BriefingTestimonials theme={theme} clientReview={clientReview} />
-            </div>
-            <SectionDivider theme={theme} />
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
 
             {/* ── 23. RATE MY SERVICE — only shown when a booking is loaded ── */}
             {booking?.gdx && (
-              <>
+              <SectionErrorBoundary>
                 <div className={sectionGap}>
-                  <RateMyService theme={theme} gdxReference={booking.gdx} onReviewSaved={setClientReview} />
+                  <RateMyService theme={theme} gdxReference={booking.gdx} destination={slug} onReviewSaved={setClientReview} />
                 </div>
                 <SectionDivider theme={theme} />
-              </>
+              </SectionErrorBoundary>
             )}
 
             {/* ── 24. REFERRAL ── */}
-            <div className={sectionGap}>
-              <ReferralSection theme={theme} />
-            </div>
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <ReferralSection theme={theme} />
+              </div>
+            </SectionErrorBoundary>
 
           </div>
         </div>
       )}
 
-      {/* ── NAVIGATION FOOTER ── */}
-      <div className="py-12 px-4 border-t transition-colors duration-300" style={{ backgroundColor: bgAlt, borderColor: border }}>
-        <div className="max-w-4xl mx-auto flex items-center justify-center">
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 font-body font-semibold text-sm px-6 py-3 rounded-full border transition-all hover:opacity-80"
-            style={{ borderColor: border, color: textPrimary, backgroundColor: bgCard }}
-          >
-            ← Back
-          </button>
-        </div>
-      </div>
+      <ScrollControls />
 
       {/* ── BOOKING MODAL ── */}
       <AnimatePresence>
@@ -3259,8 +3447,10 @@ function PreviewContent() {
 
 export default function DestinationPreview() {
   return (
-    <ThemeProvider>
-      <PreviewContent />
-    </ThemeProvider>
+    <PageErrorBoundary>
+      <ThemeProvider>
+        <PreviewContent />
+      </ThemeProvider>
+    </PageErrorBoundary>
   );
 }

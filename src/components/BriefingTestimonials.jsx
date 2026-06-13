@@ -10,6 +10,7 @@ const HARDCODED = [
   {
     name: "Maria Santos",
     destination: "Da Nang, Vietnam",
+    slugKeywords: ["da-nang", "vietnam-hanoi", "vietnam-phu-quoc"],
     rating: 5,
     review: "Gladex made our Vietnam trip absolutely seamless! The briefing page had everything we needed — no stress, no confusion. The itinerary was perfect from start to finish. 10/10!",
     photo: "/images/testimonials/maria-santos.jpg",
@@ -18,6 +19,7 @@ const HARDCODED = [
   {
     name: "Jose Reyes",
     destination: "Hong Kong",
+    slugKeywords: ["hong-kong", "macau"],
     rating: 5,
     review: "The pre-trip briefing page was incredibly detailed. I loved seeing all the tour options and insurance in one place. Our family of 5 had zero confusion during the entire trip!",
     photo: "/images/testimonials/jose-reyes.jpg",
@@ -26,6 +28,7 @@ const HARDCODED = [
   {
     name: "Ana Villanueva",
     destination: "Singapore",
+    slugKeywords: ["singapore", "twin-city", "tri-city"],
     rating: 5,
     review: "Best travel experience ever! The team was so responsive and the itinerary was perfectly planned. We've already booked our Korea trip with Gladex for next year!",
     photo: "/images/testimonials/ana-villanueva.jpg",
@@ -34,6 +37,7 @@ const HARDCODED = [
   {
     name: "Carlos Mendoza",
     destination: "Korea",
+    slugKeywords: ["jeju-korea", "korea"],
     rating: 5,
     review: "Gladex handled every single detail. The digital briefing page was so professional — I felt completely prepared before the trip even started. Truly world-class service!",
     photo: "/images/testimonials/carlos-mendoza.jpg",
@@ -42,10 +46,38 @@ const HARDCODED = [
   {
     name: "Lea Cruz",
     destination: "Bangkok, Thailand",
+    slugKeywords: ["bangkok", "bangkok-pattaya", "indochina"],
     rating: 5,
     review: "From the moment we received the briefing link, everything was crystal clear. No stress, no confusion — just pure excitement. Gladex truly knows how to take care of their travelers!",
     photo: "/images/testimonials/lea-cruz.jpg",
     date: "January 2025",
+  },
+  {
+    name: "Rafael Gomez",
+    destination: "Bali, Indonesia",
+    slugKeywords: ["bali", "bali-wisataku"],
+    rating: 5,
+    review: "The Bali briefing covered absolutely everything — visa on arrival, culture tips, currency, even the best restaurants. We felt like experts before we even landed!",
+    photo: "/images/testimonials/rafael-gomez.jpg",
+    date: "March 2025",
+  },
+  {
+    name: "Grace Tan",
+    destination: "Japan",
+    slugKeywords: ["japan"],
+    rating: 5,
+    review: "Our Japan trip was flawlessly organized by Gladex. The IC card guide, temple etiquette tips, and day-by-day itinerary made everything so easy for our group of 8!",
+    photo: "/images/testimonials/grace-tan.jpg",
+    date: "April 2025",
+  },
+  {
+    name: "Miguel Dela Cruz",
+    destination: "Maldives",
+    slugKeywords: ["maldives", "maldives-maafushi"],
+    rating: 5,
+    review: "Gladex's attention to detail is unmatched. From the speedboat transfer schedule to the snorkeling gear rental tips — everything was covered in the briefing. Truly 5-star service!",
+    photo: "/images/testimonials/miguel-dela-cruz.jpg",
+    date: "May 2025",
   },
 ];
 
@@ -87,7 +119,7 @@ function TestimonialCard({ t, theme }) {
 
       {/* Quote */}
       <p
-        className="font-body text-sm leading-relaxed italic flex-1 mb-4"
+        className="font-body text-base leading-relaxed italic flex-1 mb-4"
         style={{ color: textPrimary }}
       >
         "{t.review}"
@@ -133,14 +165,28 @@ const variants = {
   exit:   (dir) => ({ x: dir > 0 ? -48 : 48, opacity: 0 }),
 };
 
-export default function BriefingTestimonials({ theme, clientReview }) {
+export default function BriefingTestimonials({ theme, clientReview, slug }) {
   const { border, textSecondary } = theme;
   const [active, setActive] = useState(0);
   const [dir,    setDir]    = useState(1);
 
-  // Build the display list — client's own review always first if it exists
+  // Filter hardcoded testimonials: destination match + 3★ minimum
+  const filtered = HARDCODED.filter((t) => {
+    if (t.rating < 3) return false;
+    if (!slug) return true;
+    // If this testimonial has no slugKeywords, it shows for all destinations
+    if (!t.slugKeywords?.length) return true;
+    return t.slugKeywords.includes(slug);
+  });
+
+  // Fall back to all 3★+ testimonials if none match the current destination
+  const displayHardcoded = filtered.length > 0
+    ? filtered
+    : HARDCODED.filter((t) => t.rating >= 3);
+
+  // Build the display list — client's own review (3★+) always first
   const ALL = [
-    ...(clientReview?.rating
+    ...(clientReview?.rating >= 3
       ? [{
           name: "You",
           destination: "",
@@ -151,7 +197,7 @@ export default function BriefingTestimonials({ theme, clientReview }) {
           isClient: true,
         }]
       : []),
-    ...HARDCODED,
+    ...displayHardcoded,
   ];
   const N = ALL.length;
 
