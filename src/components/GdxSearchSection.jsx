@@ -400,9 +400,11 @@ export default function GdxSearchSection() {
           setStatus(STATUS.LAST_NAME_MISMATCH);
           return;
         }
-        // Always re-validate domestic on cache hits — a booking may have been
-        // cached before the Philippine destination detection was in place.
-        if (isDomesticBooking(cached.booking)) {
+        // Re-validate on every cache hit: must still resolve to a known
+        // international slug. Catches bookings cached before detection was in
+        // place and any destination not in the international KEYWORD_MAP.
+        const cachedSlug = resolveDestinationSlug(cached.booking);
+        if (isDomesticBooking(cached.booking) || !cachedSlug) {
           setShowWrongPortal(true);
           setStatus(STATUS.WRONG_PORTAL);
           return;
@@ -456,17 +458,27 @@ export default function GdxSearchSection() {
         tourName:                fullBooking?.tourName,
       });
 
-      // ── 6. Safety-net domestic check on Fusioo-enriched data ─────────────
-      // Catches cases where package type is stored in Fusioo but not in Supabase.
-      // Domestic bookings are NEVER cached and NO data is passed to the UI.
+      // ── 6. Authorize: booking MUST resolve to a known international slug ─────
+      // resolveDestinationSlug returns a non-null value ONLY for destinations
+      // in the KEYWORD_MAP (the authoritative international list). Anything that
+      // doesn't match — Philippine domestic packages, unknown destinations, or
+      // bookings where Fusioo returned no destination text — gets redirected.
+      // isDomesticBooking is a fast-exit for obvious Philippine keyword matches;
+      // the slug check is the hard gate that catches everything else.
       if (isDomesticBooking(fullBooking)) {
+        setShowWrongPortal(true);
+        setStatus(STATUS.WRONG_PORTAL);
+        return;
+      }
+      const resolvedSlug = resolveDestinationSlug(fullBooking);
+      if (!resolvedSlug) {
+        // Not a recognized international destination — send to domestic portal.
         setShowWrongPortal(true);
         setStatus(STATUS.WRONG_PORTAL);
         return;
       }
 
       // ── 7. International confirmed — cache and navigate ───────────────────
-      const resolvedSlug = resolveDestinationSlug(fullBooking);
       setCachedGdx(query, fullBooking, resolvedSlug);
       setBooking(fullBooking);
       setStatus(STATUS.READY);
