@@ -101,8 +101,17 @@ function isDomesticBooking(booking) {
     hasDomesticKeyword(booking.collective_package_name)
   ) return true;
 
-  // ── Layer 2: Fusioo domestic_voucher_ destination field ──────────────────
-  // This field is only populated on Fusioo domestic booking records.
+  // ── Layer 2: domestic voucher presence (Supabase raw OR Fusioo enriched) ──
+  // domestic_voucher (Supabase) = array of linked domestic-voucher record IDs.
+  // domestic_voucher_ destination (Fusioo) = resolved destination text.
+  // Either being present means the booking is domestic.
+  const rawVoucher = booking.domestic_voucher;
+  if (rawVoucher) {
+    const hasRaw = Array.isArray(rawVoucher)
+      ? rawVoucher.length > 0
+      : String(rawVoucher).trim().length > 0;
+    if (hasRaw) return true;
+  }
   const voucherDest =
     booking["domestic_voucher_ destination"] ||
     booking["domestic_voucher_destination"];
