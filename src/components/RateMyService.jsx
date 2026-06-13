@@ -197,14 +197,24 @@ export default function RateMyService({ theme, gdxReference, destination, review
       .from("reviews")
       .upsert(payload, { onConflict: "gdx_reference" });
 
-    // Retry: strip any optional column Postgres flags as missing (42703)
-    while (upsertError?.code === "42703") {
-      const col = upsertError.message?.match(/column "?(\w+)"? of relation/)?.[1]
-               || upsertError.message?.match(/column reviews\.(\w+)/)?.[1];
-      if (!col || !(col in payload)) break;
-      delete payload[col];
-      const r = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" });
-      upsertError = r.error;
+    // Retry: strip optional columns that don't exist yet in Supabase (error 42703)
+    if (upsertError?.code === "42703" && upsertError.message?.includes("reviewer_name")) {
+      delete payload.reviewer_name;
+      ({ error: upsertError } = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" }));
+    }
+    if (upsertError?.code === "42703" && upsertError.message?.includes("photos")) {
+      delete payload.photos;
+      ({ error: upsertError } = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" }));
+    }
+    if (upsertError?.code === "42703" && upsertError.message?.includes("destination")) {
+      delete payload.destination;
+      ({ error: upsertError } = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" }));
+    }
+    if (upsertError?.code === "42703") {
+      ({ error: upsertError } = await supabase.from("reviews").upsert(
+        { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null },
+        { onConflict: "gdx_reference" }
+      ));
     }
 
     if (upsertError) {

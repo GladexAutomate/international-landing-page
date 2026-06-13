@@ -389,7 +389,7 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
     if (!slug) return;
     let query = supabase
       .from("reviews")
-      .select("reviewer_name, rating, comment, photos, created_at")
+      .select("gdx_reference, reviewer_name, rating, comment, photos, created_at")
       .eq("destination", slug)
       .gte("rating", 4)
       .order("created_at", { ascending: false })
