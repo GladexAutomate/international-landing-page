@@ -46,14 +46,13 @@ function extractLastName(fullName) {
 function isLastNameMatch(row, enteredLastName) {
   const entered = enteredLastName.trim().toUpperCase();
   if (!entered) return false;
+  // Supabase column is "lead_name" (full name of lead passenger).
+  // extractLastName takes the last word, handling both "First Last" and "Last, First" formats.
   const candidates = [
-    row.last_name,
-    extractLastName(row.name_of_lead),
-    extractLastName(row.passenger_name),
-    extractLastName(row.lead_passenger_name),
+    extractLastName(row.lead_name),
   ].filter(Boolean).map((s) => String(s).trim().toUpperCase());
-  // No name data in record — pass through so valid bookings aren't blocked
-  if (candidates.length === 0) return true;
+  // Fail secure: if no name data exists in the record, block access.
+  if (candidates.length === 0) return false;
   return candidates.some((c) => c === entered);
 }
 
