@@ -11,7 +11,7 @@ function FAQItem({ q, a, theme }) {
       style={{ borderColor: border }}
     >
       <p
-        className="font-body text-sm font-semibold leading-snug mb-2"
+        className="font-body text-base font-semibold leading-snug mb-2"
         style={{ color: textPrimary }}
       >
         {q}

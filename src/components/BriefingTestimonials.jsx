@@ -173,20 +173,20 @@ function TestimonialCard({ t, theme }) {
         <Avatar t={t} />
         <div className="flex-1 min-w-0 pt-0.5">
           <p
-            className="font-condensed font-bold text-base leading-tight truncate"
+            className="font-condensed font-bold text-lg leading-tight truncate"
             style={{ color: textPrimary }}
           >
             {t.name}
           </p>
           {(t.destination || t.date) && (
-            <p className="font-body text-xs mt-0.5" style={{ color: ORANGE }}>
+            <p className="font-body text-sm mt-0.5" style={{ color: ORANGE }}>
               {[t.destination, t.date].filter(Boolean).join(" · ")}
             </p>
           )}
         </div>
         {isClient && (
           <span
-            className="shrink-0 self-start text-[10px] font-bold tracking-[0.2em] uppercase px-2.5 py-1 rounded-full"
+            className="shrink-0 self-start text-xs font-bold tracking-[0.2em] uppercase px-2.5 py-1 rounded-full"
             style={{ backgroundColor: ORANGE + "20", color: ORANGE }}
           >
             Your Review
@@ -199,7 +199,7 @@ function TestimonialCard({ t, theme }) {
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
             key={i}
-            className="w-3.5 h-3.5 fill-current"
+            className="w-4 h-4 fill-current"
             style={{ color: i < t.rating ? ORANGE : isDark ? "#333" : "#E5E5E5" }}
           />
         ))}
@@ -217,7 +217,7 @@ function TestimonialCard({ t, theme }) {
       {photos.length > 0 && (
         <>
           <p
-            className="font-body text-[10px] font-bold uppercase tracking-[0.18em] mb-2"
+            className="font-body text-xs font-bold uppercase tracking-[0.18em] mb-2"
             style={{ color: ORANGE }}
           >
             Photos
