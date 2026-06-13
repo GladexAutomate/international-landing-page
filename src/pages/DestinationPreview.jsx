@@ -2461,7 +2461,14 @@ function PreviewContent() {
   const [bookingModalTour, setBookingModalTour] = useState(null);
 
   // Client's own submitted review — passed to Testimonials so it appears as first card
-  const [clientReview, setClientReview] = useState(null);
+  const [clientReview,      setClientReview]      = useState(null);
+  // Bumped on every review CRUD so BriefingTestimonials re-fetches live reviews
+  const [reviewRefreshKey,  setReviewRefreshKey]  = useState(0);
+
+  function handleReviewSaved(record) {
+    setClientReview(record);
+    setReviewRefreshKey((k) => k + 1);
+  }
 
   // Recompute totals whenever tours or insurance change
   const _updateTotals = (tours, insurance) => {
@@ -3401,7 +3408,7 @@ function PreviewContent() {
             {/* ── 22. TESTIMONIALS ── */}
             <SectionErrorBoundary>
               <div className={sectionGap}>
-                <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} />
+                <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} reviewRefreshKey={reviewRefreshKey} />
               </div>
               <SectionDivider theme={theme} />
             </SectionErrorBoundary>
@@ -3410,7 +3417,7 @@ function PreviewContent() {
             {booking?.gdx && (
               <SectionErrorBoundary>
                 <div className={sectionGap}>
-                  <RateMyService theme={theme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={setClientReview} />
+                  <RateMyService theme={theme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={handleReviewSaved} />
                 </div>
                 <SectionDivider theme={theme} />
               </SectionErrorBoundary>

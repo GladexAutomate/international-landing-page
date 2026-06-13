@@ -108,15 +108,29 @@ export default function RateMyService({ theme, gdxReference, destination, review
   async function handleDelete() {
     if (deleting || !gdxReference) return;
     setDeleting(true);
-    const { error: deleteError } = await supabase
+    setError(null);
+
+    const { data: deleted, error: deleteError } = await supabase
       .from("reviews")
       .delete()
-      .eq("gdx_reference", gdxReference);
+      .eq("gdx_reference", gdxReference)
+      .select("id");
+
     if (deleteError) {
       console.error("[RateMyService] delete:", deleteError.code, deleteError.message);
+      setError("Failed to delete review. Please try again.");
       setDeleting(false);
       return;
     }
+
+    if (!deleted?.length) {
+      // 0 rows deleted — RLS may be blocking, or record doesn't exist
+      console.warn("[RateMyService] delete: 0 rows affected");
+      setError("Failed to delete review. Please try again.");
+      setDeleting(false);
+      return;
+    }
+
     setExistingReview(null);
     onReviewSaved?.(null);
     setDeleting(false);
@@ -219,18 +233,27 @@ export default function RateMyService({ theme, gdxReference, destination, review
 
     if (upsertError) {
       console.error("[RateMyService] upsert failed:", upsertError.code, upsertError.message);
-      setError("Something went wrong. Please try again.");
+      setError("Failed to save review. Please try again.");
       setSubmitting(false);
       return;
     }
 
-    const saved = {
-      rating:  selected,
-      comment: comment.trim() || null,
-      photos:  allPhotos.length ? allPhotos : null,
-    };
-    setExistingReview(saved);
-    onReviewSaved?.(saved);
+    // Refetch the authoritative record from DB to confirm the write persisted
+    const { data: freshRecord, error: fetchErr } = await supabase
+      .from("reviews")
+      .select("*")
+      .eq("gdx_reference", gdxReference)
+      .maybeSingle();
+
+    if (fetchErr || !freshRecord) {
+      console.warn("[RateMyService] review not found after upsert — possible RLS block");
+      setError("Failed to save review. Please try again.");
+      setSubmitting(false);
+      return;
+    }
+
+    setExistingReview(freshRecord);
+    onReviewSaved?.(freshRecord);
     setIsEditing(false);
     setSelected(0);
     setComment("");
@@ -332,6 +355,12 @@ export default function RateMyService({ theme, gdxReference, destination, review
               {deleting ? "Removing…" : "Remove"}
             </button>
           </div>
+
+          {error && (
+            <p className="font-body text-sm" style={{ color: "#EF4444" }}>
+              {error}
+            </p>
+          )}
         </div>
       )}
 

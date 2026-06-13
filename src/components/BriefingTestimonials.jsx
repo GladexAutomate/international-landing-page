@@ -378,39 +378,39 @@ const variants = {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function BriefingTestimonials({ theme, clientReview, slug, gdxReference }) {
+export default function BriefingTestimonials({ theme, clientReview, slug, gdxReference, reviewRefreshKey }) {
   const { border, textSecondary } = theme;
   const [active,      setActive]      = useState(0);
   const [dir,         setDir]         = useState(1);
   const [liveReviews, setLiveReviews] = useState([]);
 
-  // Fetch 4★+ reviews for this destination from Supabase, excluding current client
+  // Fetch 4★+ reviews for this destination from Supabase, excluding current client.
+  // Re-runs when reviewRefreshKey changes so CRUD in RateMyService triggers a live refresh.
   useEffect(() => {
     if (!slug) return;
-    let query = supabase
+    supabase
       .from("reviews")
       .select("gdx_reference, reviewer_name, rating, comment, photos, created_at")
       .eq("destination", slug)
       .gte("rating", 4)
       .order("created_at", { ascending: false })
-      .limit(30);
-
-    query.then(({ data }) => {
-      if (!data?.length) return;
-      const reviews = data
-        .filter((r) => String(r.gdx_reference) !== String(gdxReference))
-        .map((r) => ({
-          name:     r.reviewer_name || "Gladex Traveler",
-          rating:   r.rating,
-          review:   r.comment || "Had a great experience with Gladex Tours!",
-          photos:   Array.isArray(r.photos) ? r.photos : [],
-          date:     null,
-          isClient: false,
-          isLive:   true,
-        }));
-      setLiveReviews(reviews);
-    });
-  }, [slug, gdxReference]);
+      .limit(30)
+      .then(({ data }) => {
+        if (!data?.length) { setLiveReviews([]); return; }
+        const reviews = data
+          .filter((r) => String(r.gdx_reference) !== String(gdxReference))
+          .map((r) => ({
+            name:     r.reviewer_name || "Gladex Traveler",
+            rating:   r.rating,
+            review:   r.comment || "Had a great experience with Gladex Tours!",
+            photos:   Array.isArray(r.photos) ? r.photos : [],
+            date:     null,
+            isClient: false,
+            isLive:   true,
+          }));
+        setLiveReviews(reviews);
+      });
+  }, [slug, gdxReference, reviewRefreshKey]);
 
   // Hardcoded placeholder reviews — destination-specific only, never cross-destination.
   // Only shown when no live Supabase reviews exist for this destination yet.
