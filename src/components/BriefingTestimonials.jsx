@@ -445,7 +445,7 @@ export default function BriefingTestimonials({ theme, clientReview, slug }) {
             exit="exit"
             transition={{ duration: 0.28, ease: "easeOut" }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
               <TestimonialCard t={cards[0]} theme={theme} />
               <div className="hidden md:block">
                 <TestimonialCard t={cards[1]} theme={theme} />

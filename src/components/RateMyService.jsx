@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from "react";
-import { Star, Pencil, X, Upload } from "lucide-react";
+import { Star, Pencil, X, Upload, Check, Trash2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import BriefingSection from "./briefing/BriefingSection";
 
@@ -45,6 +45,7 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
   const [newPhotoFiles,    setNewPhotoFiles]    = useState([]);   // File objects to upload
   const [newPhotoPreviews, setNewPhotoPreviews] = useState([]);   // object URL previews
   const [isDragging,       setIsDragging]       = useState(false);
+  const [deleting,         setDeleting]         = useState(false);
 
   // Revoke all object URLs on unmount
   useEffect(() => () => objectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u)), []);
@@ -93,6 +94,23 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
     setNewPhotoFiles([]);
     setNewPhotoPreviews([]);
     setError(null);
+  }
+
+  async function handleDelete() {
+    if (deleting || !gdxReference) return;
+    setDeleting(true);
+    const { error: deleteError } = await supabase
+      .from("reviews")
+      .delete()
+      .eq("gdx_reference", gdxReference);
+    if (deleteError) {
+      console.error("[RateMyService] delete:", deleteError.code, deleteError.message);
+      setDeleting(false);
+      return;
+    }
+    setExistingReview(null);
+    onReviewSaved?.(null);
+    setDeleting(false);
   }
 
   function addFiles(fileList) {
@@ -232,15 +250,33 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
       {/* ── Existing review (view mode) ── */}
       {!loading && existingReview && !isEditing && (
         <div
-          className="rounded-2xl border p-6 space-y-4"
+          className="rounded-2xl border p-5 space-y-4"
           style={{ backgroundColor: bgCard, borderColor: border }}
         >
+          {/* Success badge */}
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+              style={{ backgroundColor: ORANGE + "18" }}
+            >
+              <Check className="w-4.5 h-4.5" style={{ color: ORANGE }} />
+            </div>
+            <div>
+              <p className="font-condensed font-bold text-base leading-tight" style={{ color: textPrimary }}>
+                Review Submitted
+              </p>
+              <p className="font-body text-xs mt-0.5" style={{ color: textSecondary }}>
+                Your feedback has been saved. Thank you!
+              </p>
+            </div>
+          </div>
+
           {/* Stars */}
           <div className="flex gap-1.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
                 key={i}
-                className="w-6 h-6"
+                className="w-5 h-5"
                 style={{
                   fill:        i < existingReview.rating ? ORANGE : "none",
                   color:       i < existingReview.rating ? ORANGE : isDark ? "#555" : "#CCC",
@@ -250,20 +286,10 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
             ))}
           </div>
 
-          {/* Thank you */}
-          <div>
-            <p className="font-condensed font-bold text-base" style={{ color: textPrimary }}>
-              Thank you for your feedback!
-            </p>
-            <p className="font-body text-sm" style={{ color: ORANGE }}>
-              We hope you have an amazing trip.
-            </p>
-          </div>
-
           {/* Comment */}
           {existingReview.comment && (
             <p
-              className="font-body text-base leading-relaxed italic px-4 py-3 rounded-xl"
+              className="font-body text-sm leading-relaxed italic px-4 py-3 rounded-xl"
               style={{
                 backgroundColor: isDark ? "rgba(255,140,0,0.07)" : "rgba(255,140,0,0.05)",
                 color: textSecondary,
@@ -273,29 +299,26 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
             </p>
           )}
 
-          {/* Photos — full image, no cropping */}
-          {existingReview.photos?.length > 0 && (
-            <div className="space-y-2">
-              {existingReview.photos.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt={`Your photo ${i + 1}`}
-                  className="w-full h-auto block rounded-xl"
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Edit button */}
-          <button
-            onClick={handleEdit}
-            className="flex items-center gap-2 font-body text-xs font-semibold px-4 py-2 rounded-xl border transition-all hover:opacity-80"
-            style={{ borderColor: border, color: textSecondary }}
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            Edit Review
-          </button>
+          {/* Action buttons */}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={handleEdit}
+              className="flex-1 flex items-center justify-center gap-2 font-body text-xs font-semibold px-4 py-2.5 rounded-xl border transition-all hover:opacity-80"
+              style={{ borderColor: border, color: textSecondary, backgroundColor: "transparent" }}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit Review
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex items-center justify-center gap-2 font-body text-xs font-semibold px-4 py-2.5 rounded-xl border transition-all hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ borderColor: "#EF444460", color: "#EF4444", backgroundColor: "transparent" }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {deleting ? "Removing…" : "Remove"}
+            </button>
+          </div>
         </div>
       )}
 
