@@ -190,70 +190,73 @@ export default function RateMyService({ theme, gdxReference, destination, review
     setSubmitting(true);
     setError(null);
 
-    // Upload any new photos first
+    // Upload new photos first
     let uploadedUrls = [];
     if (newPhotoFiles.length > 0) {
       uploadedUrls = await uploadPhotosToStorage(newPhotoFiles, gdxReference);
     }
     const allPhotos = [...existingPhotos, ...uploadedUrls];
 
-    const firstName = extractFirstName(reviewerName);
-    const payload = {
-      gdx_reference:  gdxReference,
-      rating:         selected,
-      comment:        comment.trim() || null,
+    const firstName  = extractFirstName(reviewerName);
+    const isUpdate   = existingReview?.id != null;
+
+    // Start with optional columns; strip on 42703 retries
+    let fields = {
+      rating:  selected,
+      comment: comment.trim() || null,
     };
-    if (destination)  payload.destination    = destination;
-    if (firstName)    payload.reviewer_name  = firstName;
-    if (allPhotos.length) payload.photos     = allPhotos;
+    if (destination)      fields.destination   = destination;
+    if (firstName)        fields.reviewer_name = firstName;
+    if (allPhotos.length) fields.photos        = allPhotos;
 
-    let { error: upsertError } = await supabase
-      .from("reviews")
-      .upsert(payload, { onConflict: "gdx_reference" });
-
-    // Retry: strip optional columns that don't exist yet in Supabase (error 42703)
-    if (upsertError?.code === "42703" && upsertError.message?.includes("reviewer_name")) {
-      delete payload.reviewer_name;
-      ({ error: upsertError } = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" }));
-    }
-    if (upsertError?.code === "42703" && upsertError.message?.includes("photos")) {
-      delete payload.photos;
-      ({ error: upsertError } = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" }));
-    }
-    if (upsertError?.code === "42703" && upsertError.message?.includes("destination")) {
-      delete payload.destination;
-      ({ error: upsertError } = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" }));
-    }
-    if (upsertError?.code === "42703") {
-      ({ error: upsertError } = await supabase.from("reviews").upsert(
-        { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null },
-        { onConflict: "gdx_reference" }
-      ));
+    // Explicit INSERT vs UPDATE — avoids requiring a UNIQUE constraint on gdx_reference
+    async function doWrite(f) {
+      if (isUpdate) {
+        return supabase.from("reviews").update(f).eq("id", existingReview.id).select("*").maybeSingle();
+      }
+      return supabase.from("reviews").insert({ gdx_reference: gdxReference, ...f }).select("*").maybeSingle();
     }
 
-    if (upsertError) {
-      console.error("[RateMyService] upsert failed:", upsertError.code, upsertError.message);
+    let { data: savedRecord, error: writeError } = await doWrite(fields);
+
+    // Retry: strip optional columns that don't exist yet in DB (error 42703)
+    if (writeError?.code === "42703" && writeError.message?.includes("reviewer_name")) {
+      delete fields.reviewer_name;
+      ({ data: savedRecord, error: writeError } = await doWrite(fields));
+    }
+    if (writeError?.code === "42703" && writeError.message?.includes("photos")) {
+      delete fields.photos;
+      ({ data: savedRecord, error: writeError } = await doWrite(fields));
+    }
+    if (writeError?.code === "42703" && writeError.message?.includes("destination")) {
+      delete fields.destination;
+      ({ data: savedRecord, error: writeError } = await doWrite(fields));
+    }
+    if (writeError?.code === "42703") {
+      fields = { rating: selected, comment: comment.trim() || null };
+      ({ data: savedRecord, error: writeError } = await doWrite(fields));
+    }
+
+    if (writeError) {
+      console.error("[RateMyService] write failed:", writeError.code, writeError.message);
       setError("Failed to save review. Please try again.");
       setSubmitting(false);
       return;
     }
 
-    // Refetch the authoritative record from DB to confirm the write persisted
-    const { data: freshRecord, error: fetchErr } = await supabase
-      .from("reviews")
-      .select("*")
-      .eq("gdx_reference", gdxReference)
-      .maybeSingle();
+    // Use returned DB record; fall back to local fields if SELECT policy blocked return
+    const record = savedRecord ?? {
+      id:            existingReview?.id ?? null,
+      gdx_reference: gdxReference,
+      rating:        selected,
+      comment:       comment.trim() || null,
+      photos:        allPhotos.length ? allPhotos : null,
+      destination:   destination || null,
+      reviewer_name: firstName || null,
+    };
 
-    if (fetchErr || !freshRecord) {
-      console.warn("[RateMyService] review not found after upsert — possible RLS block");
-      setError("Failed to save review. Please try again.");
-      setSubmitting(false);
-      return;
-    }
-
-    setExistingReview(freshRecord);
-    onReviewSaved?.(freshRecord);
+    setExistingReview(record);
+    onReviewSaved?.(record);
     setIsEditing(false);
     setSelected(0);
     setComment("");
