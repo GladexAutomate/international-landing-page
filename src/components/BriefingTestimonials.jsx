@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star, X } from "lucide-react";
 import BriefingSection from "./briefing/BriefingSection";
+import { supabase } from "../lib/supabase";
 
 const ORANGE = "#FF8C00";
 
@@ -377,38 +378,65 @@ const variants = {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function BriefingTestimonials({ theme, clientReview, slug }) {
+export default function BriefingTestimonials({ theme, clientReview, slug, gdxReference }) {
   const { border, textSecondary } = theme;
-  const [active, setActive] = useState(0);
-  const [dir,    setDir]    = useState(1);
+  const [active,      setActive]      = useState(0);
+  const [dir,         setDir]         = useState(1);
+  const [liveReviews, setLiveReviews] = useState([]);
 
-  // Only show 4★ and 5★ reviews publicly
-  const filtered = HARDCODED.filter((t) => {
+  // Fetch 4★+ reviews for this destination from Supabase, excluding current client
+  useEffect(() => {
+    if (!slug) return;
+    let query = supabase
+      .from("reviews")
+      .select("reviewer_name, rating, comment, photos, created_at")
+      .eq("destination", slug)
+      .gte("rating", 4)
+      .order("created_at", { ascending: false })
+      .limit(30);
+
+    query.then(({ data }) => {
+      if (!data?.length) return;
+      const reviews = data
+        .filter((r) => String(r.gdx_reference) !== String(gdxReference))
+        .map((r) => ({
+          name:     r.reviewer_name || "Gladex Traveler",
+          rating:   r.rating,
+          review:   r.comment || "Had a great experience with Gladex Tours!",
+          photos:   Array.isArray(r.photos) ? r.photos : [],
+          date:     null,
+          isClient: false,
+          isLive:   true,
+        }));
+      setLiveReviews(reviews);
+    });
+  }, [slug, gdxReference]);
+
+  // Hardcoded fallback — only used when no live reviews exist for this destination
+  const hardcodedForSlug = HARDCODED.filter((t) => {
     if (t.rating < 4) return false;
     if (!slug) return true;
     if (!t.slugKeywords?.length) return true;
     return t.slugKeywords.includes(slug);
   });
-
-  const displayHardcoded = filtered.length > 0
-    ? filtered
+  const fallbackReviews = hardcodedForSlug.length > 0
+    ? hardcodedForSlug
     : HARDCODED.filter((t) => t.rating >= 4);
 
-  // Client's own review: only show if 4★+
+  // Build final list: client's own → live reviews → hardcoded fallback (if no live)
   const ALL = [
     ...(clientReview?.rating >= 4
       ? [{
-          name:        "You",
-          destination: "",
-          rating:      clientReview.rating,
-          review:      clientReview.comment || "I rated my Gladex travel experience.",
-          photo:       null,
-          photos:      clientReview.photos || null,
-          date:        "Just now",
-          isClient:    true,
+          name:     "You",
+          rating:   clientReview.rating,
+          review:   clientReview.comment || "I rated my Gladex travel experience.",
+          photos:   clientReview.photos || [],
+          date:     "Just now",
+          isClient: true,
         }]
       : []),
-    ...displayHardcoded,
+    ...liveReviews,
+    ...(liveReviews.length === 0 ? fallbackReviews : []),
   ];
   const N = ALL.length;
 

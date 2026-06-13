@@ -27,7 +27,16 @@ async function uploadPhotosToStorage(files, gdxReference) {
   return urls;
 }
 
-export default function RateMyService({ theme, gdxReference, destination, onReviewSaved }) {
+function extractFirstName(fullName) {
+  if (!fullName) return null;
+  const n = String(fullName).trim();
+  const parts = n.includes(",")
+    ? n.split(",")[1].trim().split(/\s+/)
+    : n.split(/\s+/);
+  return parts[0] || null;
+}
+
+export default function RateMyService({ theme, gdxReference, destination, reviewerName, onReviewSaved }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   const fileInputRef  = useRef(null);
   const objectUrlsRef = useRef([]);
@@ -174,34 +183,28 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
     }
     const allPhotos = [...existingPhotos, ...uploadedUrls];
 
+    const firstName = extractFirstName(reviewerName);
     const payload = {
-      gdx_reference: gdxReference,
-      rating: selected,
-      comment: comment.trim() || null,
+      gdx_reference:  gdxReference,
+      rating:         selected,
+      comment:        comment.trim() || null,
     };
-    if (destination)      payload.destination = destination;
-    if (allPhotos.length) payload.photos      = allPhotos;
+    if (destination)  payload.destination    = destination;
+    if (firstName)    payload.reviewer_name  = firstName;
+    if (allPhotos.length) payload.photos     = allPhotos;
 
     let { error: upsertError } = await supabase
       .from("reviews")
       .upsert(payload, { onConflict: "gdx_reference" });
 
-    // Retry 1: strip whichever optional column Postgres flagged
-    if (upsertError?.code === "42703") {
-      const clean = { ...payload };
-      if (upsertError.message?.includes("photos"))      delete clean.photos;
-      if (upsertError.message?.includes("destination")) delete clean.destination;
-      const r2 = await supabase.from("reviews").upsert(clean, { onConflict: "gdx_reference" });
-      upsertError = r2.error;
-    }
-
-    // Retry 2: both optional columns missing — fall back to core fields only
-    if (upsertError?.code === "42703") {
-      const r3 = await supabase.from("reviews").upsert(
-        { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null },
-        { onConflict: "gdx_reference" }
-      );
-      upsertError = r3.error;
+    // Retry: strip any optional column Postgres flags as missing (42703)
+    while (upsertError?.code === "42703") {
+      const col = upsertError.message?.match(/column "?(\w+)"? of relation/)?.[1]
+               || upsertError.message?.match(/column reviews\.(\w+)/)?.[1];
+      if (!col || !(col in payload)) break;
+      delete payload[col];
+      const r = await supabase.from("reviews").upsert(payload, { onConflict: "gdx_reference" });
+      upsertError = r.error;
     }
 
     if (upsertError) {

@@ -3401,7 +3401,7 @@ function PreviewContent() {
             {/* ── 22. TESTIMONIALS ── */}
             <SectionErrorBoundary>
               <div className={sectionGap}>
-                <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} />
+                <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} />
               </div>
               <SectionDivider theme={theme} />
             </SectionErrorBoundary>
@@ -3410,7 +3410,7 @@ function PreviewContent() {
             {booking?.gdx && (
               <SectionErrorBoundary>
                 <div className={sectionGap}>
-                  <RateMyService theme={theme} gdxReference={booking.gdx} destination={slug} onReviewSaved={setClientReview} />
+                  <RateMyService theme={theme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={setClientReview} />
                 </div>
                 <SectionDivider theme={theme} />
               </SectionErrorBoundary>
