@@ -1,35 +1,79 @@
 // @ts-nocheck
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, CheckCircle, XCircle, Loader, MapPin } from "lucide-react";
+import {
+  Search, CheckCircle, XCircle, Loader, MapPin,
+  AlertTriangle, ExternalLink,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "../lib/ThemeContext";
 import { getFullBookingFromFusioo } from "../services/fusiooService";
 import { resolveDestinationSlug } from "../utils/destinationResolver";
 import { getCachedGdx, setCachedGdx } from "../services/gdxCacheService";
 
-const ORANGE     = "#FF8C00";
-const LOGO_URL   = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
-const GDX_PATTERN = /^[0-9]+$/;
+const ORANGE              = "#FF8C00";
+const LOGO_URL            = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
+const GDX_PATTERN         = /^[0-9]+$/;
+const DOMESTIC_PORTAL_URL = "https://domestic-landing-page.vercel.app/";
+const REDIRECT_SECONDS    = 3;
 
-// ── Status types ──────────────────────────────────────────────────────────────
+// ── Status types ───────────────────────────────────────────────────────────────
 const STATUS = {
-  IDLE:       "idle",
-  SEARCHING:  "searching",
-  FOUND:      "found",    // Supabase confirmed — Fusioo loading
-  CACHED:     "cached",   // Retrieved instantly from gdx_cache table
-  READY:      "ready",    // Loaded — show View My Trip button
-  NOT_FOUND:  "not_found",
-  ERROR:      "error",
+  IDLE:               "idle",
+  SEARCHING:          "searching",
+  FOUND:              "found",
+  CACHED:             "cached",
+  READY:              "ready",
+  NOT_FOUND:          "not_found",
+  LAST_NAME_MISMATCH: "last_name_mismatch",
+  WRONG_PORTAL:       "wrong_portal",
+  ERROR:              "error",
 };
 
-// ── Animated background orbs ──────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function extractLastName(fullName) {
+  if (!fullName) return null;
+  const n = String(fullName).trim();
+  // "SMITH, JOHN" → "SMITH"
+  if (n.includes(",")) return n.split(",")[0].trim().toUpperCase();
+  // "JOHN SMITH" → "SMITH"
+  const parts = n.split(/\s+/).filter(Boolean);
+  return parts.length > 0 ? parts[parts.length - 1].toUpperCase() : null;
+}
+
+function isLastNameMatch(row, enteredLastName) {
+  const entered = enteredLastName.trim().toUpperCase();
+  if (!entered) return false;
+  const candidates = [
+    row.last_name,
+    extractLastName(row.name_of_lead),
+    extractLastName(row.passenger_name),
+    extractLastName(row.lead_passenger_name),
+  ].filter(Boolean).map((s) => String(s).trim().toUpperCase());
+  // No name data in record — pass through so valid bookings aren't blocked
+  if (candidates.length === 0) return true;
+  return candidates.some((c) => c === entered);
+}
+
+function isDomesticBooking(booking) {
+  if (!booking) return false;
+  const check = (val) => typeof val === "string" && val.toLowerCase().includes("domestic");
+  return (
+    check(booking.packageType)      ||
+    check(booking.type_of_package)  ||
+    check(booking.transaction_type) ||
+    check(booking.packageName)
+  );
+}
+
+// ── Background orbs ────────────────────────────────────────────────────────────
 function BackgroundOrbs({ isDark }) {
   const orbs = [
-    { size: 500, x: "10%",  y: "15%",  delay: 0,   duration: 18 },
-    { size: 350, x: "75%",  y: "60%",  delay: 3,   duration: 22 },
-    { size: 280, x: "55%",  y: "5%",   delay: 6,   duration: 16 },
+    { size: 500, x: "10%", y: "15%", delay: 0,  duration: 18 },
+    { size: 350, x: "75%", y: "60%", delay: 3,  duration: 22 },
+    { size: 280, x: "55%", y: "5%",  delay: 6,  duration: 16 },
   ];
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -38,10 +82,7 @@ function BackgroundOrbs({ isDark }) {
           key={i}
           className="absolute rounded-full"
           style={{
-            width:  orb.size,
-            height: orb.size,
-            left:   orb.x,
-            top:    orb.y,
+            width: orb.size, height: orb.size, left: orb.x, top: orb.y,
             background: isDark
               ? `radial-gradient(circle, rgba(255,140,0,0.07) 0%, transparent 70%)`
               : `radial-gradient(circle, rgba(255,140,0,0.10) 0%, transparent 70%)`,
@@ -55,7 +96,121 @@ function BackgroundOrbs({ isDark }) {
   );
 }
 
-// ── Status indicator ──────────────────────────────────────────────────────────
+// ── Wrong Portal Modal ─────────────────────────────────────────────────────────
+function WrongPortalModal({ show }) {
+  const [countdown, setCountdown] = useState(REDIRECT_SECONDS);
+
+  useEffect(() => {
+    if (!show) return;
+    setCountdown(REDIRECT_SECONDS);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          window.location.href = DOMESTIC_PORTAL_URL;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [show]);
+
+  if (!show) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        backgroundColor: "rgba(0,0,0,0.82)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
+    >
+      <motion.div
+        className="relative w-full max-w-sm rounded-3xl p-8 text-center"
+        style={{
+          backgroundColor: "#1A1A1A",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,140,0,0.15)",
+        }}
+        initial={{ opacity: 0, scale: 0.88, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {/* Icon */}
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+          style={{
+            backgroundColor: "rgba(255,140,0,0.12)",
+            border: "1.5px solid rgba(255,140,0,0.3)",
+          }}
+        >
+          <AlertTriangle size={30} style={{ color: ORANGE }} />
+        </div>
+
+        {/* Title */}
+        <h2
+          className="font-condensed font-black text-2xl mb-2"
+          style={{ color: "#FFFFFF" }}
+        >
+          Wrong Portal Detected
+        </h2>
+
+        {/* Description */}
+        <p
+          className="font-body text-sm leading-relaxed mb-6"
+          style={{ color: "#A0A0A0" }}
+        >
+          Your booking is for a{" "}
+          <span style={{ color: ORANGE, fontWeight: 700 }}>Domestic Package</span>.
+          {" "}Please use the Domestic Travel Portal to access your trip details.
+        </p>
+
+        {/* Countdown badge */}
+        <div
+          className="rounded-2xl px-5 py-3 mb-4"
+          style={{
+            backgroundColor: "rgba(255,140,0,0.08)",
+            border: "1px solid rgba(255,140,0,0.2)",
+          }}
+        >
+          <p className="font-body text-sm font-semibold" style={{ color: ORANGE }}>
+            Redirecting in {countdown} second{countdown !== 1 ? "s" : ""}…
+          </p>
+        </div>
+
+        {/* Progress bar */}
+        <div
+          className="w-full rounded-full overflow-hidden mb-5"
+          style={{ height: 4, backgroundColor: "rgba(255,255,255,0.08)" }}
+        >
+          <motion.div
+            className="h-full rounded-full"
+            style={{ backgroundColor: ORANGE }}
+            initial={{ width: "100%" }}
+            animate={{ width: "0%" }}
+            transition={{ duration: REDIRECT_SECONDS, ease: "linear" }}
+          />
+        </div>
+
+        {/* Manual redirect */}
+        <motion.a
+          href={DOMESTIC_PORTAL_URL}
+          className="inline-flex items-center justify-center gap-2 w-full font-body font-bold text-sm py-4 rounded-2xl"
+          style={{ backgroundColor: ORANGE, color: "#000000", textDecoration: "none" }}
+          whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(255,140,0,0.45)" }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <ExternalLink size={16} />
+          Go to Domestic Portal Now
+        </motion.a>
+      </motion.div>
+    </div>
+  );
+}
+
+// ── Status indicator ───────────────────────────────────────────────────────────
 function StatusMessage({ status, gdxInput, isDark }) {
   const configs = {
     [STATUS.SEARCHING]: {
@@ -74,7 +229,7 @@ function StatusMessage({ status, gdxInput, isDark }) {
     },
     [STATUS.CACHED]: {
       icon:   <CheckCircle className="w-5 h-5" style={{ color: "#22C55E" }} />,
-      text:   "Booking loaded instantly from cache! Click View My Trip below.",
+      text:   "Booking loaded instantly! Click View My Trip below.",
       color:  "#22C55E",
       bg:     isDark ? "rgba(34,197,94,0.08)" : "rgba(34,197,94,0.07)",
       border: "rgba(34,197,94,0.3)",
@@ -88,10 +243,24 @@ function StatusMessage({ status, gdxInput, isDark }) {
     },
     [STATUS.NOT_FOUND]: {
       icon:   <XCircle className="w-5 h-5" style={{ color: "#EF4444" }} />,
-      text:   `No booking found for GDX ${gdxInput}. Please check your code and try again.`,
+      text:   "Booking not found. Please check your GDX number and Last Name, then try again.",
       color:  "#EF4444",
       bg:     isDark ? "rgba(239,68,68,0.08)" : "#FFF5F5",
       border: isDark ? "rgba(127,29,29,0.6)" : "#FECACA",
+    },
+    [STATUS.LAST_NAME_MISMATCH]: {
+      icon:   <XCircle className="w-5 h-5" style={{ color: "#EF4444" }} />,
+      text:   "Booking not found. Please check your GDX number and Last Name, then try again.",
+      color:  "#EF4444",
+      bg:     isDark ? "rgba(239,68,68,0.08)" : "#FFF5F5",
+      border: isDark ? "rgba(127,29,29,0.6)" : "#FECACA",
+    },
+    [STATUS.WRONG_PORTAL]: {
+      icon:   <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />,
+      text:   "Wrong Portal Detected — redirecting to Domestic Travel Portal…",
+      color:  ORANGE,
+      bg:     isDark ? "rgba(255,140,0,0.08)" : "rgba(255,140,0,0.07)",
+      border: "rgba(255,140,0,0.3)",
     },
     [STATUS.ERROR]: {
       icon:   <XCircle className="w-5 h-5" style={{ color: "#EF4444" }} />,
@@ -122,31 +291,41 @@ function StatusMessage({ status, gdxInput, isDark }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main component ─────────────────────────────────────────────────────────────
 export default function GdxSearchSection() {
   const { isDark } = useTheme();
   const navigate   = useNavigate();
 
-  const [gdxInput, setGdxInput] = useState("");
-  const [status,   setStatus]   = useState(STATUS.IDLE);
-  const [booking,  setBooking]  = useState(null);
+  const [gdxInput,      setGdxInput]      = useState("");
+  const [lastNameInput, setLastNameInput] = useState("");
+  const [status,        setStatus]        = useState(STATUS.IDLE);
+  const [booking,       setBooking]       = useState(null);
+  const [showWrongPortal, setShowWrongPortal] = useState(false);
 
-  const bg          = isDark ? "#080808" : "#F0F0F0";
-  const cardBg      = isDark ? "rgba(26,26,26,0.85)" : "rgba(255,255,255,0.85)";
-  const cardBorder  = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)";
-  const inputBg     = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)";
-  const inputBorder = gdxInput
-    ? ORANGE
-    : isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
+  const bg         = isDark ? "#080808" : "#F0F0F0";
+  const cardBg     = isDark ? "rgba(26,26,26,0.85)" : "rgba(255,255,255,0.85)";
+  const cardBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)";
+  const inputBg    = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)";
   const textPrimary   = isDark ? "#FFFFFF" : "#111111";
   const textSecondary = isDark ? "#A0A0A0" : "#555555";
 
-  const isLoading  = status === STATUS.SEARCHING || status === STATUS.FOUND;
-  const isReady    = status === STATUS.READY || status === STATUS.CACHED;
+  const isLoading = status === STATUS.SEARCHING || status === STATUS.FOUND;
+  const isReady   = status === STATUS.READY || status === STATUS.CACHED;
+  const canSearch = !isLoading && gdxInput.trim().length > 0 && lastNameInput.trim().length > 0;
+
+  const gdxBorder      = gdxInput
+    ? ORANGE : isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
+  const lastNameBorder = lastNameInput
+    ? ORANGE : isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
+
+  const resetStatus = () => {
+    if (status !== STATUS.IDLE) { setStatus(STATUS.IDLE); setBooking(null); }
+  };
 
   const handleSearch = async () => {
-    const query = gdxInput.trim();
-    if (!query) return;
+    const query    = gdxInput.trim();
+    const lastName = lastNameInput.trim();
+    if (!query || !lastName) return;
 
     if (!GDX_PATTERN.test(query)) {
       setStatus(STATUS.NOT_FOUND);
@@ -157,15 +336,20 @@ export default function GdxSearchSection() {
     setBooking(null);
 
     try {
-      // ── 1. Check gdx_cache first ─────────────────────────────────────────
+      // ── 1. Cache check ────────────────────────────────────────────────────
+      // Domestic bookings are never cached, so a cache hit is always international.
       const cached = await getCachedGdx(query);
       if (cached) {
+        if (!isLastNameMatch(cached.booking, lastName)) {
+          setStatus(STATUS.LAST_NAME_MISMATCH);
+          return;
+        }
         setBooking(cached.booking);
         setStatus(STATUS.CACHED);
         return;
       }
 
-      // ── 2. Cache miss — read from bookings table ──────────────────────────
+      // ── 2. Supabase lookup ────────────────────────────────────────────────
       console.log("[GDX] Cache miss — querying Supabase:", query);
       const { data, error: supaError } = await supabase
         .from("bookings_6fbdd6b2")
@@ -177,26 +361,47 @@ export default function GdxSearchSection() {
         return;
       }
 
-      // ── 3. Enrich with Fusioo ─────────────────────────────────────────────
       const rawBooking = data[0];
-      setStatus(STATUS.FOUND); // Show "Loading your trip details…"
 
+      // ── 3. Last name validation (against raw Supabase row) ────────────────
+      if (!isLastNameMatch(rawBooking, lastName)) {
+        setStatus(STATUS.LAST_NAME_MISMATCH);
+        return;
+      }
+
+      // ── 4. Early domestic check on raw row (avoids Fusioo call entirely) ─
+      // If the Supabase row already carries a package type field, we redirect
+      // immediately without ever fetching Fusioo data for domestic bookings.
+      if (isDomesticBooking(rawBooking)) {
+        setShowWrongPortal(true);
+        setStatus(STATUS.WRONG_PORTAL);
+        return;
+      }
+
+      setStatus(STATUS.FOUND);
+
+      // ── 5. Fusioo enrichment (international bookings only reach this point) ─
       const fullBooking = await getFullBookingFromFusioo(rawBooking);
       console.log("[GDX] Full booking loaded:", {
-        gdx:             fullBooking?.gdx,
-        destinationName: fullBooking?.destinationName,
-        hotelName:       fullBooking?.hotelName,
-        airlineName:     fullBooking?.airlineName,
-        pnr:             fullBooking?.pnr,
-        tourName:        fullBooking?.tourName,
-        packageName:     fullBooking?.packageName,
-        amountPaid:      fullBooking?.amountPaid,
+        gdx:              fullBooking?.gdx,
+        destinationName:  fullBooking?.destinationName,
+        packageName:      fullBooking?.packageName,
+        type_of_package:  fullBooking?.type_of_package,
+        transaction_type: fullBooking?.transaction_type,
       });
 
-      // ── 4. Store in gdx_cache (fire-and-forget, won't slow the user down) ─
+      // ── 6. Safety-net domestic check on Fusioo-enriched data ─────────────
+      // Catches cases where package type is stored in Fusioo but not in Supabase.
+      // Domestic bookings are NEVER cached and NO data is passed to the UI.
+      if (isDomesticBooking(fullBooking)) {
+        setShowWrongPortal(true);
+        setStatus(STATUS.WRONG_PORTAL);
+        return;
+      }
+
+      // ── 7. International confirmed — cache and navigate ───────────────────
       const resolvedSlug = resolveDestinationSlug(fullBooking);
       setCachedGdx(query, fullBooking, resolvedSlug);
-
       setBooking(fullBooking);
       setStatus(STATUS.READY);
 
@@ -212,19 +417,19 @@ export default function GdxSearchSection() {
     navigate(`/destination/${slug || "_booking"}`, { state: { booking } });
   };
 
-
   return (
     <div
       className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16 transition-colors duration-500"
       style={{ backgroundColor: bg }}
     >
+      {/* Wrong Portal Modal — renders on top of everything */}
+      <WrongPortalModal show={showWrongPortal} />
+
       {/* Animated background orbs */}
       <BackgroundOrbs isDark={isDark} />
 
-      {/* Content column — search area + expanding panel */}
+      {/* Content column */}
       <div className="relative z-10 w-full flex flex-col items-center">
-
-        {/* ── Search area (always max-w-lg) ──────────────────────────────────── */}
         <div className="w-full max-w-lg flex flex-col items-center">
 
           {/* Logo */}
@@ -258,7 +463,8 @@ export default function GdxSearchSection() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Enter your GDX Confirmation Number or Tour Voucher Number to access your personalized travel briefing, vouchers, reminders, optional tours, and add-ons.
+            Enter your GDX Confirmation Number and Lead Passenger Last Name to access
+            your personalized travel briefing, vouchers, reminders, and add-ons.
           </motion.p>
 
           {/* Glass card */}
@@ -274,52 +480,72 @@ export default function GdxSearchSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
           >
-            {/* Input + Button */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={gdxInput}
-                  onChange={(e) => {
-                    setGdxInput(e.target.value.replace(/[^0-9]/g, ""));
-                    if (status !== STATUS.IDLE) {
-                      setStatus(STATUS.IDLE);
-                      setBooking(null);
-                    }
-                  }}
-                  onKeyDown={(e) => e.key === "Enter" && !isLoading && handleSearch()}
-                  placeholder="Enter GDX Confirmation Number / Tour Voucher Number"
-                  maxLength={20}
-                  disabled={isLoading}
-                  aria-label="GDX booking number"
-                  className="w-full font-body font-semibold text-base px-5 py-4 rounded-2xl border focus:outline-none transition-all duration-200 disabled:opacity-50"
-                  style={{
-                    backgroundColor: inputBg,
-                    borderColor: inputBorder,
-                    color: textPrimary,
-                    boxShadow: gdxInput ? `0 0 0 3px rgba(255,140,0,0.12)` : "none",
-                  }}
-                />
-              </div>
-
-              <motion.button
-                onClick={handleSearch}
-                disabled={isLoading || !gdxInput.trim()}
-                aria-label="Find my briefing"
-                className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-7 py-4 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0 w-full sm:w-auto"
-                style={{ backgroundColor: ORANGE, color: "#080808" }}
-                whileHover={{ scale: 1.03, boxShadow: "0 0 24px rgba(255,140,0,0.45)" }}
-                whileTap={{ scale: 0.97 }}
-              >
-                {isLoading ? (
-                  <Loader className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4" />
-                )}
-                {isLoading ? "Loading…" : "View My Trip"}
-              </motion.button>
+            {/* GDX Number input */}
+            <div className="mb-3">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={gdxInput}
+                onChange={(e) => {
+                  setGdxInput(e.target.value.replace(/[^0-9]/g, ""));
+                  resetStatus();
+                }}
+                onKeyDown={(e) => e.key === "Enter" && canSearch && handleSearch()}
+                placeholder="GDX Confirmation / Tour Voucher Number"
+                maxLength={20}
+                disabled={isLoading}
+                aria-label="GDX booking number"
+                className="w-full font-body font-semibold text-base px-5 py-4 rounded-2xl border focus:outline-none transition-all duration-200 disabled:opacity-50"
+                style={{
+                  backgroundColor: inputBg,
+                  borderColor: gdxBorder,
+                  color: textPrimary,
+                  boxShadow: gdxInput ? `0 0 0 3px rgba(255,140,0,0.12)` : "none",
+                }}
+              />
             </div>
+
+            {/* Last Name input */}
+            <div className="mb-4">
+              <input
+                type="text"
+                value={lastNameInput}
+                onChange={(e) => {
+                  setLastNameInput(e.target.value);
+                  resetStatus();
+                }}
+                onKeyDown={(e) => e.key === "Enter" && canSearch && handleSearch()}
+                placeholder="Lead Passenger Last Name"
+                maxLength={60}
+                disabled={isLoading}
+                aria-label="Lead passenger last name"
+                className="w-full font-body font-semibold text-base px-5 py-4 rounded-2xl border focus:outline-none transition-all duration-200 disabled:opacity-50"
+                style={{
+                  backgroundColor: inputBg,
+                  borderColor: lastNameBorder,
+                  color: textPrimary,
+                  boxShadow: lastNameInput ? `0 0 0 3px rgba(255,140,0,0.12)` : "none",
+                }}
+              />
+            </div>
+
+            {/* Find My Trip button */}
+            <motion.button
+              onClick={handleSearch}
+              disabled={!canSearch}
+              aria-label="Find my booking"
+              className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-7 py-4 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full"
+              style={{ backgroundColor: ORANGE, color: "#080808" }}
+              whileHover={{ scale: 1.03, boxShadow: "0 0 24px rgba(255,140,0,0.45)" }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {isLoading ? (
+                <Loader className="w-4 h-4 animate-spin" />
+              ) : (
+                <Search className="w-4 h-4" />
+              )}
+              {isLoading ? "Loading…" : "Find My Trip"}
+            </motion.button>
 
             {/* Status feedback */}
             <AnimatePresence mode="wait">
@@ -334,7 +560,7 @@ export default function GdxSearchSection() {
             </AnimatePresence>
           </motion.div>
 
-          {/* View My Trip button — shows on READY (fresh) or CACHED (instant) */}
+          {/* View My Trip button — shows on READY or CACHED */}
           <AnimatePresence>
             {isReady && (
               <motion.button
@@ -362,14 +588,12 @@ export default function GdxSearchSection() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            Your GDX number was provided in your booking confirmation from Gladex Tours.
+            Both fields are required. Your GDX number was provided in your booking confirmation from Gladex Tours.
           </motion.p>
         </div>
-
-
       </div>
 
-      {/* Footer — flows below panel when visible */}
+      {/* Footer */}
       <motion.p
         className="relative z-10 mt-12 font-body text-xs"
         style={{ color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }}

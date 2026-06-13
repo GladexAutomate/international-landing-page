@@ -676,7 +676,7 @@ export const danangBriefing = {
         { label: "Police", value: "113", type: "phone" },
         { label: "Fire Department", value: "114", type: "phone" },
         { label: "Medical Emergency / Ambulance", value: "115", type: "phone" },
-        { label: "Tourist Support Hotline (toll-free)", value: "1800 599 9936", type: "phone" },
+        { label: "Tourist Support Hotline (Toll-Free)", value: "1800 599 9936", type: "phone" },
       ],
     },
     {
@@ -684,7 +684,7 @@ export const danangBriefing = {
       icon: "🇵🇭",
       contacts: [
         {
-          label: "Phil. Consulate General (Ho Chi Minh City)",
+          label: "Philippine Consulate General (Ho Chi Minh City)",
           value: "+84-28-3825-6858",
           type: "phone",
         },

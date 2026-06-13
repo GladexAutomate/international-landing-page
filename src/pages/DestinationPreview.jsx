@@ -1543,7 +1543,7 @@ function EmergencyContactsSection({ briefing, theme }) {
   if (!contacts?.length) return null;
 
   return (
-    <BriefingSection label="Save These Now" title="Emergency Contacts" theme={theme}>
+    <BriefingSection label="Save These Now" title="Important Contact Numbers" theme={theme}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {contacts.map((group, i) => (
           <div
@@ -1556,7 +1556,7 @@ function EmergencyContactsSection({ briefing, theme }) {
               style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
             >
               <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>
-                {group.category}
+                {group.icon} {group.category}
               </p>
             </div>
             <ul className="px-4 py-3 space-y-2.5">
