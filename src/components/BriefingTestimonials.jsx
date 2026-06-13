@@ -297,7 +297,7 @@ const HARDCODED = [
   {
     name:        "Maria Santos",
     destination: "Da Nang, Vietnam",
-    slugKeywords: ["da-nang", "vietnam-hanoi", "vietnam-phu-quoc"],
+    slugKeywords: ["danang-vietnam", "vietnam-hanoi", "vietnam-phu-quoc"],
     rating: 5,
     review: "Gladex made our Vietnam trip absolutely seamless! The briefing page had everything we needed — no stress, no confusion. The itinerary was perfect from start to finish. 10/10!",
     photo: "/images/testimonials/maria-santos.jpg",
@@ -306,7 +306,7 @@ const HARDCODED = [
   {
     name:        "Jose Reyes",
     destination: "Hong Kong",
-    slugKeywords: ["hong-kong", "macau"],
+    slugKeywords: ["hongkong", "macau"],
     rating: 5,
     review: "The pre-trip briefing page was incredibly detailed. I loved seeing all the tour options and insurance in one place. Our family of 5 had zero confusion during the entire trip!",
     photo: "/images/testimonials/jose-reyes.jpg",
@@ -412,18 +412,15 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
     });
   }, [slug, gdxReference]);
 
-  // Hardcoded fallback — only used when no live reviews exist for this destination
+  // Hardcoded placeholder reviews — destination-specific only, never cross-destination.
+  // Only shown when no live Supabase reviews exist for this destination yet.
   const hardcodedForSlug = HARDCODED.filter((t) => {
     if (t.rating < 4) return false;
-    if (!slug) return true;
-    if (!t.slugKeywords?.length) return true;
-    return t.slugKeywords.includes(slug);
+    if (!slug) return false;
+    return t.slugKeywords?.includes(slug);
   });
-  const fallbackReviews = hardcodedForSlug.length > 0
-    ? hardcodedForSlug
-    : HARDCODED.filter((t) => t.rating >= 4);
 
-  // Build final list: client's own → live reviews → hardcoded fallback (if no live)
+  // Build final list: client's own → live reviews → hardcoded (if no live)
   const ALL = [
     ...(clientReview?.rating >= 4
       ? [{
@@ -436,9 +433,10 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
         }]
       : []),
     ...liveReviews,
-    ...(liveReviews.length === 0 ? fallbackReviews : []),
+    ...(liveReviews.length === 0 ? hardcodedForSlug : []),
   ];
   const N = ALL.length;
+  if (N === 0) return null;
 
   const prev = () => { setDir(-1); setActive((a) => (a - 1 + N) % N); };
   const next = () => { setDir(1);  setActive((a) => (a + 1) % N);     };

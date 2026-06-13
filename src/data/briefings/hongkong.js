@@ -697,6 +697,13 @@ export const hongkongBriefing = {
         { label: "MTR Customer Service", value: "2881 8888", type: "phone" },
       ],
     },
+    {
+      category: "Local Transfer and Tour Operations Team",
+      icon: "🚐",
+      contacts: [
+        { label: "Local Transfer and Tour Operations Team (Hong Kong)", value: "+852 6822 7223", type: "phone" },
+      ],
+    },
   ],
 
   // ─── 19. DO'S AND DON'TS ─────────────────────────────────────────────────
