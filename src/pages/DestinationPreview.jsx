@@ -1556,7 +1556,7 @@ function EmergencyContactsSection({ briefing, theme }) {
               style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
             >
               <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>
-                {group.icon} {group.category}
+                {group.category}
               </p>
             </div>
             <ul className="px-4 py-3 space-y-2.5">
@@ -3191,6 +3191,14 @@ function PreviewContent() {
               </div>
             </SectionErrorBoundary>
 
+            {/* ── IMPORTANT CONTACT NUMBERS — right below video, before all other sections ── */}
+            <SectionErrorBoundary>
+              <div className={sectionGap}>
+                <EmergencyContactsSection briefing={briefing} theme={theme} />
+              </div>
+              <SectionDivider theme={theme} />
+            </SectionErrorBoundary>
+
             {/* ── 1. WELCOME ── */}
             <SectionErrorBoundary>
               <div className={sectionGap}>
@@ -3255,14 +3263,6 @@ function PreviewContent() {
             <SectionErrorBoundary>
               <div className={sectionGap}>
                 <RemindersSection briefing={briefing} theme={theme} />
-              </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
-
-            {/* ── 10. EMERGENCY CONTACTS ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <EmergencyContactsSection briefing={briefing} theme={theme} />
               </div>
               <SectionDivider theme={theme} />
             </SectionErrorBoundary>
