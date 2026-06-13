@@ -57,15 +57,72 @@ function isLastNameMatch(row, enteredLastName) {
   return candidates.some((c) => c === entered);
 }
 
+// Philippine domestic destination keywords — any booking whose destination text
+// contains one of these is classified as domestic and redirected immediately.
+// Based on the international KEYWORD_MAP in destinationResolver.js: anything NOT
+// in that map and matching a Philippine location is domestic.
+const PHILIPPINE_DOMESTIC_KEYWORDS = [
+  // Islands & beach resorts
+  "boracay", "caticlan", "kalibo",
+  "siargao", "surigao",
+  "palawan", "el nido", "coron", "puerto princesa",
+  "camiguin",
+  // Visayas
+  "cebu", "mactan", "lapu-lapu",
+  "bohol", "panglao", "tagbilaran",
+  "iloilo", "bacolod", "negros occidental", "negros oriental",
+  "tacloban", "leyte", "samar",
+  "dumaguete", "siquijor",
+  // Mindanao
+  "davao", "samal", "general santos", "gensan",
+  "cagayan de oro", "bukidnon", "zamboanga", "cotabato",
+  // Luzon
+  "batangas", "nasugbu", "puerto galera", "mindoro",
+  "la union", "san juan la union",
+  "baguio", "benguet", "sagada", "banaue", "ifugao",
+  "ilocos", "vigan", "laoag", "pagudpud",
+  "subic", "olongapo", "clark", "angeles pampanga",
+  "bicol", "naga city", "legazpi", "albay", "sorsogon",
+  "tagaytay", "bataan",
+  "zambales", "pangasinan",
+];
+
 function isDomesticBooking(booking) {
   if (!booking) return false;
-  const check = (val) => typeof val === "string" && val.toLowerCase().includes("domestic");
-  return (
-    check(booking.packageType)      ||
-    check(booking.type_of_package)  ||
-    check(booking.transaction_type) ||
-    check(booking.packageName)
-  );
+
+  // ── Layer 1: "domestic" keyword in package type / name fields ────────────
+  const hasDomesticKeyword = (val) =>
+    typeof val === "string" && val.toLowerCase().includes("domestic");
+  if (
+    hasDomesticKeyword(booking.packageType)            ||
+    hasDomesticKeyword(booking.type_of_package)        ||
+    hasDomesticKeyword(booking.transaction_type)       ||
+    hasDomesticKeyword(booking.packageName)            ||
+    hasDomesticKeyword(booking.collective_package_name)
+  ) return true;
+
+  // ── Layer 2: Fusioo domestic_voucher_ destination field ──────────────────
+  // This field is only populated on Fusioo domestic booking records.
+  const voucherDest =
+    booking["domestic_voucher_ destination"] ||
+    booking["domestic_voucher_destination"];
+  if (voucherDest && String(voucherDest).trim().length > 0) return true;
+
+  // ── Layer 3: Philippine destination name check ────────────────────────────
+  // Catches cases like "Boracay (via CATICLAN)" where no "domestic" keyword
+  // appears in package type fields.
+  const destText = [
+    booking.destinationName,
+    booking.tourName,
+    booking.packageName,
+    booking.collective_package_name,
+    voucherDest,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return PHILIPPINE_DOMESTIC_KEYWORDS.some((kw) => destText.includes(kw));
 }
 
 // ── Background orbs ────────────────────────────────────────────────────────────
@@ -337,11 +394,17 @@ export default function GdxSearchSection() {
 
     try {
       // ── 1. Cache check ────────────────────────────────────────────────────
-      // Domestic bookings are never cached, so a cache hit is always international.
       const cached = await getCachedGdx(query);
       if (cached) {
         if (!isLastNameMatch(cached.booking, lastName)) {
           setStatus(STATUS.LAST_NAME_MISMATCH);
+          return;
+        }
+        // Always re-validate domestic on cache hits — a booking may have been
+        // cached before the Philippine destination detection was in place.
+        if (isDomesticBooking(cached.booking)) {
+          setShowWrongPortal(true);
+          setStatus(STATUS.WRONG_PORTAL);
           return;
         }
         setBooking(cached.booking);
@@ -383,11 +446,14 @@ export default function GdxSearchSection() {
       // ── 5. Fusioo enrichment (international bookings only reach this point) ─
       const fullBooking = await getFullBookingFromFusioo(rawBooking);
       console.log("[GDX] Full booking loaded:", {
-        gdx:              fullBooking?.gdx,
-        destinationName:  fullBooking?.destinationName,
-        packageName:      fullBooking?.packageName,
-        type_of_package:  fullBooking?.type_of_package,
-        transaction_type: fullBooking?.transaction_type,
+        gdx:                     fullBooking?.gdx,
+        destinationName:         fullBooking?.destinationName,
+        packageName:             fullBooking?.packageName,
+        type_of_package:         fullBooking?.type_of_package,
+        transaction_type:        fullBooking?.transaction_type,
+        collective_package_name: fullBooking?.collective_package_name,
+        domestic_voucher_dest:   fullBooking?.["domestic_voucher_ destination"],
+        tourName:                fullBooking?.tourName,
       });
 
       // ── 6. Safety-net domestic check on Fusioo-enriched data ─────────────
