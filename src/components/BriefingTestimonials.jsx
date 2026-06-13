@@ -1,90 +1,162 @@
 // @ts-nocheck
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Star, UserCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, X } from "lucide-react";
 import BriefingSection from "./briefing/BriefingSection";
 
 const ORANGE = "#FF8C00";
 
-const HARDCODED = [
-  {
-    name: "Maria Santos",
-    destination: "Da Nang, Vietnam",
-    slugKeywords: ["da-nang", "vietnam-hanoi", "vietnam-phu-quoc"],
-    rating: 5,
-    review: "Gladex made our Vietnam trip absolutely seamless! The briefing page had everything we needed — no stress, no confusion. The itinerary was perfect from start to finish. 10/10!",
-    photo: "/images/testimonials/maria-santos.jpg",
-    date: "May 2025",
-  },
-  {
-    name: "Jose Reyes",
-    destination: "Hong Kong",
-    slugKeywords: ["hong-kong", "macau"],
-    rating: 5,
-    review: "The pre-trip briefing page was incredibly detailed. I loved seeing all the tour options and insurance in one place. Our family of 5 had zero confusion during the entire trip!",
-    photo: "/images/testimonials/jose-reyes.jpg",
-    date: "March 2025",
-  },
-  {
-    name: "Ana Villanueva",
-    destination: "Singapore",
-    slugKeywords: ["singapore", "twin-city", "tri-city"],
-    rating: 5,
-    review: "Best travel experience ever! The team was so responsive and the itinerary was perfectly planned. We've already booked our Korea trip with Gladex for next year!",
-    photo: "/images/testimonials/ana-villanueva.jpg",
-    date: "April 2025",
-  },
-  {
-    name: "Carlos Mendoza",
-    destination: "Korea",
-    slugKeywords: ["jeju-korea", "korea"],
-    rating: 5,
-    review: "Gladex handled every single detail. The digital briefing page was so professional — I felt completely prepared before the trip even started. Truly world-class service!",
-    photo: "/images/testimonials/carlos-mendoza.jpg",
-    date: "February 2025",
-  },
-  {
-    name: "Lea Cruz",
-    destination: "Bangkok, Thailand",
-    slugKeywords: ["bangkok", "bangkok-pattaya", "indochina"],
-    rating: 5,
-    review: "From the moment we received the briefing link, everything was crystal clear. No stress, no confusion — just pure excitement. Gladex truly knows how to take care of their travelers!",
-    photo: "/images/testimonials/lea-cruz.jpg",
-    date: "January 2025",
-  },
-  {
-    name: "Rafael Gomez",
-    destination: "Bali, Indonesia",
-    slugKeywords: ["bali", "bali-wisataku"],
-    rating: 5,
-    review: "The Bali briefing covered absolutely everything — visa on arrival, culture tips, currency, even the best restaurants. We felt like experts before we even landed!",
-    photo: "/images/testimonials/rafael-gomez.jpg",
-    date: "March 2025",
-  },
-  {
-    name: "Grace Tan",
-    destination: "Japan",
-    slugKeywords: ["japan"],
-    rating: 5,
-    review: "Our Japan trip was flawlessly organized by Gladex. The IC card guide, temple etiquette tips, and day-by-day itinerary made everything so easy for our group of 8!",
-    photo: "/images/testimonials/grace-tan.jpg",
-    date: "April 2025",
-  },
-  {
-    name: "Miguel Dela Cruz",
-    destination: "Maldives",
-    slugKeywords: ["maldives", "maldives-maafushi"],
-    rating: 5,
-    review: "Gladex's attention to detail is unmatched. From the speedboat transfer schedule to the snorkeling gear rental tips — everything was covered in the briefing. Truly 5-star service!",
-    photo: "/images/testimonials/miguel-dela-cruz.jpg",
-    date: "May 2025",
-  },
+const AVATAR_PALETTE = [
+  "#FF8C00", "#7C3AED", "#059669", "#2563EB",
+  "#DC2626", "#0891B2", "#D97706", "#9D174D",
 ];
 
-// Single card — handles both regular and client reviews
+function avatarColor(name) {
+  if (!name) return AVATAR_PALETTE[0];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_PALETTE[Math.abs(h) % AVATAR_PALETTE.length];
+}
+
+function initials(name) {
+  if (!name) return "?";
+  return name.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+
+function Lightbox({ images, startIndex, onClose }) {
+  const [current, setCurrent] = useState(startIndex);
+  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
+  const next = () => setCurrent((c) => (c + 1) % images.length);
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape")     onClose();
+      if (e.key === "ArrowLeft")  prev();
+      if (e.key === "ArrowRight") next();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [images.length]);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[99999] flex items-center justify-center"
+      style={{ backgroundColor: "rgba(0,0,0,0.92)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-3xl px-4 flex flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute -top-12 right-4 w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-75"
+          style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Image */}
+        <img
+          src={images[current]}
+          alt={`Photo ${current + 1}`}
+          className="w-full max-h-[72vh] object-contain rounded-2xl"
+          style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.6)" }}
+        />
+
+        {/* Prev / Next */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute left-0 top-1/2 -translate-y-1/2 ml-1 w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-75"
+              style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}
+              aria-label="Previous photo"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={next}
+              className="absolute right-0 top-1/2 -translate-y-1/2 mr-1 w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-75"
+              style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}
+              aria-label="Next photo"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </>
+        )}
+
+        {/* Counter + dot strip */}
+        {images.length > 1 && (
+          <div className="flex flex-col items-center gap-2 mt-3">
+            <div className="flex gap-1.5">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  className="rounded-full transition-all duration-200"
+                  style={{
+                    width:           i === current ? 16 : 7,
+                    height:          7,
+                    backgroundColor: i === current ? ORANGE : "rgba(255,255,255,0.35)",
+                  }}
+                />
+              ))}
+            </div>
+            <p className="font-body text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
+              {current + 1} / {images.length}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+
+function Avatar({ t }) {
+  const [imgError, setImgError] = useState(false);
+  const photoUrl  = t.photos?.[0] ?? t.photo;   // uploaded photo > hardcoded
+  const useImage  = !!photoUrl && !imgError;
+  const color     = avatarColor(t.name);
+  const inits     = initials(t.name);
+
+  if (useImage) {
+    return (
+      <img
+        src={photoUrl}
+        alt={t.name}
+        className="w-12 h-12 rounded-full object-cover border-2 shrink-0"
+        style={{ borderColor: ORANGE }}
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 font-condensed font-black text-white text-sm select-none"
+      style={{ backgroundColor: color, border: `2px solid ${color}99` }}
+    >
+      {inits}
+    </div>
+  );
+}
+
+// ── TestimonialCard ───────────────────────────────────────────────────────────
+
 function TestimonialCard({ t, theme }) {
   const { textPrimary, isDark } = theme;
   const isClient = !!t.isClient;
+  const photos   = Array.isArray(t.photos) ? t.photos : [];
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   return (
     <div
@@ -96,17 +168,33 @@ function TestimonialCard({ t, theme }) {
         borderColor: isClient ? ORANGE + "99" : ORANGE + "35",
       }}
     >
-      {/* Your Review badge */}
-      {isClient && (
-        <span
-          className="self-start text-[10px] font-bold tracking-[0.2em] uppercase px-2.5 py-1 rounded-full mb-3"
-          style={{ backgroundColor: ORANGE + "20", color: ORANGE }}
-        >
-          Your Review
-        </span>
-      )}
+      {/* ── Profile header ── */}
+      <div className="flex items-start gap-3 mb-4">
+        <Avatar t={t} />
+        <div className="flex-1 min-w-0 pt-0.5">
+          <p
+            className="font-condensed font-bold text-base leading-tight truncate"
+            style={{ color: textPrimary }}
+          >
+            {t.name}
+          </p>
+          {(t.destination || t.date) && (
+            <p className="font-body text-xs mt-0.5" style={{ color: ORANGE }}>
+              {[t.destination, t.date].filter(Boolean).join(" · ")}
+            </p>
+          )}
+        </div>
+        {isClient && (
+          <span
+            className="shrink-0 self-start text-[10px] font-bold tracking-[0.2em] uppercase px-2.5 py-1 rounded-full"
+            style={{ backgroundColor: ORANGE + "20", color: ORANGE }}
+          >
+            Your Review
+          </span>
+        )}
+      </div>
 
-      {/* Stars */}
+      {/* ── Stars ── */}
       <div className="flex gap-1 mb-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
@@ -117,7 +205,7 @@ function TestimonialCard({ t, theme }) {
         ))}
       </div>
 
-      {/* Quote */}
+      {/* ── Quote ── */}
       <p
         className="font-body text-base leading-relaxed italic flex-1 mb-4"
         style={{ color: textPrimary }}
@@ -125,76 +213,168 @@ function TestimonialCard({ t, theme }) {
         "{t.review}"
       </p>
 
-      {/* Reviewer */}
-      <div className="flex items-center gap-3">
-        {isClient ? (
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2"
-            style={{ borderColor: ORANGE, backgroundColor: ORANGE + "20" }}
+      {/* ── Photo gallery ── */}
+      {photos.length > 0 && (
+        <>
+          <p
+            className="font-body text-[10px] font-bold uppercase tracking-[0.18em] mb-2"
+            style={{ color: ORANGE }}
           >
-            <UserCircle className="w-6 h-6" style={{ color: ORANGE }} />
+            Photos
+          </p>
+          <div
+            className={`grid gap-1.5 mb-1 ${
+              photos.length === 1 ? "grid-cols-1" : photos.length === 2 ? "grid-cols-2" : "grid-cols-3"
+            }`}
+          >
+            {photos.map((url, i) => (
+              <button
+                key={i}
+                onClick={() => setLightboxIndex(i)}
+                className={`overflow-hidden rounded-xl transition-transform hover:scale-[1.03] active:scale-95 focus:outline-none ${
+                  photos.length === 1 ? "w-full" : ""
+                }`}
+                aria-label={`View photo ${i + 1}`}
+              >
+                <img
+                  src={url}
+                  alt={`Photo ${i + 1}`}
+                  className={`w-full object-cover ${photos.length === 1 ? "max-h-40" : "aspect-square"}`}
+                />
+              </button>
+            ))}
           </div>
-        ) : (
-          <img
-            src={t.photo}
-            alt={t.name}
-            className="w-10 h-10 rounded-full object-cover border-2 shrink-0"
-            style={{ borderColor: ORANGE }}
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = "/images/placeholder.svg";
-            }}
-          />
-        )}
-        <div>
-          <p className="font-condensed font-bold text-sm" style={{ color: textPrimary }}>
-            {t.name}
-          </p>
-          <p className="font-body text-xs" style={{ color: ORANGE }}>
-            {[t.destination, t.date].filter(Boolean).join(" · ")}
-          </p>
-        </div>
-      </div>
+        </>
+      )}
+
+      {/* Lightbox portal */}
+      {lightboxIndex !== null && (
+        <Lightbox
+          images={photos}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
     </div>
   );
 }
 
+// ── Hardcoded reviews ─────────────────────────────────────────────────────────
+
+const HARDCODED = [
+  {
+    name:        "Maria Santos",
+    destination: "Da Nang, Vietnam",
+    slugKeywords: ["da-nang", "vietnam-hanoi", "vietnam-phu-quoc"],
+    rating: 5,
+    review: "Gladex made our Vietnam trip absolutely seamless! The briefing page had everything we needed — no stress, no confusion. The itinerary was perfect from start to finish. 10/10!",
+    photo: "/images/testimonials/maria-santos.jpg",
+    date:  "May 2025",
+  },
+  {
+    name:        "Jose Reyes",
+    destination: "Hong Kong",
+    slugKeywords: ["hong-kong", "macau"],
+    rating: 5,
+    review: "The pre-trip briefing page was incredibly detailed. I loved seeing all the tour options and insurance in one place. Our family of 5 had zero confusion during the entire trip!",
+    photo: "/images/testimonials/jose-reyes.jpg",
+    date:  "March 2025",
+  },
+  {
+    name:        "Ana Villanueva",
+    destination: "Singapore",
+    slugKeywords: ["singapore", "twin-city", "tri-city"],
+    rating: 5,
+    review: "Best travel experience ever! The team was so responsive and the itinerary was perfectly planned. We've already booked our Korea trip with Gladex for next year!",
+    photo: "/images/testimonials/ana-villanueva.jpg",
+    date:  "April 2025",
+  },
+  {
+    name:        "Carlos Mendoza",
+    destination: "Korea",
+    slugKeywords: ["jeju-korea", "korea"],
+    rating: 5,
+    review: "Gladex handled every single detail. The digital briefing page was so professional — I felt completely prepared before the trip even started. Truly world-class service!",
+    photo: "/images/testimonials/carlos-mendoza.jpg",
+    date:  "February 2025",
+  },
+  {
+    name:        "Lea Cruz",
+    destination: "Bangkok, Thailand",
+    slugKeywords: ["bangkok", "bangkok-pattaya", "indochina"],
+    rating: 5,
+    review: "From the moment we received the briefing link, everything was crystal clear. No stress, no confusion — just pure excitement. Gladex truly knows how to take care of their travelers!",
+    photo: "/images/testimonials/lea-cruz.jpg",
+    date:  "January 2025",
+  },
+  {
+    name:        "Rafael Gomez",
+    destination: "Bali, Indonesia",
+    slugKeywords: ["bali", "bali-wisataku"],
+    rating: 5,
+    review: "The Bali briefing covered absolutely everything — visa on arrival, culture tips, currency, even the best restaurants. We felt like experts before we even landed!",
+    photo: "/images/testimonials/rafael-gomez.jpg",
+    date:  "March 2025",
+  },
+  {
+    name:        "Grace Tan",
+    destination: "Japan",
+    slugKeywords: ["japan"],
+    rating: 5,
+    review: "Our Japan trip was flawlessly organized by Gladex. The IC card guide, temple etiquette tips, and day-by-day itinerary made everything so easy for our group of 8!",
+    photo: "/images/testimonials/grace-tan.jpg",
+    date:  "April 2025",
+  },
+  {
+    name:        "Miguel Dela Cruz",
+    destination: "Maldives",
+    slugKeywords: ["maldives", "maldives-maafushi"],
+    rating: 5,
+    review: "Gladex's attention to detail is unmatched. From the speedboat transfer schedule to the snorkeling gear rental tips — everything was covered in the briefing. Truly 5-star service!",
+    photo: "/images/testimonials/miguel-dela-cruz.jpg",
+    date:  "May 2025",
+  },
+];
+
+// ── Variants ──────────────────────────────────────────────────────────────────
+
 const variants = {
-  enter:  (dir) => ({ x: dir > 0 ? 48 : -48, opacity: 0 }),
+  enter:  (dir) => ({ x: dir > 0 ?  48 : -48, opacity: 0 }),
   center: { x: 0, opacity: 1 },
-  exit:   (dir) => ({ x: dir > 0 ? -48 : 48, opacity: 0 }),
+  exit:   (dir) => ({ x: dir > 0 ? -48 :  48, opacity: 0 }),
 };
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 export default function BriefingTestimonials({ theme, clientReview, slug }) {
   const { border, textSecondary } = theme;
   const [active, setActive] = useState(0);
   const [dir,    setDir]    = useState(1);
 
-  // Filter hardcoded testimonials: destination match + 3★ minimum
+  // Only show 4★ and 5★ reviews publicly
   const filtered = HARDCODED.filter((t) => {
-    if (t.rating < 3) return false;
+    if (t.rating < 4) return false;
     if (!slug) return true;
-    // If this testimonial has no slugKeywords, it shows for all destinations
     if (!t.slugKeywords?.length) return true;
     return t.slugKeywords.includes(slug);
   });
 
-  // Fall back to all 3★+ testimonials if none match the current destination
   const displayHardcoded = filtered.length > 0
     ? filtered
-    : HARDCODED.filter((t) => t.rating >= 3);
+    : HARDCODED.filter((t) => t.rating >= 4);
 
-  // Build the display list — client's own review (3★+) always first
+  // Client's own review: only show if 4★+
   const ALL = [
-    ...(clientReview?.rating >= 3
+    ...(clientReview?.rating >= 4
       ? [{
-          name: "You",
+          name:        "You",
           destination: "",
-          rating: clientReview.rating,
-          review: clientReview.comment || "I rated my Gladex travel experience.",
-          photo: null,
-          date: "Just now",
-          isClient: true,
+          rating:      clientReview.rating,
+          review:      clientReview.comment || "I rated my Gladex travel experience.",
+          photo:       null,
+          photos:      clientReview.photos || null,
+          date:        "Just now",
+          isClient:    true,
         }]
       : []),
     ...displayHardcoded,
@@ -204,8 +384,10 @@ export default function BriefingTestimonials({ theme, clientReview, slug }) {
   const prev = () => { setDir(-1); setActive((a) => (a - 1 + N) % N); };
   const next = () => { setDir(1);  setActive((a) => (a + 1) % N);     };
 
-  // Touch swipe support for mobile
-  const touchX = useRef(null);
+  const touchX    = useRef(null);
+  const safeActive = active % N;
+  const cards      = [0, 1, 2].map((offset) => ALL[(safeActive + offset) % N]);
+
   function onTouchStart(e) { touchX.current = e.touches[0].clientX; }
   function onTouchEnd(e) {
     if (touchX.current === null) return;
@@ -214,22 +396,14 @@ export default function BriefingTestimonials({ theme, clientReview, slug }) {
     touchX.current = null;
   }
 
-  // Keep active index in range when N changes (e.g. client review added)
-  const safeActive = active % N;
-  const cards = [0, 1, 2].map((offset) => ALL[(safeActive + offset) % N]);
-
   return (
     <BriefingSection
       label="Traveler Reviews"
-      title="Real Gladex Travel Experiences 🧡"
+      title="Real Gladex Travel Experiences"
       theme={theme}
     >
-      {/* Card area — touch swipe enabled on mobile */}
-      <div
-        className="overflow-hidden"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-      >
+      {/* Card area — swipeable on mobile */}
+      <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <AnimatePresence mode="wait" custom={dir}>
           <motion.div
             key={safeActive}

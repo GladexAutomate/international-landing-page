@@ -1,27 +1,57 @@
 // @ts-nocheck
-import { useState, useEffect } from "react";
-import { Star, Pencil, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Star, Pencil, X, Upload } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import BriefingSection from "./briefing/BriefingSection";
 
 const ORANGE = "#FF8C00";
+const MAX_PHOTOS = 3;
+const MAX_FILE_MB = 5;
+const ACCEPTED = "image/jpeg,image/png,image/webp";
+
+async function uploadPhotosToStorage(files, gdxReference) {
+  const urls = [];
+  for (const file of files) {
+    const ext = file.name.split(".").pop().toLowerCase() || "jpg";
+    const path = `${gdxReference}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const { data, error } = await supabase.storage
+      .from("review-photos")
+      .upload(path, file, { contentType: file.type, upsert: false });
+    if (error) {
+      console.warn("[RateMyService] photo upload failed:", error.message);
+      continue;
+    }
+    const { data: { publicUrl } } = supabase.storage.from("review-photos").getPublicUrl(data.path);
+    urls.push(publicUrl);
+  }
+  return urls;
+}
 
 export default function RateMyService({ theme, gdxReference, destination, onReviewSaved }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  const fileInputRef  = useRef(null);
+  const objectUrlsRef = useRef([]);
+  const dragCounterRef = useRef(0);
 
-  const [loading,        setLoading]        = useState(true);
-  const [existingReview, setExistingReview] = useState(null); // { rating, comment }
-  const [isEditing,      setIsEditing]      = useState(false);
-  const [hovered,        setHovered]        = useState(0);
-  const [selected,       setSelected]       = useState(0);
-  const [comment,        setComment]        = useState("");
-  const [submitting,     setSubmitting]     = useState(false);
-  const [error,          setError]          = useState(null);
+  const [loading,          setLoading]          = useState(true);
+  const [existingReview,   setExistingReview]   = useState(null);
+  const [isEditing,        setIsEditing]        = useState(false);
+  const [hovered,          setHovered]          = useState(0);
+  const [selected,         setSelected]         = useState(0);
+  const [comment,          setComment]          = useState("");
+  const [submitting,       setSubmitting]       = useState(false);
+  const [error,            setError]            = useState(null);
+  const [existingPhotos,   setExistingPhotos]   = useState([]);   // URLs already in DB
+  const [newPhotoFiles,    setNewPhotoFiles]    = useState([]);   // File objects to upload
+  const [newPhotoPreviews, setNewPhotoPreviews] = useState([]);   // object URL previews
+  const [isDragging,       setIsDragging]       = useState(false);
 
-  // Fetch existing review on load / GDX change
+  // Revoke all object URLs on unmount
+  useEffect(() => () => objectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u)), []);
+
+  // Fetch existing review on GDX change
   useEffect(() => {
     if (!gdxReference) { setLoading(false); return; }
-
     setLoading(true);
     setExistingReview(null);
     setIsEditing(false);
@@ -31,13 +61,11 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
 
     supabase
       .from("reviews")
-      .select("rating, comment")
+      .select("*")
       .eq("gdx_reference", gdxReference)
       .maybeSingle()
       .then(({ data, error: fetchError }) => {
-        if (fetchError) {
-          console.error("[RateMyService] fetch error:", fetchError.code, fetchError.message);
-        }
+        if (fetchError) console.error("[RateMyService] fetch:", fetchError.code, fetchError.message);
         if (!fetchError && data) {
           setExistingReview(data);
           onReviewSaved?.(data);
@@ -46,70 +74,138 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
       });
   }, [gdxReference]);
 
-  // Enter edit mode — pre-fill form with existing values
   function handleEdit() {
     setSelected(existingReview.rating);
     setComment(existingReview.comment || "");
+    setExistingPhotos(existingReview.photos || []);
+    setNewPhotoFiles([]);
+    setNewPhotoPreviews([]);
     setError(null);
     setIsEditing(true);
   }
 
-  // Cancel edit — go back to view mode
   function handleCancel() {
     setIsEditing(false);
     setSelected(0);
     setComment("");
+    setExistingPhotos([]);
+    newPhotoPreviews.forEach((u) => URL.revokeObjectURL(u));
+    setNewPhotoFiles([]);
+    setNewPhotoPreviews([]);
     setError(null);
   }
 
-  // Submit new review or update existing — always upserts by gdx_reference
+  function addFiles(fileList) {
+    const slots = MAX_PHOTOS - existingPhotos.length - newPhotoFiles.length;
+    if (slots <= 0) return;
+    const valid = Array.from(fileList)
+      .filter((f) => ACCEPTED.includes(f.type))
+      .filter((f) => f.size <= MAX_FILE_MB * 1024 * 1024)
+      .slice(0, slots);
+    if (!valid.length) return;
+    const previews = valid.map((f) => {
+      const url = URL.createObjectURL(f);
+      objectUrlsRef.current.push(url);
+      return url;
+    });
+    setNewPhotoFiles((p) => [...p, ...valid]);
+    setNewPhotoPreviews((p) => [...p, ...previews]);
+  }
+
+  function removeExistingPhoto(i) {
+    setExistingPhotos((p) => p.filter((_, idx) => idx !== i));
+  }
+
+  function removeNewPhoto(i) {
+    URL.revokeObjectURL(newPhotoPreviews[i]);
+    objectUrlsRef.current = objectUrlsRef.current.filter((u) => u !== newPhotoPreviews[i]);
+    setNewPhotoFiles((p) => p.filter((_, idx) => idx !== i));
+    setNewPhotoPreviews((p) => p.filter((_, idx) => idx !== i));
+  }
+
+  function handleDragEnter(e) {
+    e.preventDefault();
+    dragCounterRef.current++;
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) setIsDragging(false);
+  }
+
+  function handleDragOver(e) { e.preventDefault(); }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    dragCounterRef.current = 0;
+    setIsDragging(false);
+    addFiles(e.dataTransfer.files);
+  }
+
   async function handleSubmit() {
     if (!selected || !gdxReference || submitting) return;
     setSubmitting(true);
     setError(null);
 
-    // Build payload — include destination if provided (column must exist in Supabase)
-    const payload = { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null };
-    if (destination) payload.destination = destination;
+    // Upload any new photos first
+    let uploadedUrls = [];
+    if (newPhotoFiles.length > 0) {
+      uploadedUrls = await uploadPhotosToStorage(newPhotoFiles, gdxReference);
+    }
+    const allPhotos = [...existingPhotos, ...uploadedUrls];
+
+    const payload = {
+      gdx_reference: gdxReference,
+      rating: selected,
+      comment: comment.trim() || null,
+    };
+    if (destination)      payload.destination = destination;
+    if (allPhotos.length) payload.photos      = allPhotos;
 
     let { error: upsertError } = await supabase
       .from("reviews")
       .upsert(payload, { onConflict: "gdx_reference" });
 
-    // If destination column doesn't exist yet, retry without it
-    if (upsertError?.code === "42703" || upsertError?.message?.toLowerCase().includes("destination")) {
-      const retry = await supabase
-        .from("reviews")
-        .upsert(
-          { gdx_reference: gdxReference, rating: selected, comment: comment.trim() || null },
-          { onConflict: "gdx_reference" }
-        );
+    // Strip unknown columns and retry once
+    if (upsertError?.code === "42703") {
+      const clean = { ...payload };
+      if (upsertError.message?.includes("destination")) delete clean.destination;
+      if (upsertError.message?.includes("photos"))      delete clean.photos;
+      const retry = await supabase.from("reviews").upsert(clean, { onConflict: "gdx_reference" });
       upsertError = retry.error;
     }
 
     if (upsertError) {
-      console.error("[RateMyService] upsert error:", upsertError.code, upsertError.message);
-      const msg =
-        upsertError.code === "PGRST205" || upsertError.message?.includes("reviews")
-          ? "Review table is not set up yet. Please contact Gladex support."
-          : "Something went wrong. Please try again.";
-      setError(msg);
+      console.error("[RateMyService] upsert:", upsertError.code, upsertError.message);
+      setError("Something went wrong. Please try again.");
       setSubmitting(false);
       return;
     }
 
-    const saved = { rating: selected, comment: comment.trim() || null };
+    const saved = {
+      rating:  selected,
+      comment: comment.trim() || null,
+      photos:  allPhotos.length ? allPhotos : null,
+    };
     setExistingReview(saved);
     onReviewSaved?.(saved);
     setIsEditing(false);
     setSelected(0);
     setComment("");
+    setExistingPhotos([]);
+    newPhotoPreviews.forEach((u) => URL.revokeObjectURL(u));
+    setNewPhotoFiles([]);
+    setNewPhotoPreviews([]);
     setSubmitting(false);
   }
 
   if (!gdxReference) return null;
 
-  const showForm = !existingReview || isEditing;
+  const showForm    = !existingReview || isEditing;
+  const totalPhotos = (isEditing ? existingPhotos.length : 0) + newPhotoFiles.length;
+  const canAddMore  = totalPhotos < MAX_PHOTOS;
 
   return (
     <BriefingSection label="Your Experience" title="Review Our Service" theme={theme}>
@@ -127,7 +223,7 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
       {/* ── Existing review (view mode) ── */}
       {!loading && existingReview && !isEditing && (
         <div
-          className="rounded-2xl border p-6 space-y-3"
+          className="rounded-2xl border p-6 space-y-4"
           style={{ backgroundColor: bgCard, borderColor: border }}
         >
           {/* Stars */}
@@ -148,7 +244,7 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
           {/* Thank you */}
           <div>
             <p className="font-condensed font-bold text-base" style={{ color: textPrimary }}>
-              Thank you for your feedback! 🧡
+              Thank you for your feedback!
             </p>
             <p className="font-body text-sm" style={{ color: ORANGE }}>
               We hope you have an amazing trip.
@@ -168,10 +264,32 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
             </p>
           )}
 
+          {/* Photos */}
+          {existingReview.photos?.length > 0 && (
+            <div
+              className={`grid gap-2 ${
+                existingReview.photos.length === 1
+                  ? "grid-cols-1"
+                  : existingReview.photos.length === 2
+                  ? "grid-cols-2"
+                  : "grid-cols-3"
+              }`}
+            >
+              {existingReview.photos.map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt={`Your photo ${i + 1}`}
+                  className={`w-full ${existingReview.photos.length === 1 ? "max-h-52 object-cover rounded-xl" : "aspect-square object-cover rounded-xl"}`}
+                />
+              ))}
+            </div>
+          )}
+
           {/* Edit button */}
           <button
             onClick={handleEdit}
-            className="flex items-center gap-2 font-body text-xs font-semibold px-4 py-2 rounded-xl border transition-all hover:opacity-80 mt-1"
+            className="flex items-center gap-2 font-body text-xs font-semibold px-4 py-2 rounded-xl border transition-all hover:opacity-80"
             style={{ borderColor: border, color: textSecondary }}
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -253,6 +371,114 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
             />
           </div>
 
+          {/* Photo upload */}
+          <div>
+            <p
+              className="font-body text-[11px] font-semibold uppercase tracking-[0.18em] mb-3"
+              style={{ color: textSecondary }}
+            >
+              Photos{" "}
+              <span className="normal-case tracking-normal font-normal text-xs">
+                (optional · up to {MAX_PHOTOS})
+              </span>
+            </p>
+
+            {/* Existing photos in edit mode */}
+            {isEditing && existingPhotos.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {existingPhotos.map((url, i) => (
+                  <div key={i} className="relative">
+                    <img
+                      src={url}
+                      alt=""
+                      className="w-full aspect-square object-cover rounded-xl"
+                    />
+                    <button
+                      onClick={() => removeExistingPhoto(i)}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "rgba(0,0,0,0.65)", color: "#fff" }}
+                      aria-label="Remove photo"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* New photo previews */}
+            {newPhotoPreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {newPhotoPreviews.map((url, i) => (
+                  <div key={i} className="relative">
+                    <img
+                      src={url}
+                      alt=""
+                      className="w-full aspect-square object-cover rounded-xl"
+                    />
+                    <button
+                      onClick={() => removeNewPhoto(i)}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "rgba(0,0,0,0.65)", color: "#fff" }}
+                      aria-label="Remove photo"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Drop zone — shown only if more slots available */}
+            {canAddMore && (
+              <div
+                className="rounded-2xl border-2 border-dashed p-5 text-center cursor-pointer transition-colors select-none"
+                style={{
+                  borderColor:     isDragging ? ORANGE : isDark ? "#3A3A3A" : "#DDD",
+                  backgroundColor: isDragging
+                    ? isDark ? "rgba(255,140,0,0.08)" : "rgba(255,140,0,0.04)"
+                    : "transparent",
+                }}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept={ACCEPTED}
+                  className="hidden"
+                  onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
+                />
+                <Upload
+                  className="w-7 h-7 mx-auto mb-2"
+                  style={{ color: isDragging ? ORANGE : isDark ? "#555" : "#AAA" }}
+                />
+                <p
+                  className="font-body text-sm font-semibold"
+                  style={{ color: isDragging ? ORANGE : textSecondary }}
+                >
+                  Drag photos here or tap to upload
+                </p>
+                <p
+                  className="font-body text-xs mt-1"
+                  style={{ color: isDark ? "#555" : "#AAA" }}
+                >
+                  JPG · PNG · WEBP · Max {MAX_FILE_MB}MB each
+                </p>
+              </div>
+            )}
+
+            {totalPhotos >= MAX_PHOTOS && (
+              <p className="font-body text-xs mt-2 text-center" style={{ color: isDark ? "#666" : "#AAA" }}>
+                Maximum {MAX_PHOTOS} photos reached
+              </p>
+            )}
+          </div>
+
           {error && (
             <p className="font-body text-sm" style={{ color: "#EF4444" }}>
               {error}
@@ -266,13 +492,13 @@ export default function RateMyService({ theme, gdxReference, destination, onRevi
             style={{ backgroundColor: ORANGE, color: "#080808" }}
           >
             {submitting
-              ? isEditing ? "Updating…" : "Submitting…"
+              ? newPhotoFiles.length > 0
+                ? "Uploading photos…"
+                : isEditing ? "Updating…" : "Submitting…"
               : isEditing ? "Update Review" : "Submit Review"}
           </button>
-
         </div>
       )}
-
     </BriefingSection>
   );
 }
