@@ -866,7 +866,7 @@ export const danangBriefing = {
     },
     {
       q: "Is the tour refundable?",
-      a: "The 5D4N Da Nang package is non-refundable after the final payment due date. Rescheduling may be allowed at the discretion of Gladex Tours subject to availability and applicable fees. Travel insurance is strongly recommended to protect against unforeseen cancellations due to medical emergencies or natural disasters.",
+      a: "The 5D3N Da Nang package is non-refundable after the final payment due date. Rescheduling may be allowed at the discretion of Gladex Tours subject to availability and applicable fees. Travel insurance is strongly recommended to protect against unforeseen cancellations due to medical emergencies or natural disasters.",
     },
     {
       q: "Can I add optional tours?",
@@ -894,7 +894,7 @@ export const danangBriefing = {
     },
     {
       q: "Is tipping expected in Vietnam?",
-      a: "Tipping fee for your tour guide and driver is already included in the 5D4N package — you do not need to tip them separately. For restaurants, hotels, or any additional personal services you arrange on your own, small tips are appreciated but entirely optional.",
+      a: "Tipping fee for your tour guide and driver is already included in the 5D3N package — you do not need to tip them separately. For restaurants, hotels, or any additional personal services you arrange on your own, small tips are appreciated but entirely optional.",
     },
     {
       q: "What happens if I'm late at the group meeting point?",
@@ -913,7 +913,7 @@ export const danangBriefing = {
       a: "The eTravel Philippines system (etravel.gov.ph) is mandatory for all Filipino travelers departing internationally. Register at least 72 hours before your departure. You will receive a QR code that BI officers will scan upon departure. Keep this QR code accessible — save a screenshot or print it.",
     },
     {
-      q: "What is included in the 5D4N Da Nang package?",
+      q: "What is included in the 5D3N Da Nang package?",
       a: "Round-trip airfare via VietJet Air, 4 nights hotel accommodation with daily breakfast, meals as listed in the itinerary, roundtrip airport transfers, guided sightseeing tours with entrance tickets, air-conditioned tour bus, English-speaking guide and driver, tipping fee, airport tax, and baggage allowance (20 kg + 7 kg carry-on). Refer to the Package Inclusions section for the complete list.",
     },
     {

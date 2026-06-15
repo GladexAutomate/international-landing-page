@@ -267,8 +267,8 @@ export const destinations = [
     packages: [
       {
         code: "GDX-UOV15B2",
-        name: "5D4N Da Nang 2026",
-        duration: "5 Days / 4 Nights",
+        name: "5D3N Da Nang 2026",
+        duration: "5 Days / 3 Nights",
         travelDates: ["2026 dates available — inquire now"],
         hotelCategories: [
           { category: "Superior 3★ (Satya Danang)", hotels: ["Satya Danang or similar"], rates: { twin: 22999, triple: 21999, solo: 29999, childNoBed: 18999, downpayment: 10000 } },
@@ -280,7 +280,7 @@ export const destinations = [
         itinerary: [
           { day: 1, title: "Manila to Da Nang — Son Tra Peninsula · Canaan Island · Hoi An", activities: ["Depart from Manila via VietJet Air to Da Nang", "Meet and greet with tour guide at the arrivals hall", "Son Tra Peninsula — Lady Buddha statue overlooking the South China Sea", "Canaan Island — coconut boat ride experience", "Hoi An Ancient Town exploration", "Dinner and hotel check-in"] },
           { day: 2, title: "Ba Na Hills — Golden Bridge · French Village · Cable Car", activities: ["Breakfast at hotel", "Full-day Ba Na Hills — cable car ride to the summit at 1,487 m", "Walk the iconic Golden Bridge held by giant stone hands", "Explore the French-inspired village and Fantasy Park", "Quick stop at local mini supermarket", "Dinner and overnight at hotel"] },
-          { day: 3, title: "Da Nang City Tour — Dragon Bridge · Love Bridge · APEC Park · Pink Church", activities: ["Breakfast at hotel", "Visit local latex shop", "Dragon Bridge (Cầu Rồng) photo stop", "Love Bridge — scenic Han River pedestrian bridge", "APEC Park waterfront walk", "Da Nang Cathedral (Pink Church)", "Souvenir shopping stop", "Dinner and overnight at hotel"] },
+          { day: 3, title: "Da Nang City Tour — Dragon Bridge · Love Bridge · APEC Park · Pink Church (B/X/X)", activities: ["Breakfast at hotel", "Visit local latex shop", "Dragon Bridge (Cầu Rồng) photo stop", "Love Bridge — scenic Han River pedestrian bridge", "APEC Park waterfront walk", "Da Nang Cathedral (Pink Church)", "Souvenir shopping stop", "Dinner and overnight at hotel"] },
           { day: 4, title: "Free Time · Hai Van Pass · Lang Co Beach · Jewelry Stop", activities: ["Breakfast at hotel", "Free time in the morning", "Treasure shops and Vietnamese coffee and bánh mì stop", "Scenic drive through Hai Van Pass", "Lang Co Beach — coastal stop with mountain and sea views", "Jewelry shop stop", "Dinner and overnight at hotel"] },
           { day: 5, title: "Da Nang to Manila — Departure Day", activities: ["Breakfast and hotel check-out", "Transfer to Da Nang International Airport", "Airport check-in and immigration procedures", "Board VietJet Air flight back to Manila"] },
         ],
