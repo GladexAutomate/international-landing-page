@@ -58,13 +58,17 @@ function DayCard({ day, title, activities, tourOptions, galleryImages, theme }) 
               {tourOptions.map((tour, i) => (
                 <div key={i} className="rounded-xl border overflow-hidden flex gap-0" style={{ borderColor: border, backgroundColor: bgAlt }}>
                   {tour.img && (
-                    <div className="shrink-0 w-20 h-20">
+                    <div className="shrink-0 w-20 h-20"
+                      ref={el => {
+                        // hide entire container if image fails
+                      }}
+                    >
                       <img
                         src={tour.img}
                         alt={tour.name}
                         className="w-full h-full object-cover"
                         loading="lazy"
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        onError={(e) => { e.currentTarget.parentElement.style.display = "none"; }}
                       />
                     </div>
                   )}
