@@ -56,15 +56,28 @@ function DayCard({ day, title, activities, tourOptions, galleryImages, theme }) 
             </p>
             <div className="space-y-2">
               {tourOptions.map((tour, i) => (
-                <div key={i} className="rounded-xl px-3 py-2.5 border" style={{ borderColor: border, backgroundColor: bgAlt }}>
-                  <span className="font-body text-sm font-semibold leading-snug" style={{ color: textPrimary }}>
-                    {tour.name}
-                  </span>
-                  {tour.note ? (
-                    <p className="font-body text-xs leading-relaxed mt-0.5" style={{ color: textSecondary }}>
-                      {tour.note}
-                    </p>
-                  ) : null}
+                <div key={i} className="rounded-xl border overflow-hidden flex gap-0" style={{ borderColor: border, backgroundColor: bgAlt }}>
+                  {tour.img && (
+                    <div className="shrink-0 w-20 h-20">
+                      <img
+                        src={tour.img}
+                        alt={tour.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                    </div>
+                  )}
+                  <div className="px-3 py-2.5 flex flex-col justify-center">
+                    <span className="font-body text-sm font-semibold leading-snug" style={{ color: textPrimary }}>
+                      {tour.name}
+                    </span>
+                    {tour.note ? (
+                      <p className="font-body text-xs leading-relaxed mt-0.5" style={{ color: textSecondary }}>
+                        {tour.note}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </div>

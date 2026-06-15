@@ -51,9 +51,9 @@ export const bangkokBriefing = {
       day: 2,
       title: "Day 2 / 3 / 4 — Your Scheduled Tours",
       tourOptions: [
-        { name: "Calypso Cabaret Bangkok", note: "THB 500 · Iconic Thai cabaret show at Asiatique The Riverfront · Instant confirmation" },
-        { name: "Bangkok Private Tour with Baiyoke Tower Buffet", note: "THB 3,200 · Private city tour + all-you-can-eat buffet at Baiyoke Sky Tower" },
-        { name: "Ayutthaya Private Tour", note: "THB 3,800 · Full-day private tour to Thailand's ancient capital — UNESCO World Heritage Site" },
+        { name: "Calypso Cabaret Bangkok", note: "THB 500 · Iconic Thai cabaret show at Asiatique The Riverfront · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/2c0bdf11-12aa-4a84-b605-93bf20b96b02" },
+        { name: "Bangkok Private Tour with Baiyoke Tower Buffet", note: "THB 3,200 · Private city tour + all-you-can-eat buffet at Baiyoke Sky Tower", img: "https://product-image.globaltix.com/stg-gtImage/8cfb57ba-2146-48d6-a527-f23056550dbc" },
+        { name: "Ayutthaya Private Tour", note: "THB 3,800 · Full-day private tour to Thailand's ancient capital — UNESCO World Heritage Site", img: "https://product-image.globaltix.com/stg-gtImage/93647399-a9a6-4055-bfa6-9d14ec791588" },
       ],
       activities: [
         "Please refer to your travel itinerary for your scheduled tours and their corresponding dates, including any optional tours you may have availed.",
