@@ -79,7 +79,7 @@ export const bangkokPattayaBriefing = {
       day: 3,
       title: "Bangkok → Pattaya — Nong Nooch Village — Pattaya Beach Evening",
       tourOptions: [
-        { name: "Alcazar Cabaret Show Pattaya", note: "THB 800 · GT Recommended · World-famous Pattaya cabaret and cultural show · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/257a5fe5-9d48-4e01-8b43-9790479d3936" },
+        { name: "Alcazar Cabaret Show Pattaya", note: "THB 800 · GT Recommended · World-famous Pattaya cabaret and cultural show · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/257a5fe5-9d48-4e01-8b43-9790479d3936" },
       ],
       activities: [
         "Breakfast at hotel",
