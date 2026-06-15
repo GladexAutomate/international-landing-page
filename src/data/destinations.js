@@ -89,7 +89,11 @@ export const destinations = [
         itinerary: [
           { day: 1, title: "Arrival in Bangkok", activities: ["Arrive at Suvarnabhumi Airport", "Meet and greet", "Transfer to hotel", "Check-in and rest"] },
           { day: 2, title: "Free Bangkok City Tour", activities: ["Breakfast", "Half-day Bangkok city tour (Wat Arun, Chao Phraya)", "Free afternoon", "Optional Floating Market"] },
-          { day: 3, title: "Optional Tours / Free Time", activities: ["Breakfast", "Optional Ayutthaya Tour or Dinner Cruise", "Free shopping time"] },
+          { day: 3, title: "Optional Tours / Free Time", activities: ["Breakfast", "Optional Ayutthaya Tour or Dinner Cruise", "Free shopping time"], tourOptions: [
+            { name: "Calypso Cabaret Bangkok", note: "THB 500 · Iconic Thai cabaret show at Asiatique · Instant confirmation" },
+            { name: "Bangkok Private Tour with Baiyoke Tower Buffet", note: "THB 3,200 · Private city tour + all-you-can-eat buffet at Baiyoke Sky Tower" },
+            { name: "Ayutthaya Private Tour", note: "THB 3,800 · Full-day private tour to Thailand's ancient capital — UNESCO World Heritage Site" },
+          ] },
           { day: 4, title: "Departure", activities: ["Breakfast", "Check-out", "Airport transfer", "Departure"] },
         ],
         optionalTours: ["Ayutthaya Ancient City Tour", "Chao Phraya Dinner Cruise", "Floating Market Tour", "Safari World", "Coral Island Day Trip"],
@@ -370,7 +374,9 @@ export const destinations = [
         ],
         itinerary: [
           { day: 1, title: "Arrival — Bangkok", activities: ["Arrive at Suvarnabhumi Airport", "Transfer to Bangkok hotel", "Check-in and rest"] },
-          { day: 2, title: "Bangkok to Pattaya", activities: ["Breakfast", "Great & Grand Sweet Destination", "Honey Bee Farm", "Gems Gallery", "Transfer to Pattaya", "Pattaya Beach", "Central Festival Mall"] },
+          { day: 2, title: "Bangkok to Pattaya", activities: ["Breakfast", "Great & Grand Sweet Destination", "Honey Bee Farm", "Gems Gallery", "Transfer to Pattaya", "Pattaya Beach", "Central Festival Mall"], tourOptions: [
+            { name: "Alcazar Cabaret Show Pattaya", note: "THB 800 · GT Recommended · World-famous Pattaya cabaret and cultural show · Instant confirmation" },
+          ] },
           { day: 3, title: "Pattaya to Bangkok", activities: ["Breakfast", "Laser Buddha", "Nong Nooch Village", "Elephant Show + Tram Ride", "Transfer back to Bangkok", "Icon Siam shopping", "Noah Luxury Dinner Cruise"] },
           { day: 4, title: "Departure", activities: ["Breakfast", "Wat Arun", "Thai Costume Experience", "Big C shopping", "Airport transfer", "Departure"] },
         ],
@@ -635,7 +641,11 @@ export const destinations = [
         itinerary: [
           { day: 1, title: "Arrival in Chiangmai", activities: ["Arrive at Chiang Mai International Airport", "Transfer to hotel", "Check-in", "Night Bazaar exploration"] },
           { day: 2, title: "City Tour", activities: ["Breakfast", "Tuk Tuk City Tour", "Wat Chedi Luang temple visit", "Thapae Gate historic site", "Fruit Market Tour"] },
-          { day: 3, title: "Free Leisure Day", activities: ["Breakfast", "Free & easy day", "Optional elephant sanctuary", "Optional cooking class"] },
+          { day: 3, title: "Free Leisure Day", activities: ["Breakfast", "Free & easy day", "Optional elephant sanctuary", "Optional cooking class"], tourOptions: [
+            { name: "Chiang Mai City Private Tour", note: "THB 1,800 · Private guided city tour — flexible schedule and stops" },
+            { name: "Muay Thai — Kalare Night Bazaar Boxing Stadium", note: "THB 600 · Evening Muay Thai match at the Night Bazaar · Instant confirmation" },
+            { name: "Muay Thai — Loi Kroh Boxing Stadium", note: "THB 1,000 · Premium evening Muay Thai match · Instant confirmation" },
+          ] },
           { day: 4, title: "Departure", activities: ["Breakfast", "Hotel check-out", "Airport transfer", "Departure"] },
         ],
         optionalTours: ["Elephant Sanctuary Half-Day", "Doi Suthep Temple", "Thai Cooking Class", "Zip Line Adventure"],
