@@ -96,6 +96,11 @@ export const chiangmaiBriefing = {
     {
       day: 4,
       title: "Doi Suthep Temple · Old City Temples · Wualai Walking Street",
+      tourOptions: [
+        { name: "Chiang Mai City Private Tour", note: "THB 1,800 · Private guided city tour — flexible schedule and stops" },
+        { name: "Muay Thai — Kalare Night Bazaar Boxing Stadium", note: "THB 600 · Evening Muay Thai match at the Night Bazaar · Instant confirmation" },
+        { name: "Muay Thai — Loi Kroh Boxing Stadium", note: "THB 1,000 · Premium evening Muay Thai match · Instant confirmation" },
+      ],
       activities: [
         "After breakfast, depart for Wat Phra That Doi Suthep — Chiang Mai's most sacred and iconic temple perched at 1,073 m above the city.",
         "Ascend via the 306-step Naga staircase (or cable car) to the golden chedi with sweeping panoramic views of the entire Chiang Mai valley.",

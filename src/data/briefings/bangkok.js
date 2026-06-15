@@ -50,6 +50,11 @@ export const bangkokBriefing = {
     {
       day: 2,
       title: "Day 2 / 3 / 4 — Your Scheduled Tours",
+      tourOptions: [
+        { name: "Calypso Cabaret Bangkok", note: "THB 500 · Iconic Thai cabaret show at Asiatique The Riverfront · Instant confirmation" },
+        { name: "Bangkok Private Tour with Baiyoke Tower Buffet", note: "THB 3,200 · Private city tour + all-you-can-eat buffet at Baiyoke Sky Tower" },
+        { name: "Ayutthaya Private Tour", note: "THB 3,800 · Full-day private tour to Thailand's ancient capital — UNESCO World Heritage Site" },
+      ],
       activities: [
         "Please refer to your travel itinerary for your scheduled tours and their corresponding dates, including any optional tours you may have availed.",
         "Bangkok City Tour – Option 1: Pick up at hotel lobby 08:00–08:30 AM. Sites: Wat Saket (Golden Mountain), Wat In (Standing Buddha), Lucky Temple, WILLS Gems Gallery. With tour guide and roundtrip SIC transfer. Drop off at hotel after tour. Free time in the afternoon.",

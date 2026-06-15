@@ -78,6 +78,9 @@ export const bangkokPattayaBriefing = {
     {
       day: 3,
       title: "Bangkok → Pattaya — Nong Nooch Village — Pattaya Beach Evening",
+      tourOptions: [
+        { name: "Alcazar Cabaret Show Pattaya", note: "THB 800 · GT Recommended · World-famous Pattaya cabaret and cultural show · Instant confirmation" },
+      ],
       activities: [
         "Breakfast at hotel",
         "Check out of Bangkok hotel",
