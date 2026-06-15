@@ -11,7 +11,7 @@ export const danangBriefing = {
   // ─── 1. WELCOME MESSAGE ──────────────────────────────────────────────────
   welcomeMessage: {
     title: "Official Da Nang Briefing",
-    subtitle: "5D4N Da Nang, Vietnam — 2026",
+    subtitle: "5D3N Da Nang, Vietnam — 2026",
     packageCode: "GDX-UOV15B2",
     body: [
       "Welcome and congratulations on your upcoming trip to Da Nang, Vietnam with Gladex Tours!",
@@ -57,7 +57,7 @@ export const danangBriefing = {
       title: "Manila to Da Nang — Son Tra Peninsula · Canaan Island · Hoi An",
       activities: [
         "Depart from Manila via VietJet Air and fly to Da Nang International Airport.",
-        "Upon arrival, meet and greet with your Gladex tour guide at the arrivals hall.",
+        "Upon arrival, meet and greet with your Gladex tour guide at the arrival hall.",
         "First stop: Son Tra Peninsula — admire the iconic Lady Buddha statue overlooking the South China Sea.",
         "Next: Canaan Island — enjoy a relaxing visit including a fun coconut boat ride experience.",
         "Afternoon: Explore the beautiful and historic Hoi An Ancient Town — a UNESCO World Heritage Site.",
@@ -88,7 +88,7 @@ export const danangBriefing = {
     },
     {
       day: 3,
-      title: "Da Nang City Tour — Dragon Bridge · Love Bridge · APEC Park · Pink Church",
+      title: "Da Nang City Tour — Dragon Bridge · Love Bridge · APEC Park · Pink Church (B/X/X)",
       activities: [
         "After breakfast, continue exploring the city of Da Nang.",
         "Visit a local latex shop before heading into the city centre.",
@@ -155,8 +155,8 @@ export const danangBriefing = {
       "Present your passport and printed Vietnam e-Visa approval letter.",
       "Fill in any required arrival card provided on the aircraft or at the counter.",
       "Claim your baggage at the designated carousel after immigration clearance.",
-      "Exit to the Arrivals Hall and look for your Gladex Tours meet-and-greet signage.",
-      "Do NOT accept assistance from unauthorized porters or taxi drivers in the arrivals hall.",
+      "Exit to the Arrival Hall and look for your Gladex Tours meet-and-greet signage.",
+      "Do NOT accept assistance from unauthorized porters or taxi drivers in the arrival hall.",
     ],
   },
 
@@ -182,7 +182,7 @@ export const danangBriefing = {
         "Fill in the arrival/departure card provided on the aircraft or at the counter (if required).",
         "Present to the Immigration Officer: Passport + printed Vietnam e-Visa approval letter.",
         "After immigration clearance, proceed to the baggage carousel to claim your checked luggage.",
-        "Exit to the Arrivals Hall — look for your Gladex Tours representative holding a sign.",
+        "Exit to the Arrival Hall — look for your Gladex Tours representative holding a sign.",
         "Do NOT accept offers from unauthorized taxi operators, porters, or travel agents.",
         "Contact your tour guide immediately if you cannot locate the Gladex meet-and-greet point.",
       ],
