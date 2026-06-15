@@ -97,9 +97,9 @@ export const chiangmaiBriefing = {
       day: 4,
       title: "Doi Suthep Temple · Old City Temples · Wualai Walking Street",
       tourOptions: [
-        { name: "Chiang Mai City Private Tour", note: "THB 1,800 · Private guided city tour — flexible schedule and stops", img: "https://product-image.globaltix.com/gtImage/4a9ca3f5-d28c-4f5d-ba4c-1790390de3c3" },
-        { name: "Muay Thai — Kalare Night Bazaar Boxing Stadium", note: "THB 600 · Evening Muay Thai match at the Night Bazaar · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/d903a024-3db4-43bf-8cf7-da04944833f5" },
-        { name: "Muay Thai — Loi Kroh Boxing Stadium", note: "THB 1,000 · Premium evening Muay Thai match · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/a757c047-4f59-4da8-ae83-c96669ee5bf2" },
+        { name: "Chiang Mai City Private Tour", note: "THB 1,800 · Private guided city tour — flexible schedule and stops", img: "https://product-image.globaltix.com/stg-gtImage/4a9ca3f5-d28c-4f5d-ba4c-1790390de3c3" },
+        { name: "Muay Thai — Kalare Night Bazaar Boxing Stadium", note: "THB 600 · Evening Muay Thai match at the Night Bazaar · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/d903a024-3db4-43bf-8cf7-da04944833f5" },
+        { name: "Muay Thai — Loi Kroh Boxing Stadium", note: "THB 1,000 · Premium evening Muay Thai match · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/a757c047-4f59-4da8-ae83-c96669ee5bf2" },
       ],
       activities: [
         "After breakfast, depart for Wat Phra That Doi Suthep — Chiang Mai's most sacred and iconic temple perched at 1,073 m above the city.",

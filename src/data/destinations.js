@@ -90,9 +90,9 @@ export const destinations = [
           { day: 1, title: "Arrival in Bangkok", activities: ["Arrive at Suvarnabhumi Airport", "Meet and greet", "Transfer to hotel", "Check-in and rest"] },
           { day: 2, title: "Free Bangkok City Tour", activities: ["Breakfast", "Half-day Bangkok city tour (Wat Arun, Chao Phraya)", "Free afternoon", "Optional Floating Market"] },
           { day: 3, title: "Optional Tours / Free Time", activities: ["Breakfast", "Optional Ayutthaya Tour or Dinner Cruise", "Free shopping time"], tourOptions: [
-            { name: "Calypso Cabaret Bangkok", note: "THB 500 · Iconic Thai cabaret show at Asiatique · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/2c0bdf11-12aa-4a84-b605-93bf20b96b02" },
-            { name: "Bangkok Private Tour with Baiyoke Tower Buffet", note: "THB 3,200 · Private city tour + all-you-can-eat buffet at Baiyoke Sky Tower", img: "https://product-image.globaltix.com/gtImage/8cfb57ba-2146-48d6-a527-f23056550dbc" },
-            { name: "Ayutthaya Private Tour", note: "THB 3,800 · Full-day private tour to Thailand's ancient capital — UNESCO World Heritage Site", img: "https://product-image.globaltix.com/gtImage/93647399-a9a6-4055-bfa6-9d14ec791588" },
+            { name: "Calypso Cabaret Bangkok", note: "THB 500 · Iconic Thai cabaret show at Asiatique · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/2c0bdf11-12aa-4a84-b605-93bf20b96b02" },
+            { name: "Bangkok Private Tour with Baiyoke Tower Buffet", note: "THB 3,200 · Private city tour + all-you-can-eat buffet at Baiyoke Sky Tower", img: "https://product-image.globaltix.com/stg-gtImage/8cfb57ba-2146-48d6-a527-f23056550dbc" },
+            { name: "Ayutthaya Private Tour", note: "THB 3,800 · Full-day private tour to Thailand's ancient capital — UNESCO World Heritage Site", img: "https://product-image.globaltix.com/stg-gtImage/93647399-a9a6-4055-bfa6-9d14ec791588" },
           ] },
           { day: 4, title: "Departure", activities: ["Breakfast", "Check-out", "Airport transfer", "Departure"] },
         ],
@@ -375,7 +375,7 @@ export const destinations = [
         itinerary: [
           { day: 1, title: "Arrival — Bangkok", activities: ["Arrive at Suvarnabhumi Airport", "Transfer to Bangkok hotel", "Check-in and rest"] },
           { day: 2, title: "Bangkok to Pattaya", activities: ["Breakfast", "Great & Grand Sweet Destination", "Honey Bee Farm", "Gems Gallery", "Transfer to Pattaya", "Pattaya Beach", "Central Festival Mall"], tourOptions: [
-            { name: "Alcazar Cabaret Show Pattaya", note: "THB 800 · GT Recommended · World-famous Pattaya cabaret and cultural show · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/257a5fe5-9d48-4e01-8b43-9790479d3936" },
+            { name: "Alcazar Cabaret Show Pattaya", note: "THB 800 · GT Recommended · World-famous Pattaya cabaret and cultural show · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/257a5fe5-9d48-4e01-8b43-9790479d3936" },
           ] },
           { day: 3, title: "Pattaya to Bangkok", activities: ["Breakfast", "Laser Buddha", "Nong Nooch Village", "Elephant Show + Tram Ride", "Transfer back to Bangkok", "Icon Siam shopping", "Noah Luxury Dinner Cruise"] },
           { day: 4, title: "Departure", activities: ["Breakfast", "Wat Arun", "Thai Costume Experience", "Big C shopping", "Airport transfer", "Departure"] },
@@ -642,9 +642,9 @@ export const destinations = [
           { day: 1, title: "Arrival in Chiangmai", activities: ["Arrive at Chiang Mai International Airport", "Transfer to hotel", "Check-in", "Night Bazaar exploration"] },
           { day: 2, title: "City Tour", activities: ["Breakfast", "Tuk Tuk City Tour", "Wat Chedi Luang temple visit", "Thapae Gate historic site", "Fruit Market Tour"] },
           { day: 3, title: "Free Leisure Day", activities: ["Breakfast", "Free & easy day", "Optional elephant sanctuary", "Optional cooking class"], tourOptions: [
-            { name: "Chiang Mai City Private Tour", note: "THB 1,800 · Private guided city tour — flexible schedule and stops", img: "https://product-image.globaltix.com/gtImage/4a9ca3f5-d28c-4f5d-ba4c-1790390de3c3" },
-            { name: "Muay Thai — Kalare Night Bazaar Boxing Stadium", note: "THB 600 · Evening Muay Thai match at the Night Bazaar · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/d903a024-3db4-43bf-8cf7-da04944833f5" },
-            { name: "Muay Thai — Loi Kroh Boxing Stadium", note: "THB 1,000 · Premium evening Muay Thai match · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/a757c047-4f59-4da8-ae83-c96669ee5bf2" },
+            { name: "Chiang Mai City Private Tour", note: "THB 1,800 · Private guided city tour — flexible schedule and stops", img: "https://product-image.globaltix.com/stg-gtImage/4a9ca3f5-d28c-4f5d-ba4c-1790390de3c3" },
+            { name: "Muay Thai — Kalare Night Bazaar Boxing Stadium", note: "THB 600 · Evening Muay Thai match at the Night Bazaar · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/d903a024-3db4-43bf-8cf7-da04944833f5" },
+            { name: "Muay Thai — Loi Kroh Boxing Stadium", note: "THB 1,000 · Premium evening Muay Thai match · Instant confirmation", img: "https://product-image.globaltix.com/stg-gtImage/a757c047-4f59-4da8-ae83-c96669ee5bf2" },
           ] },
           { day: 4, title: "Departure", activities: ["Breakfast", "Hotel check-out", "Airport transfer", "Departure"] },
         ],
