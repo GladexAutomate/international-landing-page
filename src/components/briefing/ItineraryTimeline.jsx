@@ -5,7 +5,7 @@ import { getBriefingDayImages } from "../../utils/briefingImages";
 
 const ORANGE = "#FF8C00";
 
-function DayCard({ day, title, activities, galleryImages, theme }) {
+function DayCard({ day, title, activities, tourOptions, galleryImages, theme }) {
   const { bgCard, bgAlt, border, textPrimary, textSecondary } = theme;
 
   return (
@@ -32,7 +32,7 @@ function DayCard({ day, title, activities, galleryImages, theme }) {
         </span>
       </div>
 
-      {/* Activities + gallery — always expanded */}
+      {/* Activities + optional tours + gallery — always expanded */}
       <div className="px-5 pb-5 pt-4">
         <ul className="space-y-2.5">
           {activities.map((activity, i) => (
@@ -47,6 +47,29 @@ function DayCard({ day, title, activities, galleryImages, theme }) {
             </li>
           ))}
         </ul>
+
+        {/* Optional tour choices */}
+        {tourOptions?.length > 0 && (
+          <div className="mt-4 pt-4 border-t" style={{ borderColor: border }}>
+            <p className="font-condensed font-bold text-xs uppercase tracking-widest mb-3" style={{ color: ORANGE }}>
+              Optional Tours Available
+            </p>
+            <div className="space-y-2">
+              {tourOptions.map((tour, i) => (
+                <div key={i} className="rounded-xl px-3 py-2.5 border" style={{ borderColor: border, backgroundColor: bgAlt }}>
+                  <span className="font-body text-sm font-semibold leading-snug" style={{ color: textPrimary }}>
+                    {tour.name}
+                  </span>
+                  {tour.note ? (
+                    <p className="font-body text-xs leading-relaxed mt-0.5" style={{ color: textSecondary }}>
+                      {tour.note}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <DayGallery images={galleryImages} theme={theme} />
       </div>
@@ -80,6 +103,7 @@ export default function ItineraryTimeline({ itinerary = [], theme, slug }) {
             day={item.day}
             title={item.title}
             activities={item.activities || []}
+            tourOptions={item.tourOptions || []}
             galleryImages={images}
             theme={theme}
           />

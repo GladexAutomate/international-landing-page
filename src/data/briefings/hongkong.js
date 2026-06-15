@@ -53,51 +53,56 @@ export const hongkongBriefing = {
   itinerary: [
     {
       day: 1,
-      title: "Manila to Hong Kong — Arrival · Airport Transfer · Hotel Check-In",
+      title: "Hong Kong Arrival — Airport Meet & Greet · SIC Transfer · Hotel Check-In",
       activities: [
-        "Arrive at HK International Airport then proceed to Arrival Hall - Tourist Pick Up Area - Hall A.",
-        "Free time at your own leisure.",
-        "Overnight at the Hotel.",
+        "Upon arrival at Hong Kong International Airport, meet and greet with the agency representative at the arrival hall.",
+        "Enjoy your SIC (Seat-in-Coach) transfer going to the hotel for check-in.",
+        "Enjoy free time in the afternoon — perfect for exploring nearby streets, trying local food, or simply relaxing after the flight.",
+        "Overnight stay at the hotel.",
       ],
-      galleryImages: [
-        // "/images/briefings/hongkong/day1/photo1.jpg",
-        // "/images/briefings/hongkong/day1/photo2.jpg",
-      ],
+      galleryImages: [],
     },
     {
       day: 2,
-      title: "Hong Kong Morning City Tour — Aberdeen · Repulse Bay · Victoria Peak · Shopping Stops",
+      title: "Hong Kong City Tour — Avenue of Stars · Victoria Harbour · West Kowloon · Shopping",
       activities: [
-        "Breakfast Outside (HK$20/pax/day for fast food meal coupon)",
-        "Overnight at the Hotel.",
+        "Start the day with breakfast before heading out for the city tour.",
+        "Visit the famous Avenue of Stars and enjoy the stunning view of Victoria Harbour.",
+        "Explore the West Kowloon Cultural District — take photos around the Hong Kong Palace Museum and Art Park.",
+        "Shopping stops at jewelry factories and souvenir outlets.",
+        "Tour usually ends at Tsim Sha Tsui where you can continue exploring the city on your own.",
+        "Overnight stay at the hotel.",
       ],
-      galleryImages: [
-        // "/images/briefings/hongkong/day2/photo1.jpg",
-        // "/images/briefings/hongkong/day2/photo2.jpg",
-      ],
+      galleryImages: [],
     },
     {
       day: 3,
-      title: "Free Day — Optional: Disneyland · Ocean Park · Macau · Ngong Ping 360",
+      title: "Free Time or Optional Tours — Disneyland · Ocean Park · Macau · Ngong Ping 360",
       activities: [
-        "Breakfast Outside (HK$20/pax/day for fast food meal coupon)",
-        "Overnight at the Hotel.",
+        "After breakfast, enjoy free time at your own leisure or avail of optional tours.",
+        "One of the highlights is visiting Hong Kong Disneyland — perfect for making unforgettable memories, watching magical shows, and enjoying thrilling rides.",
+        "Overnight stay at the hotel.",
       ],
-      galleryImages: [
-        // "/images/briefings/hongkong/day3/photo1.jpg",
-        // "/images/briefings/hongkong/day3/photo2.jpg",
+      tourOptions: [
+        { name: "Whole Day Disneyland", note: "" },
+        { name: "Whole Day Ocean Park", note: "" },
+        { name: "Half Day City Tour + Disneyland", note: "Clients must attend the city tour first before receiving Disneyland tickets." },
+        { name: "Half Day City Tour + Ocean Park", note: "Clients must attend the city tour first before receiving Ocean Park tickets." },
+        { name: "Macau Tour", note: "" },
+        { name: "Night Tour", note: "" },
+        { name: "PM Ngong Ping 360", note: "" },
       ],
+      galleryImages: [],
     },
     {
       day: 4,
-      title: "Hong Kong to Manila — Check-Out · Airport Transfer · Departure",
+      title: "Hong Kong Departure — Check-Out · Airport Transfer · Farewell",
       activities: [
-        "Breakfast Outside (HK$20/pax/day for fast food meal coupon)",
-        "Please coordinate hotel pick-up from the tour guide and be at the hotel lobby to be picked up for SIC transfer to Hong Kong International Airport.",
+        "After breakfast, prepare for check-out and coordinate hotel pick-up for your transfer back to the airport.",
+        "Be at the hotel lobby at your confirmed pick-up time for your SIC transfer to Hong Kong International Airport.",
+        "Time to say goodbye to Hong Kong and head back home with unforgettable memories.",
       ],
-      galleryImages: [
-        // "/images/briefings/hongkong/day4/photo1.jpg",
-      ],
+      galleryImages: [],
     },
   ],
 

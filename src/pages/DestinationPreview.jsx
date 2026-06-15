@@ -1452,7 +1452,29 @@ function DestinationGuideSection({ briefing, slug, theme }) {
         {photoSpots.length > 0 && (
           <div>
             <SubHeading label="Best Photo Spots" />
-            <PhotoSlider items={photoSpots} theme={theme} />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {photoSpots.map((item, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden border"
+                  style={{ backgroundColor: bgCard, borderColor: border }}>
+                  <div className="flex items-center justify-center overflow-hidden"
+                    style={{ aspectRatio: "4/3", backgroundColor: isDark ? "#111" : "#EFEFEF" }}>
+                    {item.img ? (
+                      <img src={item.img} alt={item.name}
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
+                      />
+                    ) : (
+                      <span className="text-4xl">📸</span>
+                    )}
+                  </div>
+                  <div className="px-3 py-2.5">
+                    <p className="font-condensed font-bold text-sm leading-tight mb-0.5" style={{ color: textPrimary }}>{item.name}</p>
+                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -3223,11 +3245,15 @@ function PreviewContent() {
             </SectionErrorBoundary>
 
             {/* ── 4. ITINERARY TIMELINE ── */}
-            {pkg?.itinerary?.length > 0 && (
+            {(pkg?.itinerary?.length > 0 || briefing?.itinerary?.length > 0) && (
               <SectionErrorBoundary>
                 <div className={sectionGap}>
                   <BriefingSection label="Day by Day" title="Itinerary Timeline" theme={theme}>
-                    <ItineraryTimeline itinerary={pkg.itinerary} theme={theme} slug={slug} />
+                    <ItineraryTimeline
+                      itinerary={pkg?.itinerary?.length > 0 ? pkg.itinerary : briefing.itinerary}
+                      theme={theme}
+                      slug={slug}
+                    />
                   </BriefingSection>
                 </div>
                 <SectionDivider theme={theme} />

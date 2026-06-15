@@ -25,34 +25,62 @@ const FUSIOO_ID_MAP = {
 // ─── 2. KEYWORD → SLUG MAP ───────────────────────────────────────────────────
 // Used for text-based fields (domestic_voucher_ destination, data.destination.value).
 // Each entry: { slug, keywords[] }  —  keywords are checked case-insensitively.
+//
+// ORDERING RULES:
+//   • More-specific slugs MUST come before broader ones that share a keyword.
+//     e.g. "bangkok-pattaya" before "bangkok" — otherwise "Bangkok Pattaya"
+//          would match "bangkok" first and route to the wrong page.
+//   • Same rule for bali-wisataku before bali, maldives-maafushi before maldives,
+//     jeju-korea before korea.
 const KEYWORD_MAP = [
+  // ── Vietnam ────────────────────────────────────────────────────────────────
   { slug: "danang-vietnam",         keywords: ["da nang", "danang", "da-nang", "hoi an", "vietnam central"] },
-  { slug: "hongkong",               keywords: ["hong kong", "hongkong", "hk ", "h.k."] },
-  { slug: "korea",                  keywords: ["korea", "seoul", "nami island", "k-pop"] },
-  { slug: "jeju-korea",             keywords: ["jeju"] },
-  { slug: "japan",                  keywords: ["japan", "osaka", "tokyo", "nara", "kyoto"] },
-  { slug: "bangkok",                keywords: ["bangkok free", "bangkok f&e", "bangkok fne"] },
-  { slug: "bangkok-pattaya",        keywords: ["pattaya", "bangkok pattaya"] },
-  { slug: "singapore",              keywords: ["singapore"] },
-  { slug: "bali-wisataku",          keywords: ["bali wisataku", "wisataku"] },
-  { slug: "bali",                   keywords: ["bali"] },
-  { slug: "beijing-shanghai",       keywords: ["beijing", "shanghai", "china"] },
-  { slug: "chiangmai",              keywords: ["chiang mai", "chiangmai"] },
-  { slug: "dubai",                  keywords: ["dubai", "uae"] },
-  { slug: "malaysia-kota-kinabalu", keywords: ["kota kinabalu", "kinabalu", "sabah"] },
-  { slug: "maldives-maafushi",      keywords: ["maafushi"] },
-  { slug: "maldives",               keywords: ["maldives"] },
+  { slug: "vietnam-hanoi",          keywords: ["hanoi", "ha noi"] },
+  { slug: "vietnam-phu-quoc",       keywords: ["phu quoc", "phuquoc", "phú quốc"] },
+
+  // ── China / Hong Kong / Macau ───────────────────────────────────────────────
+  { slug: "hongkong",               keywords: ["hong kong", "hongkong", "hk ", "h.k.", "hong-kong"] },
   { slug: "macau",                  keywords: ["macau", "macao"] },
-  { slug: "new-zealand",            keywords: ["new zealand"] },
-  { slug: "taipei",                 keywords: ["taipei", "taiwan"] },
+  { slug: "beijing-shanghai",       keywords: ["beijing", "shanghai", "china tour", "beijing shanghai"] },
+
+  // ── Korea ──────────────────────────────────────────────────────────────────
+  { slug: "jeju-korea",             keywords: ["jeju"] },            // specific first
+  { slug: "korea",                  keywords: ["korea", "seoul", "nami island", "k-pop", "south korea"] },
+
+  // ── Japan ──────────────────────────────────────────────────────────────────
+  { slug: "japan",                  keywords: ["japan", "osaka", "tokyo", "nara", "kyoto"] },
+
+  // ── Thailand — specific combos before plain Bangkok ────────────────────────
+  { slug: "bangkok-pattaya",        keywords: ["pattaya", "bangkok pattaya", "bangkok & pattaya", "bkk pattaya", "bangkok+pattaya"] },
+  { slug: "chiangmai",              keywords: ["chiang mai", "chiangmai", "chiang-mai"] },
   { slug: "phuket",                 keywords: ["phuket"] },
-  { slug: "vietnam-hanoi",          keywords: ["hanoi"] },
-  { slug: "vietnam-phu-quoc",       keywords: ["phu quoc", "phuquoc"] },
-  { slug: "kuala-lumpur",           keywords: ["kuala lumpur", " kl ", "malaysia kl", "kl tour"] },
-  { slug: "tri-city",               keywords: ["tri city", "tri-city", "3 city"] },
-  { slug: "twin-city",              keywords: ["twin city", "twin-city", "2 city"] },
-  { slug: "indochina",              keywords: ["indochina"] },
+  { slug: "bangkok",                keywords: ["bangkok", "bkk"] }, // broad — must come after bangkok-pattaya & chiangmai
+
+  // ── Southeast Asia ─────────────────────────────────────────────────────────
+  { slug: "singapore",              keywords: ["singapore"] },
+  { slug: "bali-wisataku",          keywords: ["bali wisataku", "wisataku"] }, // specific first
+  { slug: "bali",                   keywords: ["bali"] },
+  { slug: "malaysia-kota-kinabalu", keywords: ["kota kinabalu", "kinabalu", "sabah", "kota kina"] },
+  { slug: "kuala-lumpur",           keywords: ["kuala lumpur", " kl ", "malaysia kl", "kl tour", "k.l."] },
   { slug: "cambodia",               keywords: ["cambodia", "siem reap", "angkor"] },
+  { slug: "indochina",              keywords: ["indochina"] },
+
+  // ── Middle East ────────────────────────────────────────────────────────────
+  { slug: "dubai",                  keywords: ["dubai", "uae"] },
+
+  // ── Oceania ────────────────────────────────────────────────────────────────
+  { slug: "new-zealand",            keywords: ["new zealand", "auckland", "nz "] },
+
+  // ── Indian Ocean ───────────────────────────────────────────────────────────
+  { slug: "maldives-maafushi",      keywords: ["maafushi"] },        // specific first
+  { slug: "maldives",               keywords: ["maldives"] },
+
+  // ── Taiwan ─────────────────────────────────────────────────────────────────
+  { slug: "taipei",                 keywords: ["taipei", "taiwan"] },
+
+  // ── Multi-destination packages ─────────────────────────────────────────────
+  { slug: "tri-city",               keywords: ["tri city", "tri-city", "3 city", "tricity"] },
+  { slug: "twin-city",              keywords: ["twin city", "twin-city", "2 city", "twincity"] },
 ];
 
 /** @param {string} text */
