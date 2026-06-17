@@ -12,6 +12,7 @@ export const danangBriefing = {
   welcomeMessage: {
     title: "Official Da Nang Briefing",
     subtitle: "5D3N Da Nang, Vietnam — 2026",
+    duration: "5 Days / 3 Nights",
     packageCode: "GDX-UOV15B2",
     body: [
       "Welcome and congratulations on your upcoming trip to Da Nang, Vietnam with Gladex Tours!",

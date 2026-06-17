@@ -490,20 +490,22 @@ function WelcomeSection({ briefing, pkg, theme }) {
         className="rounded-2xl border p-6 space-y-4"
         style={{ backgroundColor: bgCard, borderColor: border }}
       >
-        {pkg && (
+        {(welcomeMessage?.subtitle || pkg?.name) && (
           <div className="flex flex-wrap items-center gap-3 pb-4 border-b" style={{ borderColor: border }}>
             <span
               className="font-condensed font-bold text-sm px-4 py-1.5 rounded-full tracking-widest uppercase"
               style={{ backgroundColor: ORANGE, color: "#fff" }}
             >
-              {pkg.name}
+              {welcomeMessage?.subtitle || pkg.name}
             </span>
-            <span
-              className="font-condensed font-bold text-sm px-4 py-1.5 rounded-full tracking-wider"
-              style={{ backgroundColor: "#F3EDE5", color: textSecondary }}
-            >
-              {pkg.duration}
-            </span>
+            {(welcomeMessage?.duration || pkg?.duration) && (
+              <span
+                className="font-condensed font-bold text-sm px-4 py-1.5 rounded-full tracking-wider"
+                style={{ backgroundColor: "#F3EDE5", color: textSecondary }}
+              >
+                {welcomeMessage?.duration || pkg.duration}
+              </span>
+            )}
           </div>
         )}
         {body.map((para, i) => (
