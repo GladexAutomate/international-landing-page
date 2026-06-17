@@ -39,7 +39,7 @@ export const singaporeBriefing = {
       activities: [
         "Upon arrival at Singapore Changi Airport, meet and greet with the agency representative at the Arrival Information Counter.",
         "After that, enjoy your SIC transfer going to the hotel for check-in.",
-        "Then enjoy free time in the afternoon — perfect for exploring nearby streets, trying local food, or simply relaxing after the flight.",
+        "Free time at your own leisure.",
         "Overnight stay at the hotel.",
       ],
       galleryImages: [],
@@ -50,7 +50,7 @@ export const singaporeBriefing = {
       activities: [
         "Pick up at the hotel lobby around 08:45 AM to 09:00 AM then proceed to your tour.",
         "Sites to Visit: Drive past Suntec & Singapore Flyer, Insta Photo Stop at Merlion Park, Thian Hock Theng Temple (China Town), Drive past Little India, Souvenir Shop, Gardens by the Bay (30 minutes stop only — excludes admission to Flower Dome, Cloud Forest & OCBC Skyway).",
-        "After tour, drop off at hotel. Free time in the afternoon.",
+        "After tour, free time at your own leisure.",
         "Overnight stay at the hotel.",
       ],
       galleryImages: [],
@@ -100,7 +100,6 @@ export const singaporeBriefing = {
       "Look for the assigned driver or representative holding a placard with the lead guest's name",
       "Present your voucher for verification",
       "The representative will provide important information regarding your transfers, tour schedules, and departure arrangements",
-      "Guests will also receive their breakfast meal coupons upon arrival",
       "Driver waiting time is limited to 1 hour and 15 minutes after your flight lands",
       "If you are unable to locate your representative, immediately contact the local operator using the contact details provided in your voucher",
     ],
@@ -116,7 +115,6 @@ export const singaporeBriefing = {
         "Upon arrival at Singapore Changi Airport, please proceed directly to the Arrival Information Counter.",
         "Your driver will wait up to 1 hour and 15 minutes after your flight lands. If you experience delays or long queues at Immigration, please inform the Singapore Careline immediately.",
         "After collecting your luggage, please proceed to meet the driver right away.",
-        "If you are unable to locate your driver, contact them directly at +852 6822 7223 for immediate assistance.",
         "We highly recommend downloading WhatsApp before your trip for faster communication and easier coordination with the tour coordinator.",
         "You may purchase a SIM card or exchange currency after meeting the driver.",
         "Please note that no refund or compensation will be provided if the passenger fails to report to the Arrival Information Counter within the allotted waiting time.",
@@ -132,9 +130,8 @@ export const singaporeBriefing = {
         "Look for the assigned driver or representative holding a placard with the lead guest's name",
         "Present your voucher for verification",
         "The representative will provide important information regarding your transfers, tour schedules, and departure arrangements",
-        "Guests will also receive their breakfast meal coupons upon arrival",
         "Driver waiting time is limited to 1 hour and 15 minutes after your flight lands",
-        "If you cannot locate your representative, immediately contact: +852 6822 7223",
+        "If you cannot locate your representative, immediately contact the Gladex team or the local operator using the contact details provided in your voucher",
       ],
     },
     {
@@ -160,7 +157,6 @@ export const singaporeBriefing = {
     "Proceed to Singapore Changi Airport for your departure flight",
     "Transfer schedules are based on the flight details provided during booking — flight changes must be reported immediately to avoid disruptions",
     "Midnight transfer surcharge may apply for transfers between 9:00 PM and 8:00 AM",
-    "Local guide contact: +852 6822 7223",
     "For independent movement, use the MRT (EZ-Link card) or Grab ride-hailing app — both are excellent in Singapore",
     "Always keep your hotel address and Gladex Tours contact saved on your phone",
   ],
@@ -211,7 +207,6 @@ export const singaporeBriefing = {
     { id: "powerbank", icon: "🔋", label: "Power Bank" },
     { id: "cash", icon: "💵", label: "Cash / Credit Card" },
     { id: "medicines", icon: "💊", label: "Personal Medications" },
-    { id: "octopus_card", icon: "💳", label: "Octopus Card (Optional)" },
     { id: "whatsapp", icon: "💬", label: "WhatsApp Installed" },
   ],
 
@@ -519,11 +514,10 @@ export const singaporeBriefing = {
       ],
     },
     {
-      category: "Local Tour Operations & Airport Assistance",
-      icon: "🇸🇬",
+      category: "Local Transfer and Tour Operations Team",
+      icon: "🚐",
       contacts: [
-        { label: "Local Operator", value: "Please refer to your travel voucher for the assigned contact details, as these may vary and are subject to change without prior notice", type: "info" },
-        { label: "Singapore Local Guide", value: "+852 6822 7223", type: "phone" },
+        { label: "Local Transfer and Tour Operations Team (Singapore)", value: "+65 9677 1120", type: "phone" },
       ],
     },
     {

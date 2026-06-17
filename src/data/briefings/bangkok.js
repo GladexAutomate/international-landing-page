@@ -57,9 +57,9 @@ export const bangkokBriefing = {
       ],
       activities: [
         "Please refer to your travel itinerary for your scheduled tours and their corresponding dates, including any optional tours you may have availed.",
-        "Bangkok City Tour – Option 1: Pick up at hotel lobby 08:00–08:30 AM. Sites: Wat Saket (Golden Mountain), Wat In (Standing Buddha), Lucky Temple, WILLS Gems Gallery. With tour guide and roundtrip SIC transfer. Drop off at hotel after tour. Free time in the afternoon.",
-        "Bangkok City Tour – Option 2: Pick up at hotel lobby 08:00–08:30 AM. Sites: Wat Arun (Temple of Dawn), roundtrip boat transfer along the Chao Phraya River, Lucky Temple, WILLS Gems Gallery. With tour guide and roundtrip SIC transfer. Drop off at hotel after tour. Free time in the afternoon.",
-        "Bangkok City Tour – Option 3: Pick up at hotel lobby 08:00–08:30 AM. Sites: Canal Tour, Biggest Sitting Buddha, Fish Feeding, Lucky Temple, Wills Gems. With tour guide and roundtrip SIC transfer. Drop off at hotel after tour. Free time in the afternoon.",
+        "Bangkok City Tour – Option 1: Pick up at hotel lobby 08:00–08:30 AM. Sites: Wat Saket (Golden Mountain), Wat In (Standing Buddha), Lucky Temple, WILLS Gems Gallery. With tour guide and roundtrip SIC transfer. After tour, free time at your own leisure.",
+        "Bangkok City Tour – Option 2: Pick up at hotel lobby 08:00–08:30 AM. Sites: Wat Arun (Temple of Dawn), roundtrip boat transfer along the Chao Phraya River, Lucky Temple, WILLS Gems Gallery. With tour guide and roundtrip SIC transfer. After tour, free time at your own leisure.",
+        "Bangkok City Tour – Option 3: Pick up at hotel lobby 08:00–08:30 AM. Sites: Canal Tour, Biggest Sitting Buddha, Fish Feeding, Lucky Temple, Wills Gems. With tour guide and roundtrip SIC transfer. After tour, free time at your own leisure.",
         "Bangkok Tour – White Orchid River Dinner Cruise: Pick up at hotel lobby 05:30 PM. Welcome drink on open deck overlooking the Chao Phraya River. Luxurious international and Thai dinner buffet with a fusion of global flavors, complete with coffee, tea, and desserts. Entertained by a vibrant Bangkok-style cabaret show. Duration: 5:30 PM – 10:00 PM. Drop off at hotel. Overnight at the hotel.",
         "Bangkok Tour – Chaophraya Princess Dinner Cruise: Pick up at hotel lobby 05:30 PM. Scenic cruise along the Chao Phraya River passing historic landmarks such as Wat Kanlaya, Wat Arun, and the Grand Palace. 2-hour international buffet with a fusion of global cuisines, coffee, tea, and water included. Live music on board. Duration: 5:30 PM – 10:00 PM. Drop off at hotel. Overnight at the hotel.",
         "Bangkok Tour – Floating Market (Half Day): Pick up at hotel lobby 07:00 AM (may vary depending on hotel location). Floating Market with boat ride and roundtrip SIC transfer. Explore the floating market aboard a traditional paddle boat or longtail boat, shop for local handicrafts and souvenirs, savor authentic Thai street food such as Pad Thai, Boat Noodles, and Mango Sticky Rice, and witness traditional coconut sugar-making and coconut shell carving demonstrations.",
@@ -225,7 +225,6 @@ export const bangkokBriefing = {
   checklist: [
     { id: "passport", icon: "🛂", label: "Passport (6 months valid)" },
     { id: "flight_tickets", icon: "✈️", label: "Flight Tickets" },
-    { id: "hotel_voucher", icon: "🏨", label: "Hotel Voucher" },
     { id: "travel_voucher", icon: "📄", label: "Travel Voucher" },
     { id: "travel_insurance", icon: "🛡️", label: "Travel Insurance" },
     { id: "mobile_phone", icon: "📱", label: "Mobile Phone" },
