@@ -617,8 +617,9 @@ function TravelInfoCenter({ briefing, theme }) {
     beforeItems = travelInformation.beforeDeparture || [];
     afterItems  = travelInformation.uponArrival     || [];
   }
+  const duringItems = (!Array.isArray(travelInformation) && travelInformation.duringStay) ? travelInformation.duringStay : [];
 
-  if (!beforeItems.length && !afterItems.length) return null;
+  if (!beforeItems.length && !afterItems.length && !duringItems.length) return null;
 
   const ItemList = ({ items }) => (
     <ul className="space-y-2.5">
@@ -654,6 +655,15 @@ function TravelInfoCenter({ briefing, theme }) {
               Upon Arrival
             </p>
             <ItemList items={afterItems} />
+          </div>
+        )}
+        {duringItems.length > 0 && (
+          <div className="sm:col-span-2">
+            <p className="font-condensed font-bold text-base uppercase tracking-widest mb-3"
+              style={{ color: ORANGE }}>
+              During Your Stay
+            </p>
+            <ItemList items={duringItems} />
           </div>
         )}
       </div>

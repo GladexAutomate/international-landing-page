@@ -39,7 +39,7 @@ export const singaporeBriefing = {
       activities: [
         "Upon arrival at Singapore Changi Airport, meet and greet with the agency representative at the Arrival Information Counter.",
         "After that, enjoy your SIC transfer going to the hotel for check-in.",
-        "Free time at your own leisure.",
+        "Then enjoy free time in the afternoon — perfect for exploring nearby streets, trying local food, or simply relaxing after the flight.",
         "Overnight stay at the hotel.",
       ],
       galleryImages: [],
@@ -50,7 +50,7 @@ export const singaporeBriefing = {
       activities: [
         "Pick up at the hotel lobby around 08:45 AM to 09:00 AM then proceed to your tour.",
         "Sites to Visit: Drive past Suntec & Singapore Flyer, Insta Photo Stop at Merlion Park, Thian Hock Theng Temple (China Town), Drive past Little India, Souvenir Shop, Gardens by the Bay (30 minutes stop only — excludes admission to Flower Dome, Cloud Forest & OCBC Skyway).",
-        "After tour, free time at your own leisure.",
+        "After tour, drop off at hotel. Free time in the afternoon.",
         "Overnight stay at the hotel.",
       ],
       galleryImages: [],
@@ -61,7 +61,7 @@ export const singaporeBriefing = {
       activities: [
         "Free time in the afternoon — perfect for rest or independent exploration.",
         "Optional Tour — Universal Studios Singapore: One of the highlights is visiting Universal Studios Singapore. Perfect for making unforgettable memories, watching magical shows, and enjoying thrilling rides. Includes One-day Pass Ticket, Seat-in-Coach (Joiners) Van, and English-speaking driver. Pick-up Time: Between 08:30–08:45 AM | Return Time: 07:00 PM at Universal Studios Coach Bay.",
-        "Optional Tour — Sentosa with Cable Car: Enjoy an exciting afternoon exploring Sentosa Island and experience a scenic Cable Car ride with breathtaking views of Singapore's skyline and harbor. Includes Seat-in-Coach (Joiners) and Driver. Pick-up Time: 02:00 PM | Return Time: 08:15 PM. Sites: Cable Car Sky Pass Round Trip, 4-in-1 MTSG (Madam Tussauds + IOS Live + Boat Ride + Ultimate Film Star Experience), Wings of Time — Standard Seats.",
+        "Optional Tour — Sentosa with Cable Car: Enjoy an exciting afternoon exploring Sentosa Island and experience a scenic Cable Car ride with breathtaking views of Singapore's skyline and harbor. Includes Seat-in-Coach (Joiners) and Driver. Pick-up Time: 02:00 PM | Return Time: 08:15 PM. Sites: Cable Car Sky Pass Round Trip, 4-in-1 MTSG: (Include MT + IOS Live + Boat Ride + Ultimate Film Star Experience), Wings of Time — Standard Seats.",
         "Optional Tour — Gardens by the Bay: Explore the iconic Supertree Grove, Cloud Forest, and Flower Dome. Available as an add-on — contact Gladex Tours for details.",
         "Overnight stay at the hotel.",
       ],
@@ -73,7 +73,6 @@ export const singaporeBriefing = {
       activities: [
         "After breakfast, prepare for check-out and coordinate hotel pick-up for your transfer back to the airport.",
         "It's time to say goodbye to Singapore and head back home with unforgettable memories!",
-        "If may free time po kayo, you may call us directly at +63 917 875 2200 for faster assistance.",
       ],
       galleryImages: [],
     },
@@ -103,6 +102,11 @@ export const singaporeBriefing = {
       "Driver waiting time is limited to 1 hour and 15 minutes after your flight lands",
       "If you are unable to locate your representative, immediately contact the local operator using the contact details provided in your voucher",
     ],
+    duringStay: [
+      "Keep your passport and valuables secure at all times.",
+      "Follow the instructions of your guide, coordinator, and driver.",
+      "Stay connected through roaming, eSIM, or airport Wi-Fi for easier communication.",
+    ],
   },
 
   arrivalInstructions: [
@@ -115,6 +119,7 @@ export const singaporeBriefing = {
         "Upon arrival at Singapore Changi Airport, please proceed directly to the Arrival Information Counter.",
         "Your driver will wait up to 1 hour and 15 minutes after your flight lands. If you experience delays or long queues at Immigration, please inform the Singapore Careline immediately.",
         "After collecting your luggage, please proceed to meet the driver right away.",
+        "In case hindi niyo po ma-locate ang driver, you may contact them directly at +65 9677 1120 for immediate assistance.",
         "We highly recommend downloading WhatsApp before your trip for faster communication and easier coordination with the tour coordinator.",
         "You may purchase a SIM card or exchange currency after meeting the driver.",
         "Please note that no refund or compensation will be provided if the passenger fails to report to the Arrival Information Counter within the allotted waiting time.",
@@ -157,8 +162,6 @@ export const singaporeBriefing = {
     "Proceed to Singapore Changi Airport for your departure flight",
     "Transfer schedules are based on the flight details provided during booking — flight changes must be reported immediately to avoid disruptions",
     "Midnight transfer surcharge may apply for transfers between 9:00 PM and 8:00 AM",
-    "For independent movement, use the MRT (EZ-Link card) or Grab ride-hailing app — both are excellent in Singapore",
-    "Always keep your hotel address and Gladex Tours contact saved on your phone",
   ],
 
   hotelInformation: {
@@ -169,22 +172,17 @@ export const singaporeBriefing = {
     ],
     policies: [
       "Present your passport and hotel voucher upon check-in",
-      "Hotel check-in is from 2:00 PM to 3:00 PM — early check-in is subject to availability",
-      "Check-out is at 11:00 AM to 12:00 NN — late check-out requests must be made the night before",
       "Some hotels may require a refundable security deposit upon check-in — please be prepared",
+      "Early check-in is subject to availability",
       "If your room is not yet available, you may leave your luggage at the hotel's baggage storage area and return between 2:00 PM – 3:00 PM",
       "Some hotels may charge additional fees for pool access and other facilities — charges and policies vary per hotel",
-      "Cancellation of tours on the same day is automatically forfeited and non-refundable",
-      "Requests to change tour schedules must be made at least one (1) day before the activity date",
-      "Hotel WiFi is complimentary — password available at front desk",
-      "Singapore tap water is completely safe to drink directly from the tap",
     ],
   },
 
   tourNotes: [
     "Tour schedules may change due to weather conditions, traffic situations, or operational requirements.",
     "Cancellation of tours on the same day is automatically forfeited and non-refundable.",
-    "Requests to change tour schedules must be made at least two (2) days before the activity date.",
+    "Requests to change tour schedules must be made at least one (1) day before the activity date.",
     "All optional tours are subject to availability and operational schedules.",
   ],
 
@@ -237,21 +235,11 @@ export const singaporeBriefing = {
       ],
     },
     {
-      occasion: "Universal Studios Singapore",
-      icon: "🎢",
-      tips: [
-        "Comfortable casual wear",
-        "Small backpack",
-        "Comfortable walking shoes",
-      ],
-    },
-    {
       occasion: "Evening Activities",
       icon: "🌃",
       tips: [
         "Light jacket",
         "Comfortable footwear",
-        "Smart casual attire",
       ],
     },
   ],
@@ -659,15 +647,15 @@ export const singaporeBriefing = {
     },
     {
       q: "Do I need WhatsApp?",
-      a: "Yes. WhatsApp is highly recommended for communication with the local coordinator and airport representative. We highly recommend downloading and activating WhatsApp before your trip for faster communication and easier coordination.",
+      a: "Yes. WhatsApp is highly recommended for communication with the local coordinator and airport representative.",
     },
     {
       q: "What happens if I cannot locate the airport representative?",
-      a: "Immediately contact the local operator using the contact details provided in your voucher. You may also contact +852 6822 7223 for immediate assistance.",
+      a: "Immediately contact the local operator using the contact details provided in your voucher.",
     },
     {
       q: "Is there a security deposit at the hotel?",
-      a: "Some hotels may require a refundable security deposit upon check-in. This varies per hotel and will be explained by the front desk officer upon your arrival.",
+      a: "Some hotels may require a refundable security deposit upon check-in.",
     },
     {
       q: "Can I change my tour schedule?",
