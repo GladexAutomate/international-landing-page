@@ -6,6 +6,7 @@ import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi
 import React, { useState, useEffect, useRef } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
+import { DANANG_PACKAGES, getDanangPackageByBooking } from "../data/briefings/danang-packages.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import ScrollControls from "../components/ScrollControls";
@@ -2326,8 +2327,8 @@ function PreviewContent() {
   const { isDark: _globalIsDark } = useTheme();
   // Briefing page is always light mode — premium modern look for clients
   const isDark = false;
-  const dest    = getDestinationBySlug(slug);
-  const briefing = getBriefingBySlug(slug);
+  const dest        = getDestinationBySlug(slug);
+  const baseBriefing = getBriefingBySlug(slug);
 
   // Scroll to top whenever the slug changes (mobile browser may preserve prior scroll)
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [slug]);
@@ -2443,6 +2444,17 @@ function PreviewContent() {
 
   // Use the first package for briefing content (most destinations have one)
   const pkg = dest?.packages?.[0] || null;
+
+  // ── Da Nang multi-package variant logic ──────────────────────────────────
+  const isDanang = slug === "danang-vietnam";
+  const [selectedDanangKey, setSelectedDanangKey] = useState(null);
+  const autoDetectedDanangPkg = isDanang ? getDanangPackageByBooking(booking) : null;
+  const activeDanangPkg = isDanang
+    ? (selectedDanangKey
+        ? DANANG_PACKAGES.find((p) => p.key === selectedDanangKey) ?? autoDetectedDanangPkg
+        : autoDetectedDanangPkg)
+    : null;
+  const briefing = activeDanangPkg ? activeDanangPkg.briefing : baseBriefing;
 
   // Theme for white sections — neutral background with dark text
   const theme = {
@@ -3244,6 +3256,47 @@ function PreviewContent() {
           )}
         </div>
       </div>
+      )}
+
+      {/* ── Da Nang Package Selector ── */}
+      {isDanang && (
+        <div style={{ backgroundColor: "#FFFFFF" }} className="py-10 px-4 border-b border-gray-100">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs font-bold tracking-[0.3em] uppercase text-center mb-1" style={{ color: "#FF9913" }}>
+              Your Package
+            </p>
+            <h3 className="font-condensed font-black text-[#111] text-2xl text-center mb-1">
+              Select Your Package
+            </h3>
+            <p className="text-xs text-center mb-6" style={{ color: "#888" }}>
+              {autoDetectedDanangPkg && !selectedDanangKey
+                ? "Auto-selected based on your booking — tap to switch"
+                : "Tap your package to view the correct briefing"}
+            </p>
+            <div className="flex gap-3 justify-center flex-wrap">
+              {DANANG_PACKAGES.map((dpkg) => {
+                const isActive = activeDanangPkg?.key === dpkg.key;
+                return (
+                  <button
+                    key={dpkg.key}
+                    onClick={() => setSelectedDanangKey(dpkg.key)}
+                    className="px-7 py-4 rounded-2xl transition-all active:scale-95 text-center min-w-[120px]"
+                    style={
+                      isActive
+                        ? { backgroundColor: "#FF9913", color: "#fff", border: "2px solid #FF9913", boxShadow: "0 4px 16px rgba(255,153,19,0.3)" }
+                        : { backgroundColor: "#F9F7F5", color: "#333", border: "2px solid #E5E7EB" }
+                    }
+                  >
+                    <span className="font-condensed font-black text-2xl block">{dpkg.shortLabel}</span>
+                    <span className="block text-xs font-medium mt-0.5" style={{ opacity: isActive ? 0.85 : 0.6 }}>
+                      {dpkg.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
