@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+﻿import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../lib/ThemeContext";
 import { motion } from "framer-motion";
 
@@ -18,8 +18,8 @@ export default function ThemeToggle() {
         aria-label="Toggle theme"
         className="relative w-12 h-6 rounded-full transition-all duration-300 focus:outline-none"
         style={{
-          backgroundColor: isDark ? "#FF8C00" : "#D0D0D0",
-          boxShadow: isDark ? "0 0 10px rgba(255,140,0,0.4)" : "none",
+          backgroundColor: isDark ? "#FF9913" : "#D0D0D0",
+          boxShadow: isDark ? "0 0 10px rgba(255,153,19,0.4)" : "none",
         }}
       >
         <motion.div
@@ -28,7 +28,7 @@ export default function ThemeToggle() {
           className="absolute top-1 w-4 h-4 rounded-full flex items-center justify-center bg-white"
         >
           {isDark ? (
-            <Moon className="w-2.5 h-2.5" style={{ color: "#FF8C00" }} />
+            <Moon className="w-2.5 h-2.5" style={{ color: "#FF9913" }} />
           ) : (
             <Sun className="w-2.5 h-2.5 text-yellow-500" />
           )}

@@ -1,10 +1,10 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, ChevronLeft, Calendar, Users, AlertTriangle } from "lucide-react";
 import { getBookingOptionsForProduct } from "../services/bookingService";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

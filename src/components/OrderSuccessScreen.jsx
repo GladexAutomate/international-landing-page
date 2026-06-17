@@ -1,11 +1,11 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 // DEMO MODE ONLY — Replace with real order confirmation logic later
 // Shown after a successful simulated payment in DemoPaymentModal.
 // No actual booking or fulfillment occurs.
 
 import { CheckCircle, Clock, Package } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 /**
  * DEMO MODE ONLY

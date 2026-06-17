@@ -1,8 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 // Rich review data with profile images
 const defaultReviews = [

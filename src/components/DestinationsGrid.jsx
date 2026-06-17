@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+﻿import { motion } from "framer-motion";
 import { Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../lib/ThemeContext";
@@ -10,7 +10,7 @@ export default function DestinationsGrid() {
 
   const bg = isDark ? "#0D0D0D" : "#F0F0F0";
   const headingColor = isDark ? "#FFFFFF" : "#1A1A1A";
-  const subColor = "#FF8C00";
+  const subColor = "#FF9913";
 
   return (
     <section id="destinations" className="py-12 px-4 lg:px-10" style={{ backgroundColor: bg }}>
@@ -76,14 +76,14 @@ function DestinationCard({ dest, index, isDark, onClick }) {
 
       {/* Orange glow on hover */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ background: "linear-gradient(to top, rgba(255,140,0,0.25), transparent 60%)" }}
+        style={{ background: "linear-gradient(to top, rgba(255,153,19,0.25), transparent 60%)" }}
       />
 
       {/* Play button */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-75 group-hover:scale-100"
-          style={{ backgroundColor: "rgba(255,140,0,0.9)", boxShadow: "0 0 20px rgba(255,140,0,0.6)" }}
+          style={{ backgroundColor: "rgba(255,153,19,0.9)", boxShadow: "0 0 20px rgba(255,153,19,0.6)" }}
         >
           <Play className="w-4 h-4 text-white ml-0.5" />
         </div>
@@ -94,7 +94,7 @@ function DestinationCard({ dest, index, isDark, onClick }) {
         <div className="font-condensed font-bold text-white text-sm leading-tight tracking-wide">{dest.name}</div>
         <div
           className="font-body text-[10px] font-semibold tracking-widest uppercase mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-          style={{ color: "#FF8C00" }}
+          style={{ color: "#FF9913" }}
         >
           VIEW BRIEFING
           

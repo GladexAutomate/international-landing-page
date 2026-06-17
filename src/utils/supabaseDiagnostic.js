@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SUPABASE DIAGNOSTIC UTILITY — READ ONLY
  * ─────────────────────────────────────────────────────────────────────────────
  * Tests whether the configured Supabase credentials can access candidate tables.
@@ -33,7 +33,7 @@ const CANDIDATE_TABLES = [
 export async function runSupabaseDiagnostic() {
   console.group(
     "%c[GDX SUPABASE DIAGNOSTIC] Starting read-only table scan…",
-    "color: #FF8C00; font-weight: bold; font-size: 13px;"
+    "color: #FF9913; font-weight: bold; font-size: 13px;"
   );
 
   console.log(
@@ -103,7 +103,7 @@ export async function runSupabaseDiagnostic() {
   const accessible = results.filter((r) => r.accessible);
   const blocked    = results.filter((r) => !r.accessible);
 
-  console.log("%c[GDX DIAGNOSTIC SUMMARY]", "color: #FF8C00; font-weight: bold; font-size: 13px;");
+  console.log("%c[GDX DIAGNOSTIC SUMMARY]", "color: #FF9913; font-weight: bold; font-size: 13px;");
   console.log(`  Accessible tables : ${accessible.length}`);
   console.log(`  Inaccessible      : ${blocked.length}`);
 
@@ -134,6 +134,6 @@ if (typeof window !== "undefined") {
   window.__gdxDiagnostic = runSupabaseDiagnostic;
   console.log(
     "%c[GDX] Supabase diagnostic ready — run window.__gdxDiagnostic() in the console",
-    "color: #FF8C00;"
+    "color: #FF9913;"
   );
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SUPABASE SCHEMA AUDIT
  * ─────────────────────────────────────────────────────────────────────────────
  * Discovers all accessible tables and attempts to resolve Fusioo reference IDs
@@ -100,7 +100,7 @@ const NAME_COLUMNS = [
 export async function runSchemaAudit() {
   console.group(
     "%c[SCHEMA AUDIT] Starting full database discovery…",
-    "color: #FF8C00; font-weight: bold; font-size: 14px;"
+    "color: #FF9913; font-weight: bold; font-size: 14px;"
   );
 
   console.log("%c🎯 Target IDs to resolve:", "font-weight: bold;");
@@ -293,7 +293,7 @@ export async function runSchemaAudit() {
   console.groupEnd();
 
   // ── SUMMARY ──────────────────────────────────────────────────────────────
-  console.group("%c[SUMMARY]", "color: #FF8C00; font-weight: bold; font-size: 14px;");
+  console.group("%c[SUMMARY]", "color: #FF9913; font-weight: bold; font-size: 14px;");
   console.log("Tables accessible to anon key:", foundTables.filter((t) => !t.accessDenied).map((t) => t.name));
   console.log("Tables access denied:         ", foundTables.filter((t) => t.accessDenied).map((t) => t.name));
   console.log("ID matches found:             ", idMatches.length);
@@ -318,6 +318,6 @@ if (typeof window !== "undefined") {
   window.__schemaAudit = runSchemaAudit;
   console.log(
     "%c[SCHEMA AUDIT] Ready — run window.__schemaAudit() in the console",
-    "color: #FF8C00;"
+    "color: #FF9913;"
   );
 }

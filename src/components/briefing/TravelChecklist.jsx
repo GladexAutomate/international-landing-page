@@ -1,8 +1,8 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 export default function TravelChecklist({ items = [], storageKey, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
@@ -41,8 +41,8 @@ export default function TravelChecklist({ items = [], storageKey, theme }) {
         className="flex items-center justify-between px-5 py-4 rounded-2xl mb-4 border"
         style={{
           backgroundColor: allDone
-            ? isDark ? "#0D2010" : "#F0FFF4"
-            : isDark ? "#1A1200" : "#FFF8F0",
+            ? isDark ? "#0D2010" : "#FFFFFF"
+            : isDark ? "#1A1200" : "#FFFFFF",
           borderColor: allDone ? "#22C55E" : ORANGE,
         }}
       >
@@ -97,7 +97,7 @@ export default function TravelChecklist({ items = [], storageKey, theme }) {
               className="flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left transition-all active:scale-[0.98] hover:opacity-90"
               style={{
                 backgroundColor: isChecked
-                  ? isDark ? "#0A1E0D" : "#F0FFF4"
+                  ? isDark ? "#0A1E0D" : "#FFFFFF"
                   : bgCard,
                 borderColor: isChecked ? "#22C55E" : border,
               }}

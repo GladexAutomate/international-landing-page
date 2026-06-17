@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useTheme } from "../lib/ThemeContext";
@@ -142,7 +142,7 @@ function CategoryCard({ slide, subCards, label, comingSoon, onExplore, isDark })
             style={{
               width: d === idx ? 20 : 8,
               height: 8,
-              backgroundColor: d === idx ? "#FF8C00" : isDark ? "#444" : "#D4A86A",
+              backgroundColor: d === idx ? "#FF9913" : isDark ? "#444" : "#D4A86A",
             }}
           />
         ))}

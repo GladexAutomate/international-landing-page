@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+﻿import { motion } from "framer-motion";
 import { useTheme } from "../lib/ThemeContext";
 
 const panels = [
@@ -91,7 +91,7 @@ export default function HeroSection() {
     className="h-14 w-auto object-contain transition-all duration-300"
     style={{
       filter:
-        "drop-shadow(0 0 16px rgba(255,140,0,0.5))",
+        "drop-shadow(0 0 16px rgba(255,153,19,0.5))",
     }}
   />
 </motion.a>

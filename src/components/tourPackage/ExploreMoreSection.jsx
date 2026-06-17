@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { MapPin } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 export default function ExploreMoreSection({ destinations = [] }) {
   const navigate = useNavigate();

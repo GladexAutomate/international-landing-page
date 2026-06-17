@@ -1,6 +1,6 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 function FAQItem({ q, a, theme }) {
   const { border, textPrimary, textSecondary } = theme;
@@ -28,15 +28,19 @@ function FAQItem({ q, a, theme }) {
 
 export default function BriefingFAQ({ faqs = [], theme }) {
   if (!faqs.length) return null;
-  const { bgCard, border } = theme;
+  const { border } = theme;
 
   return (
-    <div
-      className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: border, backgroundColor: bgCard }}
-    >
+    <div className="space-y-2">
       {faqs.map((faq, i) => (
-        <div key={i} className="px-5">
+        <div
+          key={i}
+          className="rounded-2xl border px-5"
+          style={{
+            borderColor: border,
+            backgroundColor: "#FFFFFF",
+          }}
+        >
           <FAQItem q={faq.q} a={faq.a} theme={theme} />
         </div>
       ))}

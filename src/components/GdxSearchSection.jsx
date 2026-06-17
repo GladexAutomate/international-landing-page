@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +12,7 @@ import { getFullBookingFromFusioo } from "../services/fusiooService";
 import { resolveDestinationSlug } from "../utils/destinationResolver";
 import { getCachedGdx, setCachedGdx } from "../services/gdxCacheService";
 
-const ORANGE              = "#FF8C00";
+const ORANGE              = "#FF9913";
 const LOGO_URL            = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const GDX_PATTERN         = /^[0-9]+$/;
 const DOMESTIC_PORTAL_URL = "https://domestic-landing-page.vercel.app/";
@@ -149,8 +149,8 @@ function BackgroundOrbs({ isDark }) {
           style={{
             width: orb.size, height: orb.size, left: orb.x, top: orb.y,
             background: isDark
-              ? `radial-gradient(circle, rgba(255,140,0,0.07) 0%, transparent 70%)`
-              : `radial-gradient(circle, rgba(255,140,0,0.10) 0%, transparent 70%)`,
+              ? `radial-gradient(circle, rgba(255,153,19,0.07) 0%, transparent 70%)`
+              : `radial-gradient(circle, rgba(255,153,19,0.10) 0%, transparent 70%)`,
             filter: "blur(40px)",
           }}
           animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
@@ -197,7 +197,7 @@ function WrongPortalModal({ show }) {
         style={{
           backgroundColor: "#1A1A1A",
           border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,140,0,0.15)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,153,19,0.15)",
         }}
         initial={{ opacity: 0, scale: 0.88, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -207,8 +207,8 @@ function WrongPortalModal({ show }) {
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
           style={{
-            backgroundColor: "rgba(255,140,0,0.12)",
-            border: "1.5px solid rgba(255,140,0,0.3)",
+            backgroundColor: "rgba(255,153,19,0.12)",
+            border: "1.5px solid rgba(255,153,19,0.3)",
           }}
         >
           <AlertTriangle size={30} style={{ color: ORANGE }} />
@@ -236,8 +236,8 @@ function WrongPortalModal({ show }) {
         <div
           className="rounded-2xl px-5 py-3 mb-4"
           style={{
-            backgroundColor: "rgba(255,140,0,0.08)",
-            border: "1px solid rgba(255,140,0,0.2)",
+            backgroundColor: "rgba(255,153,19,0.08)",
+            border: "1px solid rgba(255,153,19,0.2)",
           }}
         >
           <p className="font-body text-sm font-semibold" style={{ color: ORANGE }}>
@@ -264,7 +264,7 @@ function WrongPortalModal({ show }) {
           href={DOMESTIC_PORTAL_URL}
           className="inline-flex items-center justify-center gap-2 w-full font-body font-bold text-sm py-4 rounded-2xl"
           style={{ backgroundColor: ORANGE, color: "#000000", textDecoration: "none" }}
-          whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(255,140,0,0.45)" }}
+          whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(255,153,19,0.45)" }}
           whileTap={{ scale: 0.97 }}
         >
           <ExternalLink size={16} />
@@ -282,15 +282,15 @@ function StatusMessage({ status, gdxInput, isDark }) {
       icon:   <Loader className="w-5 h-5 animate-spin" style={{ color: ORANGE }} />,
       text:   "Searching for your booking…",
       color:  ORANGE,
-      bg:     isDark ? "rgba(255,140,0,0.08)" : "rgba(255,140,0,0.07)",
-      border: "rgba(255,140,0,0.3)",
+      bg:     isDark ? "rgba(255,153,19,0.08)" : "rgba(255,153,19,0.07)",
+      border: "rgba(255,153,19,0.3)",
     },
     [STATUS.FOUND]: {
       icon:   <Loader className="w-5 h-5 animate-spin" style={{ color: ORANGE }} />,
       text:   "Booking found! Loading your trip details…",
       color:  ORANGE,
-      bg:     isDark ? "rgba(255,140,0,0.08)" : "rgba(255,140,0,0.07)",
-      border: "rgba(255,140,0,0.3)",
+      bg:     isDark ? "rgba(255,153,19,0.08)" : "rgba(255,153,19,0.07)",
+      border: "rgba(255,153,19,0.3)",
     },
     [STATUS.CACHED]: {
       icon:   <CheckCircle className="w-5 h-5" style={{ color: "#22C55E" }} />,
@@ -324,8 +324,8 @@ function StatusMessage({ status, gdxInput, isDark }) {
       icon:   <AlertTriangle className="w-5 h-5" style={{ color: ORANGE }} />,
       text:   "Wrong Portal Detected — redirecting to Domestic Travel Portal…",
       color:  ORANGE,
-      bg:     isDark ? "rgba(255,140,0,0.08)" : "rgba(255,140,0,0.07)",
-      border: "rgba(255,140,0,0.3)",
+      bg:     isDark ? "rgba(255,153,19,0.08)" : "rgba(255,153,19,0.07)",
+      border: "rgba(255,153,19,0.3)",
     },
     [STATUS.ERROR]: {
       icon:   <XCircle className="w-5 h-5" style={{ color: "#EF4444" }} />,
@@ -523,7 +523,7 @@ export default function GdxSearchSection() {
             src={LOGO_URL}
             alt="Gladex Tours"
             className="h-16 w-auto object-contain mb-10"
-            style={{ filter: isDark ? "drop-shadow(0 0 20px rgba(255,140,0,0.4))" : "none" }}
+            style={{ filter: isDark ? "drop-shadow(0 0 20px rgba(255,153,19,0.4))" : "none" }}
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -586,7 +586,7 @@ export default function GdxSearchSection() {
                   backgroundColor: inputBg,
                   borderColor: gdxBorder,
                   color: textPrimary,
-                  boxShadow: gdxInput ? `0 0 0 3px rgba(255,140,0,0.12)` : "none",
+                  boxShadow: gdxInput ? `0 0 0 3px rgba(255,153,19,0.12)` : "none",
                 }}
               />
             </div>
@@ -610,7 +610,7 @@ export default function GdxSearchSection() {
                   backgroundColor: inputBg,
                   borderColor: lastNameBorder,
                   color: textPrimary,
-                  boxShadow: lastNameInput ? `0 0 0 3px rgba(255,140,0,0.12)` : "none",
+                  boxShadow: lastNameInput ? `0 0 0 3px rgba(255,153,19,0.12)` : "none",
                 }}
               />
             </div>
@@ -622,7 +622,7 @@ export default function GdxSearchSection() {
               aria-label="Find my booking"
               className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-7 py-4 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full"
               style={{ backgroundColor: ORANGE, color: "#080808" }}
-              whileHover={{ scale: 1.03, boxShadow: "0 0 24px rgba(255,140,0,0.45)" }}
+              whileHover={{ scale: 1.03, boxShadow: "0 0 24px rgba(255,153,19,0.45)" }}
               whileTap={{ scale: 0.97 }}
             >
               {isLoading ? (
@@ -657,7 +657,7 @@ export default function GdxSearchSection() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.3 }}
                 onClick={handleViewMyTrip}
-                whileHover={{ scale: 1.02, boxShadow: "0 0 28px rgba(255,140,0,0.50)" }}
+                whileHover={{ scale: 1.02, boxShadow: "0 0 28px rgba(255,153,19,0.50)" }}
                 whileTap={{ scale: 0.97 }}
               >
                 <MapPin className="w-5 h-5" />

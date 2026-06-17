@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -33,7 +33,7 @@
     --radius: 0.25rem;
     --font-condensed: 'Montserrat', sans-serif;
     --font-body: 'Poppins', sans-serif;
-    --gladex-orange: #FF6B00;
+    --gladex-orange: #FF9913;
     --deep-space: #080808;
     --surface-glow: rgba(255, 255, 255, 0.05);
     --muted-chrome: #A0A0A0;
@@ -67,7 +67,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
   .focus-ring:focus-visible {
-    outline: 2px solid #FF6B00;
+    outline: 2px solid #FF9913;
     outline-offset: 2px;
   }
 }
@@ -82,8 +82,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.4); }
-  50% { box-shadow: 0 0 20px 8px rgba(255, 107, 0, 0.15); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 153, 19, 0.4); }
+  50% { box-shadow: 0 0 20px 8px rgba(255, 153, 19, 0.15); }
 }
 
 @keyframes scroll-bounce {
@@ -107,16 +107,90 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 140, 0, 0.55);
+  background: rgba(255, 153, 19, 0.55);
   border-radius: 999px;
   border: 3px solid #080808;
   min-height: 48px;
   min-width: 48px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 140, 0, 0.85);
+  background: rgba(255, 153, 19, 0.85);
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* ── Briefing page — global premium card elevation ──────────────────────────
+   All cards get an orange-tinted border + warm shadow like the TeenCare template.
+   The briefing-page class is set on the main PreviewContent wrapper div.       */
+
+/* Orange-tinted border on all cards (1.5px so it's clearly visible) */
+.briefing-page .border {
+  border-width: 1.5px !important;
+  border-color: rgba(255, 153, 19, 0.28) !important;
+}
+
+/* Card base shadow */
+.briefing-page .rounded-2xl {
+  box-shadow: 0 2px 16px rgba(255, 153, 19, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.briefing-page .rounded-xl {
+  box-shadow: 0 1px 8px rgba(255, 153, 19, 0.10), 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.briefing-page .rounded-2xl:hover {
+  box-shadow: 0 6px 28px rgba(255, 153, 19, 0.18), 0 2px 8px rgba(0, 0, 0, 0.07);
+  transform: translateY(-2px);
+}
+.briefing-page .rounded-xl:hover {
+  box-shadow: 0 4px 18px rgba(255, 153, 19, 0.14), 0 1px 4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Don't lift interactive elements, inputs, or scrollable containers */
+.briefing-page input,
+.briefing-page textarea,
+.briefing-page select,
+.briefing-page [role="listbox"],
+.briefing-page .overflow-y-auto,
+.briefing-page .overflow-x-auto,
+.briefing-page button {
+  transform: none !important;
+}
+
+/* ── Orange section card elevation — white cards on solid #FF9913 bg ────────
+   Override border to white so cards stand out on orange background          */
+[data-theme="orange"] .border {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+}
+[data-theme="orange"] .rounded-2xl,
+[data-theme="orange"] .rounded-xl {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.14), 0 1px 6px rgba(0, 0, 0, 0.08) !important;
+}
+[data-theme="orange"] .rounded-2xl:hover,
+[data-theme="orange"] .rounded-xl:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.10) !important;
+  transform: translateY(-3px);
+}
+
+/* ── Briefing page — improved body text readability ─────────────────────────
+   Larger text for families, parents, and senior travelers.                  */
+.briefing-page .font-body {
+  line-height: 1.8;
+}
+.briefing-page li .font-body,
+.briefing-page p.font-body {
+  font-size: 1.0625rem; /* 17px — comfortable reading size */
+}
+
+
+/* Scrollbar matches light theme */
+.briefing-page ::-webkit-scrollbar-thumb {
+  background: rgba(255, 153, 19, 0.40);
+  border: 3px solid #F9F6F2;
+}
+.briefing-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 153, 19, 0.70);
 }
 

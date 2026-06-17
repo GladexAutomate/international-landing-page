@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 // DEMO MODE ONLY — Replace with real gateway integration later
 // This modal simulates a payment gateway flow for stakeholder visualization.
 // No actual payment is processed. Remove this file when wiring up a real gateway.
@@ -7,7 +7,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, XCircle } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 function generateDemoRef() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

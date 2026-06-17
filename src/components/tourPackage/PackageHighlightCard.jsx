@@ -1,8 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 // Strip booking/pricing-related keywords from highlights
 function cleanHighlight(text) {

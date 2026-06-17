@@ -1,9 +1,9 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { motion } from "framer-motion";
 import { Gift, Share2 } from "lucide-react";
 import BriefingSection from "./briefing/BriefingSection";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 const SHARE_TEXT =
   "Hey! I just booked my international trip with Gladex Tours and their service is amazing! Book your dream trip here: https://gladextours.com";
@@ -22,7 +22,7 @@ export default function ReferralSection({ theme }) {
         style={{
           background: isDark
             ? "linear-gradient(135deg, #1A0A00 0%, #130700 100%)"
-            : "linear-gradient(135deg, #FFF8F0 0%, #FFF0DC 100%)",
+            : "linear-gradient(135deg, #FFF8F0 0%, #FFF4E0 100%)",
           border: `1.5px solid ${ORANGE}35`,
         }}
       >
@@ -31,7 +31,7 @@ export default function ReferralSection({ theme }) {
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
             style={{
-              backgroundColor: isDark ? "rgba(255,140,0,0.12)" : "rgba(255,140,0,0.15)",
+              backgroundColor: isDark ? "rgba(255,153,19,0.12)" : "rgba(255,153,19,0.15)",
             }}
           >
             <Gift className="w-7 h-7" style={{ color: ORANGE }} />

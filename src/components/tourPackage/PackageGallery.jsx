@@ -1,7 +1,7 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { X } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 export default function PackageGallery({ images = [], destinationName }) {
   const [lightbox, setLightbox] = useState(null);

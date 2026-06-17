@@ -1,8 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 const GUIDE_ITEMS = [
   {

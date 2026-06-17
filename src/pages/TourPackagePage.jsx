@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -15,7 +15,7 @@ import ExploreMoreSection from "../components/tourPackage/ExploreMoreSection";
 import PackageFAQ from "../components/tourPackage/PackageFAQ";
 import DestinationGuideSection from "../components/tourPackage/DestinationGuideSection";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 
 function SectionHeader({ title = "" }) {

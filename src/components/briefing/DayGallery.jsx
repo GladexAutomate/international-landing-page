@@ -1,9 +1,9 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Images } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 // ─── LIGHTBOX ────────────────────────────────────────────────────────────────
 function Lightbox({ images, startIndex, onClose }) {

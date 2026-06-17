@@ -1,17 +1,19 @@
-// @ts-nocheck
-const ORANGE = "#FF8C00";
+﻿// @ts-nocheck
+const ORANGE = "#FF9913";
 
-function TravelerTypeCard({ type, requirements, note, theme }) {
-  const { bgCard, bgAlt, border, textPrimary, textSecondary, isDark } = theme;
+function TravelerTypeCard({ type, requirements, note, theme, index }) {
+  const { border, textPrimary, textSecondary } = theme;
+  const cardBg = "#FFFFFF";
+  const headerBg = "#FFFFFF";
 
   return (
     <div
       className="rounded-2xl border overflow-hidden"
-      style={{ borderColor: border, backgroundColor: bgCard }}
+      style={{ borderColor: border, backgroundColor: cardBg }}
     >
       <div
         className="px-5 py-4 border-b"
-        style={{ borderColor: border, backgroundColor: isDark ? "#1A1500" : "#FFF8F0" }}
+        style={{ borderColor: border, backgroundColor: headerBg }}
       >
         <span
           className="font-condensed font-bold text-base lg:text-lg tracking-wide"
@@ -23,7 +25,7 @@ function TravelerTypeCard({ type, requirements, note, theme }) {
 
       <div
         className="px-5 pb-5 pt-4 space-y-4"
-        style={{ backgroundColor: bgAlt }}
+        style={{ backgroundColor: cardBg }}
       >
         <div>
           <p
@@ -49,7 +51,7 @@ function TravelerTypeCard({ type, requirements, note, theme }) {
             className="px-4 py-3 rounded-xl border-l-4 text-sm font-body leading-relaxed"
             style={{
               borderLeftColor: ORANGE,
-              backgroundColor: isDark ? "#1E1200" : "#FFFAF0",
+              backgroundColor: isDark ? "#1E1200" : "#FFFFFF",
               color: textSecondary,
             }}
           >
@@ -72,6 +74,7 @@ export default function ImmigrationAdvisory({ advisory = [], theme }) {
       {advisory.map((item, i) => (
         <TravelerTypeCard
           key={i}
+          index={i}
           type={item.type}
           requirements={item.requirements}
           note={item.note}

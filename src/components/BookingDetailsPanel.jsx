@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { motion } from "framer-motion";
 import {
   X,
@@ -15,7 +15,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 // ── Formatters ────────────────────────────────────────────────────────────────
 
@@ -53,8 +53,8 @@ function stripHtml(html) {
 // ── Trip Highlights ───────────────────────────────────────────────────────────
 
 function TripHighlights({ booking, isDark }) {
-  const cardBg     = isDark ? "rgba(255,140,0,0.10)" : "rgba(255,140,0,0.08)";
-  const cardBorder = isDark ? "rgba(255,140,0,0.25)" : "rgba(255,140,0,0.22)";
+  const cardBg     = isDark ? "rgba(255,153,19,0.10)" : "rgba(255,153,19,0.08)";
+  const cardBorder = isDark ? "rgba(255,153,19,0.25)" : "rgba(255,153,19,0.22)";
   const textPrimary   = isDark ? "#FFFFFF" : "#111111";
   const textSecondary = isDark ? "#CCCCCC" : "#444444";
 

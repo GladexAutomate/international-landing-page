@@ -1,10 +1,10 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import { Star, Pencil, X, Upload, Check, Trash2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import BriefingSection from "./briefing/BriefingSection";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 const MAX_PHOTOS = 3;
 const MAX_FILE_MB = 5;
 const ACCEPTED = "image/jpeg,image/png,image/webp";
@@ -330,7 +330,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
             <p
               className="font-body text-base leading-relaxed italic px-4 py-3 rounded-xl"
               style={{
-                backgroundColor: isDark ? "rgba(255,140,0,0.07)" : "rgba(255,140,0,0.05)",
+                backgroundColor: isDark ? "rgba(255,153,19,0.07)" : "rgba(255,153,19,0.05)",
                 color: textSecondary,
               }}
             >
@@ -369,7 +369,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
 
       {/* ── Review form (new or edit) ── */}
       {!loading && showForm && (
-        <div className="space-y-5">
+        <div className="rounded-2xl border p-5 space-y-5" style={{ backgroundColor: bgCard, borderColor: border }}>
 
           {/* Edit mode header */}
           {isEditing && (
@@ -410,7 +410,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
                       className="w-8 h-8"
                       style={{
                         fill:        filled ? ORANGE : "none",
-                        color:       filled ? ORANGE : isDark ? "#555" : "#CCC",
+                        color:       filled ? ORANGE : "rgba(255,153,19,0.35)",
                         strokeWidth: 1.5,
                         transition:  "all 0.12s ease",
                       }}
@@ -503,9 +503,9 @@ export default function RateMyService({ theme, gdxReference, destination, review
               <div
                 className="rounded-2xl border-2 border-dashed p-5 text-center cursor-pointer transition-colors select-none"
                 style={{
-                  borderColor:     isDragging ? ORANGE : isDark ? "#3A3A3A" : "#DDD",
+                  borderColor:     isDragging ? ORANGE : "rgba(255,153,19,0.30)",
                   backgroundColor: isDragging
-                    ? isDark ? "rgba(255,140,0,0.08)" : "rgba(255,140,0,0.04)"
+                    ? isDark ? "rgba(255,153,19,0.08)" : "rgba(255,153,19,0.04)"
                     : "transparent",
                 }}
                 onDragEnter={handleDragEnter}
@@ -524,7 +524,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
                 />
                 <Upload
                   className="w-7 h-7 mx-auto mb-2"
-                  style={{ color: isDragging ? ORANGE : isDark ? "#555" : "#AAA" }}
+                  style={{ color: isDragging ? ORANGE : "rgba(255,153,19,0.55)" }}
                 />
                 <p
                   className="font-body text-base font-semibold"
@@ -534,7 +534,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
                 </p>
                 <p
                   className="font-body text-xs mt-1"
-                  style={{ color: isDark ? "#555" : "#AAA" }}
+                  style={{ color: textSecondary }}
                 >
                   JPG · PNG · WEBP · Max {MAX_FILE_MB}MB each
                 </p>
@@ -542,7 +542,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
             )}
 
             {totalPhotos >= MAX_PHOTOS && (
-              <p className="font-body text-xs mt-2 text-center" style={{ color: isDark ? "#666" : "#AAA" }}>
+              <p className="font-body text-xs mt-2 text-center" style={{ color: textSecondary }}>
                 Maximum {MAX_PHOTOS} photos reached
               </p>
             )}
@@ -558,7 +558,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
             onClick={handleSubmit}
             disabled={!selected || submitting}
             className="w-full py-3 rounded-xl font-condensed font-bold text-base tracking-wide transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ backgroundColor: ORANGE, color: "#080808" }}
+            style={{ backgroundColor: ORANGE, color: "#FFFFFF" }}
           >
             {submitting
               ? newPhotoFiles.length > 0

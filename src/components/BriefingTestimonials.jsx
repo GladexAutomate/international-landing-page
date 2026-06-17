@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,10 +6,10 @@ import { ChevronLeft, ChevronRight, Star, X } from "lucide-react";
 import BriefingSection from "./briefing/BriefingSection";
 import { supabase } from "../lib/supabase";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 const AVATAR_PALETTE = [
-  "#FF8C00", "#7C3AED", "#059669", "#2563EB",
+  "#FF9913", "#7C3AED", "#059669", "#2563EB",
   "#DC2626", "#0891B2", "#D97706", "#9D174D",
 ];
 

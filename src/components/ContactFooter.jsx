@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+﻿import { motion } from "framer-motion";
 import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 import { useTheme } from "../lib/ThemeContext";
 
@@ -8,7 +8,7 @@ export default function ContactFooter() {
   const bg = isDark ? "#0A0A0A" : "#2C1F0E";
   const textColor = "#FFFFFF";
   const mutedColor = isDark ? "#888" : "rgba(255,255,255,0.6)";
-  const accentColor = "#FF8C00";
+  const accentColor = "#FF9913";
   const dividerColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)";
 
   return (

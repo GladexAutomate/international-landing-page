@@ -1,10 +1,10 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import BriefingSection from "./briefing/BriefingSection";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 // Generate image paths: /images/outfits/{category}/{variant}/1.jpg … N.jpg
 function imgs(cat, variant, n = 5) {

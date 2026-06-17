@@ -1,7 +1,7 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import BriefingSection from "./briefing/BriefingSection";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 const CATEGORIES = [
   {
@@ -68,16 +68,17 @@ export default function WhatToBringCarousel({ items = [], theme }) {
                 <div
                   key={i}
                   className="rounded-2xl overflow-hidden border flex flex-col"
-                  style={{ backgroundColor: bgCard, borderColor: border }}
+                  style={{ backgroundColor: "#FFFFFF", borderColor: border }}
                 >
+                  {/* Orange image frame — TeenCare style */}
                   <div
-                    className="aspect-[4/3] overflow-hidden"
-                    style={{ backgroundColor: isDark ? "#1E1E1E" : "#F0F0F0" }}
+                    style={{ backgroundColor: "#FF9913", padding: 7 }}
                   >
                     <img
                       src={item.img}
                       alt={item.name}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      className="w-full object-cover rounded-xl transition-transform duration-300 hover:scale-105"
+                      style={{ aspectRatio: "4/3", display: "block" }}
                       loading="lazy"
                       onError={handleImgError}
                     />
@@ -114,7 +115,7 @@ export default function WhatToBringCarousel({ items = [], theme }) {
                   borderRight: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "#F0E8DC"}`,
                   borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "#F0E8DC"}`,
                   borderRadius: "0 10px 10px 0",
-                  backgroundColor: isDark ? "rgba(255,140,0,0.04)" : "#FFFBF7",
+                  backgroundColor: isDark ? "rgba(255,153,19,0.04)" : "#FFFBF7",
                 }}
               >
                 <p className="font-body text-sm leading-snug" style={{ color: textPrimary }}>

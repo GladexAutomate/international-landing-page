@@ -1,7 +1,7 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { Phone } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 const WA_GREEN = "#25D366";
 
 export default function NeedAssistance({ contacts, theme }) {
@@ -42,7 +42,7 @@ export default function NeedAssistance({ contacts, theme }) {
             href={`tel:${hotline.number?.replace(/\D/g, "")}`}
             className="flex flex-col items-center justify-center gap-2 px-4 py-5 rounded-2xl border font-body text-sm font-semibold transition-all hover:scale-105 active:scale-95 text-center"
             style={{
-              backgroundColor: isDark ? "#1A0A00" : "#FFF5EB",
+              backgroundColor: isDark ? "#1A0A00" : "#FFFFFF",
               borderColor: ORANGE,
               color: ORANGE,
             }}

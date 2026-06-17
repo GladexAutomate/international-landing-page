@@ -1,6 +1,6 @@
-import { Check, MapPin, Clock, Users, Info } from "lucide-react";
+﻿import { Check, MapPin, Clock, Users, Info } from "lucide-react";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 export default function DestinationInfoCard({ pkg, destination, meta }) {
   return (

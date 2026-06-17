@@ -1,20 +1,20 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 const btnStyle = {
   width: 44,
   height: 44,
   borderRadius: 12,
-  backgroundColor: "rgba(255,140,0,0.93)",
+  backgroundColor: "rgba(255,153,19,0.93)",
   backdropFilter: "blur(10px)",
   WebkitBackdropFilter: "blur(10px)",
   color: "#000",
   border: "1.5px solid rgba(255,255,255,0.25)",
-  boxShadow: "0 4px 18px rgba(255,140,0,0.38), 0 2px 5px rgba(0,0,0,0.22)",
+  boxShadow: "0 4px 18px rgba(255,153,19,0.38), 0 2px 5px rgba(0,0,0,0.22)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

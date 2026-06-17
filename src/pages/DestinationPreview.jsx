@@ -40,6 +40,7 @@ import BriefingTestimonials from "../components/BriefingTestimonials";
 import RateMyService from "../components/RateMyService";
 import ReferralSection from "../components/ReferralSection";
 import { getDestinationImage } from "../utils/destinationImages";
+import { getMediaForSlug } from "../data/mediaConfig";
 
 // ─── PAGE-LEVEL ERROR BOUNDARY ────────────────────────────────────────────────
 // Catches any uncaught render error and shows a recoverable fallback instead
@@ -52,9 +53,9 @@ class PageErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#111", padding: "2rem", textAlign: "center" }}>
-          <p style={{ color: "#FF8C00", fontWeight: 700, fontSize: "1.25rem", marginBottom: "0.5rem" }}>Something went wrong loading this page.</p>
+          <p style={{ color: "#FF9913", fontWeight: 700, fontSize: "1.25rem", marginBottom: "0.5rem" }}>Something went wrong loading this page.</p>
           <p style={{ color: "#888", fontSize: "0.875rem", marginBottom: "1.5rem" }}>Please refresh the page or go back and try again.</p>
-          <button onClick={() => window.location.reload()} style={{ backgroundColor: "#FF8C00", color: "#000", padding: "0.75rem 1.5rem", borderRadius: "0.75rem", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "0.9rem" }}>
+          <button onClick={() => window.location.reload()} style={{ backgroundColor: "#FF9913", color: "#000", padding: "0.75rem 1.5rem", borderRadius: "0.75rem", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "0.9rem" }}>
             Reload Page
           </button>
         </div>
@@ -78,7 +79,7 @@ class SectionErrorBoundary extends React.Component {
 }
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
-const ORANGE = "#FF8C00";
+const ORANGE = "#FF9913";
 
 // Converts any supported video URL to an embeddable iframe src.
 // enablejsapi=1  → allows postMessage play/pause control
@@ -470,10 +471,9 @@ function ContactPanel({ briefing, booking, theme }) {
 
 // ─── 1. WELCOME SECTION ──────────────────────────────────────────────────────
 function WelcomeSection({ briefing, pkg, theme }) {
-  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  const { bgCard, border, textPrimary, textSecondary } = theme;
   const { welcomeMessage } = briefing;
 
-  // Normalize: support both object {title, body:[]} and legacy plain-string format
   const title = (welcomeMessage && typeof welcomeMessage === "object" && welcomeMessage.title)
     ? welcomeMessage.title
     : "Official Travel Briefing";
@@ -492,14 +492,14 @@ function WelcomeSection({ briefing, pkg, theme }) {
         {pkg && (
           <div className="flex flex-wrap items-center gap-3 pb-4 border-b" style={{ borderColor: border }}>
             <span
-              className="font-condensed font-bold text-xs px-3 py-1.5 rounded-full tracking-widest uppercase"
+              className="font-condensed font-bold text-sm px-4 py-1.5 rounded-full tracking-widest uppercase"
               style={{ backgroundColor: ORANGE, color: "#fff" }}
             >
               {pkg.name}
             </span>
             <span
-              className="font-condensed font-bold text-xs px-3 py-1.5 rounded-full tracking-wider"
-              style={{ backgroundColor: isDark ? "#2A2A2A" : "#F0F0F0", color: textSecondary }}
+              className="font-condensed font-bold text-sm px-4 py-1.5 rounded-full tracking-wider"
+              style={{ backgroundColor: "#F3EDE5", color: textSecondary }}
             >
               {pkg.duration}
             </span>
@@ -534,7 +534,7 @@ function InclusionsSection({ pkg, briefing, theme }) {
       <BriefingSection label="What's Covered" title="Package Inclusions" theme={theme}>
         <div
           className="rounded-2xl border overflow-hidden"
-          style={{ borderColor: isDark ? "#14532D" : "#BBF7D0", backgroundColor: isDark ? "#0D1F10" : "#F0FFF4" }}
+          style={{ borderColor: "rgba(255,153,19,0.28)", backgroundColor: "#FFFFFF" }}
         >
           <ul className="px-5 py-4 space-y-2.5">
             {inclusions.map((item, i) => (
@@ -544,7 +544,7 @@ function InclusionsSection({ pkg, briefing, theme }) {
                   style={{ color: "#22C55E" }}
                   strokeWidth={2.5}
                 />
-                <span className="font-body text-base leading-relaxed" style={{ color: isDark ? "#86EFAC" : "#166534" }}>
+                <span className="font-body text-base leading-relaxed" style={{ color: "#1A0800" }}>
                   {item}
                 </span>
               </li>
@@ -557,7 +557,7 @@ function InclusionsSection({ pkg, briefing, theme }) {
       <BriefingSection label="Not Covered" title="Package Exclusions" theme={theme}>
         <div
           className="rounded-2xl border overflow-hidden"
-          style={{ borderColor: isDark ? "#7F1D1D" : "#FECACA", backgroundColor: isDark ? "#1C0808" : "#FFF5F5" }}
+          style={{ borderColor: "rgba(255,153,19,0.28)", backgroundColor: "#FFFFFF" }}
         >
           <ul className="px-5 py-4 space-y-2.5">
             {exclusions.map((item, i) => (
@@ -567,7 +567,7 @@ function InclusionsSection({ pkg, briefing, theme }) {
                   style={{ color: "#EF4444" }}
                   strokeWidth={2.5}
                 />
-                <span className="font-body text-base leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#991B1B" }}>
+                <span className="font-body text-base leading-relaxed" style={{ color: "#1A0800" }}>
                   {item}
                 </span>
               </li>
@@ -577,15 +577,15 @@ function InclusionsSection({ pkg, briefing, theme }) {
           {(pkg.fuelSurcharge || pkg.insuranceNote) && (
             <div
               className="px-5 pb-4 pt-1 border-t space-y-1"
-              style={{ borderColor: isDark ? "#7F1D1D" : "#FECACA" }}
+              style={{ borderColor: "rgba(255,153,19,0.28)" }}
             >
               {pkg.fuelSurcharge && (
-                <p className="font-body text-xs leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#B91C1C" }}>
+                <p className="font-body text-xs leading-relaxed" style={{ color: "#7A3800" }}>
                   ⚠️ {pkg.fuelSurcharge}
                 </p>
               )}
               {pkg.insuranceNote && (
-                <p className="font-body text-xs leading-relaxed" style={{ color: isDark ? "#FCA5A5" : "#B91C1C" }}>
+                <p className="font-body text-xs leading-relaxed" style={{ color: "#7A3800" }}>
                   🛡️ {pkg.insuranceNote}
                 </p>
               )}
@@ -624,7 +624,7 @@ function TravelInfoCenter({ briefing, theme }) {
     <ul className="space-y-2.5">
       {items.map((item, i) => (
         <li key={i} className="flex items-start gap-3 px-4 py-3 rounded-xl border"
-          style={{ backgroundColor: bgCard, borderColor: border }}>
+          style={{ backgroundColor: "#FFFFFF", borderColor: border }}>
           <span className="font-condensed font-black text-sm shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white"
             style={{ backgroundColor: ORANGE }}>
             {i + 1}
@@ -680,15 +680,16 @@ function ArrivalSection({ briefing, theme }) {
             : typeof block === "string" ? []
             : [];
 
+          const stepBg = "#FFFFFF";
           return (
             <div
               key={i}
               className="rounded-2xl border overflow-hidden"
-              style={{ borderColor: border, backgroundColor: bgCard }}
+              style={{ borderColor: border, backgroundColor: stepBg }}
             >
               <div
                 className="flex items-center gap-3 px-5 py-3.5 border-b"
-                style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
+                style={{ borderColor: border, backgroundColor: stepBg }}
               >
                 <span className="text-xl">{blockIcon}</span>
                 <h4 className="font-condensed font-bold text-base tracking-wide" style={{ color: textPrimary }}>
@@ -835,24 +836,24 @@ function HotelSection({ briefing, theme }) {
 
 // ─── 9. TOUR REMINDERS ───────────────────────────────────────────────────────
 function RemindersSection({ briefing, theme }) {
-  const { bgCard, border, textPrimary, textSecondary } = theme;
+  const { bgCard, border, textSecondary } = theme;
   const { reminders } = briefing;
   if (!reminders?.length) return null;
 
   return (
     <BriefingSection label="Before Each Tour Day" title="Tour Reminders" theme={theme}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="space-y-3">
         {reminders.map((item, i) => {
           const text = typeof item === "string" ? item : (item.text || "");
           return (
             <div
               key={i}
-              className="flex items-start gap-3 px-4 py-3.5 rounded-xl border"
-              style={{ backgroundColor: bgCard, borderColor: border }}
+              className="flex items-start gap-4 px-5 py-4 rounded-2xl border"
+              style={{ backgroundColor: "#FFFFFF", borderColor: border }}
             >
               <span
-                className="font-condensed font-black text-sm shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5"
-                style={{ backgroundColor: ORANGE + "20", color: ORANGE }}
+                className="font-condensed font-black text-sm shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5"
+                style={{ backgroundColor: ORANGE, color: "#fff" }}
               >
                 {i + 1}
               </span>
@@ -995,7 +996,7 @@ function RequirementsSection({ pkg, theme }) {
         {pkg.visaInfo && (
           <div
             className="px-5 py-4 rounded-2xl border"
-            style={{ borderColor: border, backgroundColor: isDark ? "#111" : "#FAFAFA" }}
+            style={{ borderColor: border, backgroundColor: "#FFFFFF" }}
           >
             <p className="font-body text-xs font-bold uppercase tracking-widest mb-2" style={{ color: ORANGE }}>
               Visa Information
@@ -1046,7 +1047,7 @@ function ConnectivitySection({ briefing, theme }) {
               className="rounded-2xl border overflow-hidden"
               style={{
                 borderColor: opt.recommended ? ORANGE : border,
-                backgroundColor: bgCard,
+                backgroundColor: "#FFFFFF",
               }}
             >
               {opt.recommended && (
@@ -1331,6 +1332,68 @@ function PhotoSlider({ items, theme }) {
 }
 
 // ─── 17. DESTINATION GUIDE ───────────────────────────────────────────────────
+// TeenCare-style: solid #FF9913 image frame, photo sits inside with padding, text beside
+function GuideCard({ item, index, textPrimary, textSecondary, fallbackEmoji }) {
+  const imageLeft = index % 2 === 0;
+  const [imgFailed, setImgFailed] = React.useState(false);
+
+  const imageBox = (
+    <div
+      className="shrink-0 rounded-2xl"
+      style={{
+        width: 136,
+        height: 136,
+        minWidth: 136,
+        backgroundColor: "#FF9913",
+        padding: 10,
+        boxSizing: "border-box",
+      }}
+    >
+      {item.img && !imgFailed ? (
+        <img
+          src={item.img}
+          alt={item.name}
+          className="w-full h-full object-cover rounded-xl"
+          loading="lazy"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <div
+          className="w-full h-full rounded-xl flex items-center justify-center text-4xl"
+          style={{ backgroundColor: "rgba(255,255,255,0.25)" }}
+        >
+          {item.icon || fallbackEmoji}
+        </div>
+      )}
+    </div>
+  );
+
+  const textBox = (
+    <div className="flex-1 min-w-0 py-1">
+      <p className="font-condensed font-black text-xl leading-snug mb-2" style={{ color: textPrimary }}>
+        {item.name}
+      </p>
+      <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+        {item.desc || item.description || ""}
+      </p>
+    </div>
+  );
+
+  return (
+    <div
+      className="flex items-center gap-4 rounded-2xl px-4 py-4"
+      style={{
+        backgroundColor: "#FFFFFF",
+        border: "1px solid rgba(255,153,19,0.28)",
+        boxShadow: "0 3px 18px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05)",
+      }}
+    >
+      {imageLeft ? imageBox : textBox}
+      {imageLeft ? textBox : imageBox}
+    </div>
+  );
+}
+
 function DestinationGuideSection({ briefing, slug, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   const guide = briefing?.destinationGuide;
@@ -1355,7 +1418,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
   }));
 
   const SubHeading = ({ label }) => (
-    <p className="font-condensed font-bold text-base uppercase tracking-widest mb-4 pt-2"
+    <p className="font-condensed font-bold text-sm uppercase tracking-widest mb-3 pt-1"
       style={{ color: ORANGE }}>
       {label}
     </p>
@@ -1383,96 +1446,37 @@ function DestinationGuideSection({ briefing, slug, theme }) {
       )}
 
       <div className="space-y-10">
-        {/* Best Places */}
+        {/* Best Places — alternating side-image cards */}
         {highlights.length > 0 && (
           <div>
             <SubHeading label="Best Places to Visit" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="space-y-3">
               {highlights.map((item, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden border group"
-                  style={{ backgroundColor: bgCard, borderColor: border }}>
-                  <div className="relative overflow-hidden"
-                    style={{ aspectRatio: "4/3", backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}>
-                    {item.img ? (
-                      <img src={item.img} alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
-                      />
-                    ) : null}
-                    <div className="absolute inset-0 items-center justify-center text-5xl"
-                      style={{ display: item.img ? "none" : "flex" }}>
-                      {item.icon}
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent pointer-events-none" />
-                    <p className="absolute bottom-3 left-3 right-3 font-condensed font-black text-white text-base leading-tight z-10 drop-shadow">
-                      {item.name}
-                    </p>
-                  </div>
-                  <div className="px-4 py-3">
-                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
-                  </div>
-                </div>
+                <GuideCard key={i} item={item} index={i} textPrimary={textPrimary} textSecondary={textSecondary} fallbackEmoji="📍" />
               ))}
             </div>
           </div>
         )}
 
-        {/* Best Food */}
+        {/* Best Food — alternating side-image cards */}
         {foods.length > 0 && (
           <div>
             <SubHeading label="Best Food & Dining" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-3">
               {foods.map((item, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden border group"
-                  style={{ backgroundColor: bgCard, borderColor: border }}>
-                  <div className="aspect-video overflow-hidden flex items-center justify-center text-5xl"
-                    style={{ backgroundColor: isDark ? "#1A1A1A" : "#E8E8E8" }}>
-                    {item.img ? (
-                      <img src={item.img} alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
-                      />
-                    ) : (
-                      <span>{item.icon || "🍽️"}</span>
-                    )}
-                  </div>
-                  <div className="px-4 py-3">
-                    <p className="font-condensed font-bold text-base leading-tight mb-1" style={{ color: textPrimary }}>{item.name}</p>
-                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc || item.description}</p>
-                  </div>
-                </div>
+                <GuideCard key={i} item={item} index={i} textPrimary={textPrimary} textSecondary={textSecondary} fallbackEmoji="🍽️" />
               ))}
             </div>
           </div>
         )}
 
-        {/* Photo Spots */}
+        {/* Photo Spots — alternating side-image cards */}
         {photoSpots.length > 0 && (
           <div>
             <SubHeading label="Best Photo Spots" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="space-y-3">
               {photoSpots.map((item, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden border"
-                  style={{ backgroundColor: bgCard, borderColor: border }}>
-                  <div className="flex items-center justify-center overflow-hidden"
-                    style={{ aspectRatio: "4/3", backgroundColor: isDark ? "#111" : "#EFEFEF" }}>
-                    {item.img ? (
-                      <img src={item.img} alt={item.name}
-                        className="w-full h-full object-contain"
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/placeholder.svg"; }}
-                      />
-                    ) : (
-                      <span className="text-4xl">📸</span>
-                    )}
-                  </div>
-                  <div className="px-3 py-2.5">
-                    <p className="font-condensed font-bold text-sm leading-tight mb-0.5" style={{ color: textPrimary }}>{item.name}</p>
-                    <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{item.desc}</p>
-                  </div>
-                </div>
+                <GuideCard key={i} item={item} index={i} textPrimary={textPrimary} textSecondary={textSecondary} fallbackEmoji="📸" />
               ))}
             </div>
           </div>
@@ -1826,7 +1830,7 @@ function TravelInsuranceSection({ plans, selectedInsurance, onSelect, theme }) {
       {/* Header banner */}
       <div
         className="rounded-2xl px-5 py-4 mb-6 flex items-start gap-4"
-        style={{ backgroundColor: isDark ? "rgba(255,140,0,0.08)" : "#FFF8F0", border: `1.5px solid ${ORANGE}30` }}
+        style={{ backgroundColor: isDark ? "rgba(255,153,19,0.08)" : "#FFF8F0", border: `1.5px solid ${ORANGE}30` }}
       >
         <span className="text-3xl shrink-0 mt-0.5">🛡️</span>
         <div>
@@ -2309,7 +2313,9 @@ function PreviewContent() {
   const { slug }   = useParams();
   const navigate   = useNavigate();
   const location   = useLocation();
-  const { isDark } = useTheme();
+  const { isDark: _globalIsDark } = useTheme();
+  // Briefing page is always light mode — premium modern look for clients
+  const isDark = false;
   const dest    = getDestinationBySlug(slug);
   const briefing = getBriefingBySlug(slug);
 
@@ -2428,21 +2434,37 @@ function PreviewContent() {
   // Use the first package for briefing content (most destinations have one)
   const pkg = dest?.packages?.[0] || null;
 
-  // Theme object passed to all briefing components
+  // Theme for white sections — neutral background with dark text
   const theme = {
-    isDark,
-    bg: isDark ? "#111111" : "#F5F5F5",
-    bgCard: isDark ? "#1A1A1A" : "#FFFFFF",
-    bgAlt: isDark ? "#161616" : "#F0F0F0",
-    border: isDark ? "#2A2A2A" : "#E5E5E5",
-    textPrimary: isDark ? "#FFFFFF" : "#111111",
-    textSecondary: isDark ? "#A0A0A0" : "#555555",
+    isDark: false,
+    bg: "#FFFFFF",
+    bgCard: "#FFFFFF",
+    bgAlt: "#F5F0EB",
+    border: "rgba(255,153,19,0.28)",
+    textPrimary: "#1A0800",
+    textSecondary: "#6B3A00",
+    accent: "#FF9913",
   };
+
+  // Theme for solid-orange (#FF9913) sections — white cards on orange bg
+  const orangeTheme = {
+    isDark: false,
+    bg: "#FF9913",
+    bgCard: "#FFFFFF",
+    bgAlt: "#FFFFFF",
+    border: "rgba(0,0,0,0.08)",
+    textPrimary: "#1A0800",
+    textSecondary: "#3D1000",
+    accent: "#FFFFFF",
+  };
+
+  // Destination hero image for section photo accents
+  const destHeroImage = getMediaForSlug(slug)?.heroImage ?? null;
 
   const { bg, bgCard, bgAlt, border, textPrimary, textSecondary, navBg, navBorder } = {
     ...theme,
-    navBg: isDark ? "#0D0D0D" : "#FFFFFF",
-    navBorder: isDark ? "#222222" : "#E5E5E5",
+    navBg: "#FFFFFF",
+    navBorder: "rgba(255,153,19,0.28)",
   };
 
   // ── Globaltix optional tours ─────────────────────────────────────────────
@@ -2550,8 +2572,7 @@ function PreviewContent() {
 
 
   return (
-    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
-      <ThemeToggle />
+    <div className="briefing-page min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
 
       {/* ── NAVBAR ── */}
       <div
@@ -2562,24 +2583,33 @@ function PreviewContent() {
           src={LOGO_URL}
           alt="Gladex"
           className="h-14 w-auto object-contain cursor-pointer transition-all duration-300 hover:scale-105"
-          style={{ filter: "drop-shadow(0 0 16px rgba(255,140,0,0.5))" }}
+          style={{ filter: "drop-shadow(0 0 16px rgba(255,153,19,0.5))" }}
           onClick={() => navigate("/")}
         />
       </div>
 
-      {/* ── HERO (destination page only) ── */}
+      {/* ── HERO (destination page only) — clean orange gradient, TeenCare style ── */}
       {dest && (
-        <div className="relative overflow-hidden" style={{ height: "60vh", minHeight: 340, backgroundColor: "#111" }}>
-          <img src={dest.heroImage} alt={dest.name} className="w-full h-full object-cover" loading="eager" fetchPriority="high" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-          <div className="absolute bottom-8 left-0 right-0 text-center px-4">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-              <h1 className="font-condensed font-black text-white text-4xl lg:text-6xl tracking-wide mb-2">{dest.name}</h1>
-              <div className="flex items-center justify-center gap-1.5 mb-2">
-                <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
-                <span className="font-body text-white/80 text-sm">{dest.country}</span>
-              </div>
-              <p className="font-body text-white/70 text-sm max-w-md mx-auto">{dest.tagline}</p>
+        <div style={{ background: "linear-gradient(135deg, #FF9913 0%, #FF7700 60%, #CC6600 100%)" }}>
+          <div className="max-w-3xl mx-auto px-5 py-16 md:py-20 text-center">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <p className="font-body text-xs font-bold tracking-[0.35em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.7)" }}>
+                Destination Briefing Guide
+              </p>
+              <h1 className="font-condensed font-black text-white text-4xl sm:text-5xl lg:text-6xl tracking-wide leading-tight">
+                {dest.name}
+              </h1>
+              {dest.country && (
+                <div className="flex items-center justify-center gap-1.5 mt-4">
+                  <MapPin className="w-4 h-4" style={{ color: "rgba(255,255,255,0.7)" }} />
+                  <span className="font-body text-sm font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>{dest.country}</span>
+                </div>
+              )}
+              {dest.tagline && (
+                <p className="font-body text-sm md:text-base mt-3 max-w-md mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  {dest.tagline}
+                </p>
+              )}
             </motion.div>
           </div>
         </div>
@@ -2602,7 +2632,7 @@ function PreviewContent() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.02, boxShadow: "0 0 28px rgba(255,140,0,0.50)" }}
+            whileHover={{ scale: 1.02, boxShadow: "0 0 28px rgba(255,153,19,0.50)" }}
             whileTap={{ scale: 0.97 }}
           >
             <MapPin className="w-5 h-5" />
@@ -2674,7 +2704,7 @@ function PreviewContent() {
                            : paymentRaw?.toLowerCase().includes("pend")    ? "#EF4444"
                            : textSecondary;
         const paymentBg    = paymentRaw?.toLowerCase().includes("full")    ? (isDark ? "rgba(34,197,94,0.12)"  : "#F0FFF4")
-                           : paymentRaw?.toLowerCase().includes("partial") ? (isDark ? "rgba(255,140,0,0.12)"  : "#FFF8F0")
+                           : paymentRaw?.toLowerCase().includes("partial") ? (isDark ? "rgba(255,153,19,0.12)"  : "#FFF8F0")
                            : paymentRaw?.toLowerCase().includes("pend")    ? (isDark ? "rgba(239,68,68,0.12)"  : "#FFF5F5")
                            : (isDark ? "rgba(255,255,255,0.05)" : "#F5F5F5");
         const statusLabel  = fmtValue(booking.status) || "Confirmed";
@@ -2853,16 +2883,16 @@ function PreviewContent() {
                 style={{
                   background: isDark
                     ? "linear-gradient(135deg, #2A1000 0%, #1A0800 60%, #0F0500 100%)"
-                    : "linear-gradient(135deg, #FF8C00 0%, #FF6A00 60%, #E05A00 100%)",
+                    : "linear-gradient(135deg, #FF9913 0%, #FF6A00 60%, #E05A00 100%)",
                   boxShadow: isDark
-                    ? "0 0 60px rgba(255,140,0,0.15), 0 4px 20px rgba(0,0,0,0.5)"
-                    : "0 8px 40px rgba(255,140,0,0.35)",
+                    ? "0 0 60px rgba(255,153,19,0.15), 0 4px 20px rgba(0,0,0,0.5)"
+                    : "0 8px 40px rgba(255,153,19,0.35)",
                 }}
               >
                 {isDark && (
                   <div
                     className="absolute inset-0 pointer-events-none"
-                    style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(255,140,0,0.22) 0%, transparent 70%)" }}
+                    style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(255,153,19,0.22) 0%, transparent 70%)" }}
                   />
                 )}
                 <div className="relative px-6 py-8 sm:px-10 sm:py-10">
@@ -2939,7 +2969,7 @@ function PreviewContent() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                        style={{ backgroundColor: isDark ? "rgba(255,140,0,0.15)" : "rgba(255,255,255,0.25)", color: isDark ? ORANGE : "#FFFFFF", border: `1px solid ${isDark ? "rgba(255,140,0,0.35)" : "rgba(255,255,255,0.45)"}` }}
+                        style={{ backgroundColor: isDark ? "rgba(255,153,19,0.15)" : "rgba(255,255,255,0.25)", color: isDark ? ORANGE : "#FFFFFF", border: `1px solid ${isDark ? "rgba(255,153,19,0.35)" : "rgba(255,255,255,0.45)"}` }}
                       >
                         <FileText className="w-4 h-4" /> View Itinerary
                       </a>
@@ -2957,8 +2987,8 @@ function PreviewContent() {
                 style={{
                   border: `1.5px solid ${ORANGE}`,
                   boxShadow: isDark
-                    ? "0 0 50px rgba(255,140,0,0.10), 0 2px 16px rgba(0,0,0,0.5)"
-                    : "0 4px 30px rgba(255,140,0,0.12), 0 1px 8px rgba(0,0,0,0.06)",
+                    ? "0 0 50px rgba(255,153,19,0.10), 0 2px 16px rgba(0,0,0,0.5)"
+                    : "0 4px 30px rgba(255,153,19,0.12), 0 1px 8px rgba(0,0,0,0.06)",
                   backdropFilter: "blur(16px)",
                   WebkitBackdropFilter: "blur(16px)",
                   backgroundColor: bgCard,
@@ -3033,7 +3063,7 @@ function PreviewContent() {
                     {/* Section divider header */}
                     <div
                       className="flex items-center gap-2 px-5 py-2.5 border-b"
-                      style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)" }}
+                      style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,153,19,0.04)" : "rgba(255,153,19,0.03)" }}
                     >
                       <span style={{ color: ORANGE }}>{section.icon}</span>
                       <p className="font-body text-xs font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
@@ -3053,7 +3083,7 @@ function PreviewContent() {
                             borderColor: border,
                             backgroundColor: "transparent",
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)"; }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? "rgba(255,153,19,0.04)" : "rgba(255,153,19,0.03)"; }}
                           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
                         >
                           <div className="min-w-0">
@@ -3074,7 +3104,7 @@ function PreviewContent() {
                 <div>
                   <div
                     className="flex items-center gap-2 px-5 py-2.5 border-b"
-                    style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,140,0,0.04)" : "rgba(255,140,0,0.03)" }}
+                    style={{ borderColor: border, backgroundColor: isDark ? "rgba(255,153,19,0.04)" : "rgba(255,153,19,0.03)" }}
                   >
                     <FileText className="w-4 h-4" style={{ color: ORANGE }} />
                     <p className="font-body text-xs font-bold uppercase tracking-[0.25em]" style={{ color: ORANGE }}>
@@ -3152,10 +3182,10 @@ function PreviewContent() {
 
       {/* ── PORTRAIT VIDEO SECTION (destination page only) ── */}
       {dest && (
-      <div className="bg-white py-16 px-4 lg:px-10 relative overflow-hidden">
+      <div className="py-16 px-4 lg:px-10 relative overflow-hidden" style={{ backgroundColor: isDark ? "#111111" : "#F9F7F5" }}>
         <div
           className="absolute inset-0"
-          style={{ background: "radial-gradient(circle at center, rgba(255,140,0,0.06) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle at center, rgba(255,153,19,0.06) 0%, transparent 70%)" }}
         />
         <div className="max-w-[1500px] mx-auto text-center mb-8 relative z-10">
           <p className="text-xs font-bold tracking-[0.3em] uppercase mb-2" style={{ color: ORANGE }}>
@@ -3181,7 +3211,7 @@ function PreviewContent() {
               <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
               <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
                 <div className="relative mb-6">
-                  <div className="absolute inset-0 rounded-full animate-ping" style={{ background: "rgba(255,140,0,0.2)" }} />
+                  <div className="absolute inset-0 rounded-full animate-ping" style={{ background: "rgba(255,153,19,0.2)" }} />
                   <div
                     className="relative w-20 h-20 rounded-full flex items-center justify-center"
                     style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
@@ -3195,7 +3225,7 @@ function PreviewContent() {
                 </p>
                 <div
                   className="px-7 py-3 rounded-full border text-xs font-bold tracking-[0.25em] uppercase"
-                  style={{ borderColor: ORANGE, color: ORANGE, background: "rgba(255,140,0,0.05)" }}
+                  style={{ borderColor: ORANGE, color: ORANGE, background: "rgba(255,153,19,0.05)" }}
                 >
                   + Stay Tuned
                 </div>
@@ -3207,47 +3237,48 @@ function PreviewContent() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
-          BRIEFING SECTIONS — only renders when a briefing exists for this slug
+          BRIEFING SECTIONS — light orange (#FFF4E0) / dark alternating backgrounds
           ══════════════════════════════════════════════════════════════════════ */}
       {briefing && (
-        <div className="transition-colors duration-300" style={{ backgroundColor: bg }}>
-          <div className="max-w-[1700px] mx-auto px-4 lg:px-8">
+        <div className="transition-colors duration-300">
 
-            {/* ── CONTACT PANEL — always first, most critical info ── */}
-            <SectionErrorBoundary>
-              <div className="pt-10 pb-6">
-                <ContactPanel briefing={briefing} booking={booking} theme={theme} />
+          {/* Contact Panel + Emergency Numbers — ORANGE */}
+          <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+            <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12">
+              <div className="space-y-8">
+                <SectionErrorBoundary>
+                  <ContactPanel briefing={briefing} booking={booking} theme={orangeTheme} />
+                </SectionErrorBoundary>
+                <SectionErrorBoundary>
+                  <EmergencyContactsSection briefing={briefing} theme={orangeTheme} />
+                </SectionErrorBoundary>
               </div>
-            </SectionErrorBoundary>
+            </div>
+          </div>
 
-            {/* ── IMPORTANT CONTACT NUMBERS — right below video, before all other sections ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <EmergencyContactsSection briefing={briefing} theme={theme} />
-              </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
-
-            {/* ── 1. WELCOME ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
+          {/* 1. Welcome — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                 <WelcomeSection briefing={briefing} pkg={pkg} theme={theme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 2 & 3. INCLUSIONS + EXCLUSIONS ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <InclusionsSection pkg={pkg} briefing={briefing} theme={theme} />
+          {/* 2 & 3. Inclusions + Exclusions — ORANGE */}
+          <SectionErrorBoundary>
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <InclusionsSection pkg={pkg} briefing={briefing} theme={orangeTheme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 4. ITINERARY TIMELINE ── */}
-            {(pkg?.itinerary?.length > 0 || briefing?.itinerary?.length > 0) && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
+          {/* 4. Itinerary Timeline — DARK */}
+          {(pkg?.itinerary?.length > 0 || briefing?.itinerary?.length > 0) && (
+            <SectionErrorBoundary>
+              <div style={{ backgroundColor: "#FFFFFF" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                   <BriefingSection label="Day by Day" title="Itinerary Timeline" theme={theme}>
                     <ItineraryTimeline
                       itinerary={pkg?.itinerary?.length > 0 ? pkg.itinerary : briefing.itinerary}
@@ -3256,54 +3287,60 @@ function PreviewContent() {
                     />
                   </BriefingSection>
                 </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
-
-            {/* ── 5. TRAVEL INFORMATION CENTER ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <TravelInfoCenter briefing={briefing} theme={theme} />
               </div>
-              <SectionDivider theme={theme} />
             </SectionErrorBoundary>
+          )}
 
-            {/* ── 6. ARRIVAL INSTRUCTIONS ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
+          {/* 5. Travel Information Center — ORANGE */}
+          <SectionErrorBoundary>
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <TravelInfoCenter briefing={briefing} theme={orangeTheme} />
+              </div>
+            </div>
+          </SectionErrorBoundary>
+
+          {/* 6. Arrival Instructions — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                 <ArrivalSection briefing={briefing} theme={theme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 7. TRANSFER INSTRUCTIONS ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <TransferSection briefing={briefing} theme={theme} />
+          {/* 7. Transfer Instructions — ORANGE */}
+          <SectionErrorBoundary>
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <TransferSection briefing={briefing} theme={orangeTheme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 8. HOTEL CHECK-IN ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
+          {/* 8. Hotel Check-In — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                 <HotelSection briefing={briefing} theme={theme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 9. TOUR REMINDERS ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <RemindersSection briefing={briefing} theme={theme} />
+          {/* 9. Tour Reminders — ORANGE */}
+          <SectionErrorBoundary>
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <RemindersSection briefing={briefing} theme={orangeTheme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 11. DO'S AND DON'TS ── */}
-            {briefing.dosAndDonts && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
+          {/* Do's and Don'ts — DARK */}
+          {briefing.dosAndDonts && (
+            <SectionErrorBoundary>
+              <div style={{ backgroundColor: "#FFFFFF" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                   <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={theme}>
                     <DosAndDonts
                       dos={briefing.dosAndDonts.dos}
@@ -3312,151 +3349,165 @@ function PreviewContent() {
                     />
                   </BriefingSection>
                 </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
+              </div>
+            </SectionErrorBoundary>
+          )}
 
-            {/* ── 12. IMMIGRATION ADVISORY ── */}
-            {briefing.immigrationAdvisory?.length > 0 && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
-                  <BriefingSection label="Philippine Immigration" title="Immigration Advisory" theme={theme}>
+          {/* Immigration Advisory — ORANGE */}
+          {briefing.immigrationAdvisory?.length > 0 && (
+            <SectionErrorBoundary>
+              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                  <BriefingSection label="Philippine Immigration" title="Immigration Advisory" theme={orangeTheme}>
                     <div className="mb-4">
-                      <p className="font-body text-base leading-relaxed" style={{ color: theme.textSecondary }}>
+                      <p className="font-body text-base leading-relaxed" style={{ color: orangeTheme.textSecondary }}>
                         Tap your traveler type below to see the documents required at Philippine immigration upon departure. Bring originals and photocopies of all documents.
                       </p>
                     </div>
-                    <ImmigrationAdvisory advisory={briefing.immigrationAdvisory} theme={theme} />
+                    <ImmigrationAdvisory advisory={briefing.immigrationAdvisory} theme={orangeTheme} />
                   </BriefingSection>
                 </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
+              </div>
+            </SectionErrorBoundary>
+          )}
 
-            {/* ── 11. SHOPPING ADVISORY ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
+          {/* Shopping Advisory — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                 <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={theme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 12. REQUIREMENTS ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <RequirementsSection pkg={pkg} theme={theme} />
+          {/* Requirements — ORANGE */}
+          <SectionErrorBoundary>
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <RequirementsSection pkg={pkg} theme={orangeTheme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 12b. IMPORTANT NOTICES ── */}
-            {pkg?.importantNotices?.length > 0 && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
+          {/* Important Notices — DARK */}
+          {pkg?.importantNotices?.length > 0 && (
+            <SectionErrorBoundary>
+              <div style={{ backgroundColor: "#FFFFFF" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                   <ImportantNoticesSection pkg={pkg} theme={theme} />
                 </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
+              </div>
+            </SectionErrorBoundary>
+          )}
 
-            {/* ── 13. TRAVEL READINESS CHECKLIST ── */}
-            {briefing.checklist?.length > 0 && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
-                  <BriefingSection label="Pre-Departure" title="Travel Readiness Checklist" theme={theme}>
+          {/* Travel Checklist — ORANGE */}
+          {briefing.checklist?.length > 0 && (
+            <SectionErrorBoundary>
+              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                  <BriefingSection label="Pre-Departure" title="Travel Readiness Checklist" theme={orangeTheme}>
                     <TravelChecklist
                       items={briefing.checklist}
                       storageKey={`gladex-checklist-${slug}`}
-                      theme={theme}
+                      theme={orangeTheme}
                     />
                   </BriefingSection>
                 </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
+              </div>
+            </SectionErrorBoundary>
+          )}
 
-            {/* ── 14. WHAT TO BRING ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
+          {/* What to Bring — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                 <WhatToBringCarousel items={briefing.whatToBring || []} theme={theme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 14.5 OUTFIT GUIDE ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <OutfitGuide theme={theme} />
+          {/* Outfit Guide — ORANGE */}
+          <SectionErrorBoundary>
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <OutfitGuide theme={orangeTheme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 15. DESTINATION GUIDE ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
+          {/* Destination Guide — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                 <DestinationGuideSection briefing={briefing} slug={slug} theme={theme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 16. CONNECTIVITY GUIDE ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <ConnectivitySection briefing={briefing} theme={theme} />
+          {/* Connectivity Guide — ORANGE */}
+          <SectionErrorBoundary>
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <ConnectivitySection briefing={briefing} theme={orangeTheme} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── FAQ ── */}
-            {briefing.faqs?.length > 0 && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
+          {/* FAQ — DARK */}
+          {briefing.faqs?.length > 0 && (
+            <SectionErrorBoundary>
+              <div style={{ backgroundColor: "#FFFFFF" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                   <BriefingSection label="Common Questions" title="Frequently Asked Questions" theme={theme}>
                     <BriefingFAQ faqs={briefing.faqs} theme={theme} />
                   </BriefingSection>
                 </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
+              </div>
+            </SectionErrorBoundary>
+          )}
 
-            {/* ── 21. NEED ASSISTANCE ── */}
-            {briefing.assistanceContacts && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
-                  <BriefingSection label="Contact Us" title="Need Assistance?" theme={theme}>
-                    <NeedAssistance contacts={briefing.assistanceContacts} theme={theme} />
+          {/* Need Assistance — ORANGE */}
+          {briefing.assistanceContacts && (
+            <SectionErrorBoundary>
+              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                  <BriefingSection label="Contact Us" title="Need Assistance?" theme={orangeTheme}>
+                    <NeedAssistance contacts={briefing.assistanceContacts} theme={orangeTheme} />
                   </BriefingSection>
                 </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
+              </div>
+            </SectionErrorBoundary>
+          )}
 
-            {/* ── 22. TESTIMONIALS ── */}
-            <SectionErrorBoundary>
-              <div className={sectionGap}>
+          {/* Testimonials — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
                 <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} reviewRefreshKey={reviewRefreshKey} />
               </div>
-              <SectionDivider theme={theme} />
-            </SectionErrorBoundary>
+            </div>
+          </SectionErrorBoundary>
 
-            {/* ── 23. RATE MY SERVICE — only shown when a booking is loaded ── */}
-            {booking?.gdx && (
-              <SectionErrorBoundary>
-                <div className={sectionGap}>
-                  <RateMyService theme={theme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={handleReviewSaved} />
-                </div>
-                <SectionDivider theme={theme} />
-              </SectionErrorBoundary>
-            )}
-
-            {/* ── 24. REFERRAL ── */}
+          {/* Rate My Service — ORANGE */}
+          {booking?.gdx && (
             <SectionErrorBoundary>
-              <div className={sectionGap}>
-                <ReferralSection theme={theme} />
+              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                  <RateMyService theme={orangeTheme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={handleReviewSaved} />
+                </div>
               </div>
             </SectionErrorBoundary>
+          )}
 
-          </div>
+          {/* Referral — DARK */}
+          <SectionErrorBoundary>
+            <div style={{ backgroundColor: "#FFFFFF" }}>
+              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <ReferralSection theme={theme} />
+              </div>
+            </div>
+          </SectionErrorBoundary>
+
         </div>
       )}
 

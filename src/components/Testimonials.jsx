@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+﻿import { motion } from "framer-motion";
 import { Star, ShieldCheck } from "lucide-react";
 import { useTheme } from "../lib/ThemeContext";
 import { testimonials } from "../data/testimonials";
@@ -13,7 +13,7 @@ export default function Testimonials() {
   const textColor = isDark ? "rgba(255,255,255,0.8)" : "#3A3A3A";
   const mutedColor = isDark ? "#A0A0A0" : "#8B6914";
   const nameColor = isDark ? "#FFFFFF" : "#1A1A1A";
-  const starColor = "#FF8C00";
+  const starColor = "#FF9913";
 
   return (
     <section id="reviews" className="py-16 px-5 lg:px-10" style={{ backgroundColor: bg }}>
@@ -82,7 +82,7 @@ export default function Testimonials() {
               <div className="flex items-center gap-2.5 pt-2" style={{ borderTop: `1px solid ${cardBorder}` }}>
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                  style={{ backgroundColor: isDark ? "#2A2A2A" : "#F5E8D0", color: "#FF8C00" }}
+                  style={{ backgroundColor: isDark ? "#2A2A2A" : "#F5E8D0", color: "#FF9913" }}
                 >
                   {t.avatar}
                 </div>
@@ -104,14 +104,14 @@ export default function Testimonials() {
           className="mt-10 rounded-2xl flex items-center justify-center gap-4 py-5 px-8"
           style={{
             background: isDark
-              ? "linear-gradient(135deg, rgba(255,140,0,0.15), rgba(255,107,0,0.08))"
-              : "linear-gradient(135deg, #FF8C00, #E8A020)",
-            border: isDark ? "1px solid rgba(255,140,0,0.3)" : "none",
+              ? "linear-gradient(135deg, rgba(255,153,19,0.15), rgba(255,153,19,0.08))"
+              : "linear-gradient(135deg, #FF9913, #E8A020)",
+            border: isDark ? "1px solid rgba(255,153,19,0.3)" : "none",
           }}
         >
           <span
             className="font-condensed font-bold text-lg lg:text-2xl tracking-wider"
-            style={{ color: isDark ? "#FF8C00" : "#FFFFFF" }}
+            style={{ color: isDark ? "#FF9913" : "#FFFFFF" }}
           >
             Overall customer satisfaction
           </span>
@@ -121,8 +121,8 @@ export default function Testimonials() {
                 key={s}
                 className="w-5 h-5"
                 style={{
-                  color: isDark ? "#FF8C00" : "#FFFFFF",
-                  fill: isDark ? "#FF8C00" : "#FFFFFF",
+                  color: isDark ? "#FF9913" : "#FFFFFF",
+                  fill: isDark ? "#FF9913" : "#FFFFFF",
                 }}
               />
             ))}
