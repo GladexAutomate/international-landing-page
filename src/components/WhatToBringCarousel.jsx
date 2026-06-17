@@ -2,30 +2,39 @@
 import BriefingSection from "./briefing/BriefingSection";
 
 export default function WhatToBringCarousel({ items = [], theme }) {
-  const { textPrimary, textSecondary } = theme;
+  const { textPrimary } = theme;
 
   if (!items.length) return null;
 
   return (
     <BriefingSection label="Packing Guide" title="What to Bring" theme={theme}>
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {items.map((item, i) => (
           <div
             key={i}
-            className="flex flex-col items-center text-center rounded-3xl py-5 px-3 gap-2"
+            className="rounded-3xl overflow-hidden"
             style={{
               backgroundColor: "#FFFFFF",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-              border: "1px solid #F2EEE9",
+              boxShadow: "0 2px 18px rgba(0,0,0,0.08)",
+              border: "1px solid #F0EDE9",
             }}
           >
-            <span className="text-3xl leading-none">{item.icon}</span>
-            <p
-              className="font-condensed font-bold text-xs leading-tight"
-              style={{ color: textPrimary }}
+            {/* Big emoji fill */}
+            <div
+              className="flex items-center justify-center"
+              style={{ backgroundColor: "#FFF8F0", height: 130 }}
             >
-              {item.label}
-            </p>
+              <span style={{ fontSize: 64, lineHeight: 1 }}>{item.icon}</span>
+            </div>
+            {/* Label */}
+            <div className="px-3 py-3">
+              <p
+                className="font-condensed font-bold text-sm text-center leading-snug"
+                style={{ color: textPrimary }}
+              >
+                {item.label}
+              </p>
+            </div>
           </div>
         ))}
       </div>
