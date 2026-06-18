@@ -75,12 +75,125 @@ class SectionErrorBoundary extends React.Component {
   componentDidCatch(err, info) { console.error("[SectionErrorBoundary] Section failed to render:", err, info?.componentStack); }
   render() {
     if (this.state.hasError) return null;
-    return this.props.children;
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.07 }}
+        transition={{ duration: 0.55, ease: "easeOut" }}
+      >
+        {this.props.children}
+      </motion.div>
+    );
   }
 }
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const ORANGE = "#FF9913";
+const CARD_BG = "#FFF5EC";
+
+// ─── TRAVEL CARD BACKGROUND DECORATION ──────────────────────────────────────
+function TravelCardBg({ variant = "city" }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" style={{ zIndex: 0 }}>
+
+      {/* Airplane + dashed loop — top left */}
+      <svg style={{ position:"absolute", top:14, left:18, width:150, height:130 }} viewBox="0 0 150 130">
+        <path d="M105 28 Q78 90 44 76 Q10 62 22 34 Q34 6 76 12 Q110 16 105 28"
+          stroke={ORANGE} strokeWidth="1.5" strokeDasharray="5 4" fill="none" opacity="0.45"/>
+        <g transform="translate(90,5) rotate(-12)" fill={ORANGE}>
+          <path d="M22 6 L33 15 L46 13 L44 20 L33 21 L30 36 L27 36 L29 21 L17 24 L15 30 L12 30 L14 20 L5 17 L5 14 L15 17 Z"/>
+          <rect x="13" y="37" width="11" height="3" rx="0.5"/>
+        </g>
+      </svg>
+
+      {/* Cloud 1 */}
+      <svg style={{ position:"absolute", top:22, right:"16%", width:120, height:60 }} viewBox="0 0 120 60">
+        <g fill={ORANGE} opacity="0.12">
+          <circle cx="24" cy="36" r="20"/>
+          <circle cx="48" cy="26" r="24"/>
+          <circle cx="75" cy="33" r="18"/>
+          <rect x="10" y="33" width="82" height="22"/>
+        </g>
+      </svg>
+
+      {/* Cloud 2 — smaller */}
+      <svg style={{ position:"absolute", top:62, right:"34%", width:80, height:40 }} viewBox="0 0 80 40">
+        <g fill={ORANGE} opacity="0.09">
+          <circle cx="16" cy="28" r="14"/>
+          <circle cx="34" cy="20" r="18"/>
+          <circle cx="54" cy="26" r="13"/>
+          <rect x="7" y="25" width="60" height="14"/>
+        </g>
+      </svg>
+
+      {/* Bottom wave */}
+      <svg style={{ position:"absolute", bottom:0, left:0, width:"100%", height:90 }} viewBox="0 0 1440 90" preserveAspectRatio="none">
+        <path d="M0,50 C240,8 480,85 720,50 C960,15 1200,72 1440,50 L1440,90 L0,90 Z" fill={ORANGE} fillOpacity="0.1"/>
+        <path d="M0,62 C360,28 720,90 1080,58 C1260,42 1380,68 1440,62 L1440,90 L0,90 Z" fill={ORANGE} fillOpacity="0.07"/>
+      </svg>
+
+      {/* City skyline + Ferris wheel — bottom left */}
+      {variant === "city" && (
+        <svg style={{ position:"absolute", bottom:0, left:0, width:260, height:190 }} viewBox="0 0 260 190">
+          <g fill={ORANGE} opacity="0.18">
+            <rect x="4" y="95" width="11" height="95"/>
+            <rect x="17" y="72" width="17" height="118"/>
+            <rect x="36" y="84" width="11" height="106"/>
+            <rect x="49" y="55" width="24" height="135"/>
+            <rect x="75" y="72" width="13" height="118"/>
+            <rect x="90" y="80" width="9" height="110"/>
+            <rect x="101" y="63" width="15" height="127"/>
+            {/* Ferris wheel */}
+            <circle cx="188" cy="112" r="58" fill="none" stroke={ORANGE} strokeWidth="3"/>
+            <circle cx="188" cy="112" r="9"/>
+            <line x1="188" y1="54" x2="188" y2="170" stroke={ORANGE} strokeWidth="2"/>
+            <line x1="130" y1="112" x2="246" y2="112" stroke={ORANGE} strokeWidth="2"/>
+            <line x1="147" y1="71" x2="229" y2="153" stroke={ORANGE} strokeWidth="2"/>
+            <line x1="147" y1="153" x2="229" y2="71" stroke={ORANGE} strokeWidth="2"/>
+            <rect x="181" y="48" width="14" height="10" rx="2"/>
+            <rect x="181" y="164" width="14" height="10" rx="2"/>
+            <rect x="124" y="107" width="14" height="10" rx="2"/>
+            <rect x="238" y="107" width="14" height="10" rx="2"/>
+            <line x1="168" y1="170" x2="158" y2="190" stroke={ORANGE} strokeWidth="3"/>
+            <line x1="208" y1="170" x2="218" y2="190" stroke={ORANGE} strokeWidth="3"/>
+          </g>
+          <path d="M0,182 Q65,170 130,182 Q195,194 260,182 L260,190 L0,190 Z" fill={ORANGE} fillOpacity="0.28"/>
+        </svg>
+      )}
+
+      {/* Luggage + Passport — bottom right */}
+      {variant === "luggage" && (
+        <svg style={{ position:"absolute", bottom:0, right:0, width:240, height:200 }} viewBox="0 0 240 200">
+          <g opacity="0.22">
+            {/* Suitcase */}
+            <rect x="105" y="78" width="92" height="110" rx="9" fill={ORANGE}/>
+            <rect x="128" y="64" width="46" height="17" rx="5" fill="#e07800"/>
+            <rect x="140" y="55" width="22" height="11" rx="3" fill="#e07800"/>
+            <rect x="105" y="120" width="92" height="5" fill="rgba(255,255,255,0.3)"/>
+            <rect x="132" y="88" width="30" height="24" rx="3" fill="rgba(255,255,255,0.22)"/>
+            <circle cx="118" cy="192" r="8" fill="#b86a00"/>
+            <circle cx="185" cy="192" r="8" fill="#b86a00"/>
+            {/* Passport */}
+            <rect x="28" y="122" width="68" height="86" rx="5" fill="#1B3D7A"/>
+            <rect x="35" y="129" width="54" height="72" rx="3" fill="#2255aa"/>
+            <circle cx="62" cy="156" r="13" fill="none" stroke="#E8C846" strokeWidth="1.5"/>
+            <circle cx="62" cy="156" r="7" fill="none" stroke="#E8C846" strokeWidth="1"/>
+            <rect x="40" y="174" width="44" height="3" rx="1.5" fill="rgba(255,255,255,0.4)"/>
+            <rect x="40" y="181" width="32" height="3" rx="1.5" fill="rgba(255,255,255,0.25)"/>
+            {/* Coins */}
+            <ellipse cx="18" cy="186" rx="15" ry="5" fill="#DAA520"/>
+            <rect x="3" y="175" width="30" height="11" fill="#DAA520"/>
+            <ellipse cx="18" cy="175" rx="15" ry="5" fill="#FFC200"/>
+            <ellipse cx="18" cy="164" rx="15" ry="5" fill="#FFD700"/>
+          </g>
+          <path d="M0,190 Q120,178 240,190 L240,200 L0,200 Z" fill={ORANGE} fillOpacity="0.28"/>
+        </svg>
+      )}
+
+    </div>
+  );
+}
 
 // Converts any supported video URL to an embeddable iframe src.
 // enablejsapi=1  → allows postMessage play/pause control
@@ -471,8 +584,8 @@ function ContactPanel({ briefing, booking, theme }) {
 }
 
 // ─── 1. WELCOME SECTION ──────────────────────────────────────────────────────
-function WelcomeSection({ briefing, pkg, theme }) {
-  const { bgCard, border, textPrimary, textSecondary } = theme;
+function WelcomeSection({ briefing, pkg, theme, heroImage }) {
+  const { textPrimary, textSecondary } = theme;
   const { welcomeMessage } = briefing;
 
   const title = (welcomeMessage && typeof welcomeMessage === "object" && welcomeMessage.title)
@@ -484,118 +597,218 @@ function WelcomeSection({ briefing, pkg, theme }) {
       ? [welcomeMessage]
       : [];
 
+  // welcomeImage in briefing data takes priority → then dest heroImage
+  const imgSrc = briefing?.welcomeImage || heroImage || null;
+
   return (
-    <BriefingSection label="Official Briefing" title={title} theme={theme}>
-      <div
-        className="rounded-2xl border p-6 space-y-4"
-        style={{ backgroundColor: bgCard, borderColor: border }}
-      >
-        {(welcomeMessage?.subtitle || pkg?.name) && (
-          <div className="flex flex-wrap items-center gap-3 pb-4 border-b" style={{ borderColor: border }}>
-            <span
-              className="font-condensed font-bold text-sm px-4 py-1.5 rounded-full tracking-widest uppercase"
-              style={{ backgroundColor: ORANGE, color: "#fff" }}
-            >
-              {welcomeMessage?.subtitle || pkg.name}
-            </span>
-            {(welcomeMessage?.duration || pkg?.duration) && (
-              <span
-                className="font-condensed font-bold text-sm px-4 py-1.5 rounded-full tracking-wider"
-                style={{ backgroundColor: "#F3EDE5", color: textSecondary }}
-              >
-                {welcomeMessage?.duration || pkg.duration}
-              </span>
-            )}
-          </div>
-        )}
-        {body.map((para, i) => (
-          <p
-            key={i}
-            className="font-body text-base leading-relaxed"
-            style={{ color: i === 0 ? textPrimary : textSecondary }}
-          >
-            {para}
+    <div
+      className="rounded-3xl overflow-hidden shadow-sm"
+      style={{ backgroundColor: "#FFFBF4", border: "1px solid rgba(255,153,19,0.15)" }}
+    >
+      <div className="flex flex-col md:flex-row" style={{ minHeight: 300 }}>
+
+        {/* ── Left: text ── */}
+        <div className="flex-1 p-8 lg:p-10 flex flex-col justify-center" style={{ minWidth: 0 }}>
+          <p className="font-body text-xs font-bold tracking-[0.35em] uppercase mb-3" style={{ color: ORANGE }}>
+            Official Briefing
           </p>
-        ))}
+          <h2
+            className="font-condensed font-black leading-tight mb-3"
+            style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", color: textPrimary }}
+          >
+            {title}
+          </h2>
+          {(welcomeMessage?.subtitle || pkg?.name) && (
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              <span
+                className="font-condensed font-bold text-xs px-4 py-1.5 rounded-full tracking-widest uppercase"
+                style={{ backgroundColor: ORANGE, color: "#fff" }}
+              >
+                {welcomeMessage?.subtitle || pkg.name}
+              </span>
+              {(welcomeMessage?.duration || pkg?.duration) && (
+                <span
+                  className="font-condensed font-bold text-xs px-4 py-1.5 rounded-full tracking-wider"
+                  style={{ backgroundColor: "#F0E8DC", color: textSecondary }}
+                >
+                  {welcomeMessage?.duration || pkg.duration}
+                </span>
+              )}
+            </div>
+          )}
+          <div className="space-y-3">
+            {body.map((para, i) => (
+              <p key={i} className="font-body text-sm leading-relaxed" style={{ color: i === 0 ? textPrimary : textSecondary }}>
+                {para}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Right: destination illustration ── */}
+        <div
+          className="hidden md:block shrink-0 relative overflow-hidden"
+          style={{ flex: "0 0 48%", backgroundColor: "#FFFBF4" }}
+        >
+          {imgSrc ? (
+            <img
+              src={imgSrc}
+              alt={title}
+              className="absolute inset-0 w-full h-full"
+              style={{ objectFit: "contain", objectPosition: "right bottom", padding: "4px 0 0 0" }}
+              onError={(e) => { e.currentTarget.parentElement.style.display = "none"; }}
+            />
+          ) : (
+            /* Fallback SVG when no image set */
+            <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(160deg, #FFF0D6 0%, #FFE4B3 100%)" }}>
+              <svg viewBox="0 0 80 80" className="w-28 h-28 opacity-60" style={{ transform: "rotate(-15deg)" }}>
+                <g fill={ORANGE}>
+                  <path d="M40 8 L55 28 L72 24 L68 32 L55 34 L48 60 L44 60 L46 34 L28 38 L24 48 L20 48 L22 32 L8 28 L8 24 L26 28 Z"/>
+                  <path d="M32 62 L48 62 L46 68 L34 68 Z"/>
+                </g>
+              </svg>
+            </div>
+          )}
+        </div>
+
       </div>
-    </BriefingSection>
+    </div>
   );
 }
 
 // ─── 2 & 3. INCLUSIONS + EXCLUSIONS ─────────────────────────────────────────
 function InclusionsSection({ pkg, briefing, theme }) {
-  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   if (!pkg) return null;
 
-  // briefing-level overrides take priority over package-level data
   const inclusions = briefing?.briefingInclusions || pkg.inclusions || [];
   const exclusions = briefing?.briefingExclusions || pkg.exclusions || [];
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Inclusions */}
-      <BriefingSection label="What's Covered" title="Package Inclusions" theme={theme}>
-        <div
-          className="rounded-2xl border overflow-hidden"
-          style={{ borderColor: "rgba(255,153,19,0.28)", backgroundColor: "#FFFFFF" }}
-        >
-          <ul className="px-5 py-4 space-y-2.5">
-            {inclusions.map((item, i) => (
-              <li key={i} className="flex items-start gap-2.5">
-                <Check
-                  className="w-4 h-4 mt-0.5 shrink-0"
-                  style={{ color: "#22C55E" }}
-                  strokeWidth={2.5}
-                />
-                <span className="font-body text-base leading-relaxed" style={{ color: "#1A0800" }}>
-                  {item}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </BriefingSection>
+  const PlaneWatermark = ({ style }) => (
+    <svg viewBox="0 0 80 80" fill="none" style={style} aria-hidden="true">
+      <path d="M40 8 L55 28 L72 24 L68 32 L55 34 L48 60 L44 60 L46 34 L28 38 L24 48 L20 48 L22 32 L8 28 L8 24 L26 28 Z" fill={ORANGE}/>
+      <path d="M32 62 L48 62 L46 68 L34 68 Z" fill={ORANGE}/>
+    </svg>
+  );
 
-      {/* Exclusions */}
-      <BriefingSection label="Not Covered" title="Package Exclusions" theme={theme}>
+  return (
+    <div
+      className="relative rounded-3xl overflow-visible"
+      style={{
+        background: "linear-gradient(135deg, #FFF8EF 0%, #FFF3E2 100%)",
+        boxShadow: "0 8px 40px rgba(255,153,19,0.12)",
+      }}
+    >
+      {/* Airplane watermarks */}
+      <PlaneWatermark style={{ position: "absolute", top: 12, left: 12, width: 48, opacity: 0.1, transform: "rotate(-20deg)" }} />
+      <PlaneWatermark style={{ position: "absolute", top: 12, right: 12, width: 48, opacity: 0.1, transform: "rotate(160deg)" }} />
+      <PlaneWatermark style={{ position: "absolute", bottom: 12, left: "25%", width: 36, opacity: 0.08, transform: "rotate(10deg)" }} />
+      <PlaneWatermark style={{ position: "absolute", bottom: 12, right: "25%", width: 36, opacity: 0.08, transform: "rotate(-160deg)" }} />
+
+      {/* Dashed flight path */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.06, borderRadius: "1.5rem", overflow: "hidden" }}>
+        <path d="M0 80 Q200 20 600 60" stroke={ORANGE} strokeWidth="2" strokeDasharray="8 5" fill="none"/>
+      </svg>
+
+      <div className="grid grid-cols-1 md:grid-cols-2">
+
+        {/* ── LEFT: INCLUSIONS ── */}
         <div
-          className="rounded-2xl border overflow-hidden"
-          style={{ borderColor: "rgba(255,153,19,0.28)", backgroundColor: "#FFFFFF" }}
+          className="relative border-b md:border-b-0 md:border-r overflow-visible"
+          style={{ borderColor: "rgba(255,153,19,0.15)" }}
         >
-          <ul className="px-5 py-4 space-y-2.5">
-            {exclusions.map((item, i) => (
-              <li key={i} className="flex items-start gap-2.5">
-                <X
-                  className="w-4 h-4 mt-0.5 shrink-0"
-                  style={{ color: "#EF4444" }}
-                  strokeWidth={2.5}
-                />
-                <span className="font-body text-base leading-relaxed" style={{ color: "#1A0800" }}>
-                  {item}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {/* Fuel surcharge + insurance note */}
-          {(pkg.fuelSurcharge || pkg.insuranceNote) && (
-            <div
-              className="px-5 pb-4 pt-1 border-t space-y-1"
-              style={{ borderColor: "rgba(255,153,19,0.28)" }}
-            >
-              {pkg.fuelSurcharge && (
-                <p className="font-body text-xs leading-relaxed" style={{ color: "#7A3800" }}>
-                  ⚠️ {pkg.fuelSurcharge}
-                </p>
-              )}
-              {pkg.insuranceNote && (
-                <p className="font-body text-xs leading-relaxed" style={{ color: "#7A3800" }}>
-                  🛡️ {pkg.insuranceNote}
-                </p>
-              )}
-            </div>
-          )}
+          {/* Luggage image — bottom-left, blended into card */}
+          <div
+            className="hidden sm:block absolute pointer-events-none"
+            style={{
+              bottom: 0, left: 0, width: 130,
+              mixBlendMode: "multiply",
+            }}
+          >
+            <img
+              src="/images/inclusions-luggage.png"
+              alt=""
+              className="w-full h-auto object-contain object-bottom"
+              onError={(e) => { e.currentTarget.parentElement.style.display = "none"; }}
+            />
+          </div>
+
+          {/* Content — padded to clear the image */}
+          <div className="relative p-6 sm:p-8 sm:pl-40" style={{ zIndex: 1 }}>
+            <p className="font-body text-xs font-bold tracking-[0.32em] uppercase mb-1" style={{ color: ORANGE }}>
+              What's Covered
+            </p>
+            <h3 className="font-condensed font-black text-2xl sm:text-3xl mb-4" style={{ color: "#111" }}>
+              Package Inclusions
+            </h3>
+            <ul className="space-y-2.5">
+              {inclusions.map((item, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ backgroundColor: "#22C55E" }}
+                  >
+                    <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                  </div>
+                  <span className="font-body text-sm leading-relaxed" style={{ color: "#222" }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </BriefingSection>
+
+        {/* ── RIGHT: EXCLUSIONS ── */}
+        <div className="relative overflow-visible">
+          {/* Passport image — bottom-right, blended into card */}
+          <div
+            className="hidden sm:block absolute pointer-events-none"
+            style={{
+              bottom: 0, right: 0, width: 130,
+              mixBlendMode: "multiply",
+            }}
+          >
+            <img
+              src="/images/exclusions-passport.png"
+              alt=""
+              className="w-full h-auto object-contain object-bottom"
+              onError={(e) => { e.currentTarget.parentElement.style.display = "none"; }}
+            />
+          </div>
+
+          {/* Content — padded to clear the image */}
+          <div className="relative p-6 sm:p-8 sm:pr-40" style={{ zIndex: 1 }}>
+            <p className="font-body text-xs font-bold tracking-[0.32em] uppercase mb-1" style={{ color: "#EF4444" }}>
+              Not Covered
+            </p>
+            <h3 className="font-condensed font-black text-2xl sm:text-3xl mb-4" style={{ color: "#111" }}>
+              Package Exclusions
+            </h3>
+            <ul className="space-y-2.5">
+              {exclusions.map((item, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ backgroundColor: "#EF4444" }}
+                  >
+                    <X className="w-3 h-3 text-white" strokeWidth={3} />
+                  </div>
+                  <span className="font-body text-sm leading-relaxed" style={{ color: "#222" }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+            {(pkg.fuelSurcharge || pkg.insuranceNote) && (
+              <div className="mt-4 pt-4 border-t space-y-1" style={{ borderColor: "rgba(255,153,19,0.2)" }}>
+                {pkg.fuelSurcharge && (
+                  <p className="font-body text-xs leading-relaxed" style={{ color: "#7A3800" }}>⚠️ {pkg.fuelSurcharge}</p>
+                )}
+                {pkg.insuranceNote && (
+                  <p className="font-body text-xs leading-relaxed" style={{ color: "#7A3800" }}>🛡️ {pkg.insuranceNote}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
@@ -1577,57 +1790,95 @@ function DestinationGuideSection({ briefing, slug, theme }) {
 
 // ─── 18. EMERGENCY CONTACTS ──────────────────────────────────────────────────
 function EmergencyContactsSection({ briefing, theme }) {
-  const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
   const contacts = briefing?.emergencyContacts;
   if (!contacts?.length) return null;
 
-  return (
-    <BriefingSection label="Save These Now" title="Important Contact Numbers" theme={theme}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {contacts.map((group, i) => (
+  const getCategoryIcon = (cat = "") => {
+    const c = cat.toLowerCase();
+    if (c.includes("transfer") || c.includes("driver") || c.includes("transport") || c.includes("ground")) return Car;
+    if (c.includes("emergency") || c.includes("ambulance") || c.includes("police")) return AlertTriangle;
+    if (c.includes("hotel") || c.includes("lodging") || c.includes("accommodation")) return Hotel;
+    if (c.includes("airport")) return Plane;
+    if (c.includes("operator") || c.includes("operations") || c.includes("24/7")) return Users;
+    if (c.includes("philippine") || c.includes("contact center") || c.includes("center")) return Globe;
+    return Phone;
+  };
+
+  const isPhone = (v) => v && /^\+?[\d\s\-\(\)]{6,}$/.test(String(v));
+
+  // Last group shown full-width if odd count
+  const mainGroups = contacts.length > 2 ? contacts.slice(0, -1) : contacts;
+  const lastGroup = contacts.length > 2 && contacts.length % 2 !== 0 ? contacts[contacts.length - 1] : null;
+
+  const ContactCard = ({ group, fullWidth = false }) => {
+    const Icon = getCategoryIcon(group.category);
+    return (
+      <div
+        className={`rounded-2xl overflow-hidden border border-orange-100${fullWidth ? " col-span-2" : ""}`}
+        style={{ backgroundColor: "#FFFFFF" }}
+      >
+        <div className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: "#FFF5E6" }}>
           <div
-            key={i}
-            className="rounded-2xl border overflow-hidden"
-            style={{ borderColor: border, backgroundColor: bgCard }}
+            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: "rgba(255,153,19,0.18)" }}
           >
-            <div
-              className="px-4 py-3 border-b"
-              style={{ borderColor: border, backgroundColor: isDark ? "#1A1A1A" : "#FAFAFA" }}
-            >
-              <p className="font-condensed font-bold text-sm tracking-wide" style={{ color: textPrimary }}>
-                {group.category}
-              </p>
-            </div>
-            <ul className="px-4 py-3 space-y-2.5">
-              {(group.contacts || []).map((c, j) => (
-                <li key={j} className="flex items-start justify-between gap-2">
-                  <span className="font-body text-xs" style={{ color: textSecondary }}>{c.label}</span>
-                  {c.url ? (
-                    <a
-                      href={c.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-body text-xs font-semibold hover:opacity-80 transition-opacity shrink-0"
-                      style={{ color: ORANGE }}
-                    >
-                      {c.value}
-                    </a>
-                  ) : c.value ? (
-                    <a
-                      href={`tel:${String(c.value).replace(/\D/g, "")}`}
-                      className="font-body text-xs font-semibold hover:opacity-80 transition-opacity shrink-0"
-                      style={{ color: ORANGE }}
-                    >
-                      {c.value}
-                    </a>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            <Icon className="w-4 h-4" style={{ color: ORANGE }} />
           </div>
-        ))}
+          <p className="font-condensed font-black text-xs tracking-[0.2em] uppercase" style={{ color: ORANGE }}>
+            {group.category}
+          </p>
+        </div>
+        <ul className="px-4 py-3 space-y-2">
+          {(group.contacts || []).map((c, j) => (
+            <li key={j} className="flex items-center justify-between gap-3 py-1 border-b border-orange-50 last:border-0">
+              <span className="font-body text-sm" style={{ color: "#555" }}>{c.label}</span>
+              {c.url ? (
+                <a href={c.url} target="_blank" rel="noopener noreferrer"
+                  className="font-condensed font-black text-sm shrink-0 hover:opacity-75 transition-opacity" style={{ color: ORANGE }}>
+                  {c.value}
+                </a>
+              ) : isPhone(c.value) ? (
+                <a href={`tel:${String(c.value).replace(/\D/g, "")}`}
+                  className="font-condensed font-black text-sm shrink-0 hover:opacity-75 transition-opacity" style={{ color: ORANGE }}>
+                  {c.value}
+                </a>
+              ) : c.value ? (
+                <span className="font-condensed font-black text-sm shrink-0" style={{ color: ORANGE }}>{c.value}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
       </div>
-    </BriefingSection>
+    );
+  };
+
+  return (
+    <div className="rounded-3xl overflow-hidden shadow-xl">
+      {/* Orange gradient header */}
+      <div
+        className="py-5 px-6 text-center relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #FFB347 0%, #FF9913 50%, #e07800 100%)" }}
+      >
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
+          backgroundSize: "20px 20px"
+        }} />
+        <p className="relative font-condensed font-black text-lg sm:text-xl tracking-[0.3em] uppercase text-white">
+          Important Contact Numbers
+        </p>
+        <p className="relative font-body text-sm mt-1" style={{ color: "rgba(255,255,255,0.85)" }}>
+          Save these for a worry-free travel
+        </p>
+      </div>
+
+      {/* Cards */}
+      <div className="p-4 sm:p-5" style={{ backgroundColor: "#FFF8EE" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {mainGroups.map((group, i) => <ContactCard key={i} group={group} />)}
+          {lastGroup && <ContactCard group={lastGroup} fullWidth />}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -2612,28 +2863,114 @@ function PreviewContent() {
         />
       </div>
 
-      {/* ── HERO (destination page only) — clean orange gradient, TeenCare style ── */}
+      {/* ── HERO ── */}
       {dest && (
-        <div style={{ background: "linear-gradient(135deg, #FF9913 0%, #FF7700 60%, #CC6600 100%)" }}>
-          <div className="max-w-3xl mx-auto px-5 py-16 md:py-20 text-center">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <p className="font-body text-xs font-bold tracking-[0.35em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.7)" }}>
+        <div
+          className="relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #FF9913 0%, #FF6600 55%, #CC5500 100%)" }}
+        >
+          {/* Dot grid */}
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.18) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+
+          {/* CSS for horizontal fly animation */}
+          <style>{`
+            @keyframes gladex-fly-across {
+              0%   { transform: translateX(-160px); opacity: 0; }
+              6%   { opacity: 0.65; }
+              88%  { opacity: 0.65; }
+              100% { transform: translateX(calc(100vw + 160px)); opacity: 0; }
+            }
+            @keyframes gladex-fly-across-2 {
+              0%   { transform: translateX(-160px); opacity: 0; }
+              6%   { opacity: 0.35; }
+              88%  { opacity: 0.35; }
+              100% { transform: translateX(calc(100vw + 160px)); opacity: 0; }
+            }
+          `}</style>
+
+          {/* Airplane silhouette — static large bg */}
+          <motion.div
+            className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none hidden md:block"
+            initial={{ x: 60, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
+          >
+            <svg viewBox="0 0 300 260" style={{ width: 260, height: 210, opacity: 0.18 }} fill="white">
+              <path d="M290,115 L192,115 L150,8 L128,8 L150,115 L52,115 L30,84 L6,84 L18,145 L6,206 L30,206 L52,175 L150,175 L128,282 L150,282 L192,175 L290,175 C290,175 316,145 290,115 Z"/>
+            </svg>
+          </motion.div>
+
+          {/* Plane 1 — horizontal scroll, top lane */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              top: "22%",
+              left: 0,
+              zIndex: 4,
+              animation: "gladex-fly-across 11s linear 1s infinite",
+            }}
+          >
+            <svg viewBox="0 0 300 260" style={{ width: 52, height: 44, fill: "white" }}>
+              <path d="M290,115 L192,115 L150,8 L128,8 L150,115 L52,115 L30,84 L6,84 L18,145 L6,206 L30,206 L52,175 L150,175 L128,282 L150,282 L192,175 L290,175 C290,175 316,145 290,115 Z"/>
+            </svg>
+          </div>
+
+          {/* Plane 2 — horizontal scroll, lower lane, delayed + smaller */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              top: "58%",
+              left: 0,
+              zIndex: 4,
+              animation: "gladex-fly-across-2 14s linear 5.5s infinite",
+            }}
+          >
+            <svg viewBox="0 0 300 260" style={{ width: 36, height: 30, fill: "white" }}>
+              <path d="M290,115 L192,115 L150,8 L128,8 L150,115 L52,115 L30,84 L6,84 L18,145 L6,206 L30,206 L52,175 L150,175 L128,282 L150,282 L192,175 L290,175 C290,175 316,145 290,115 Z"/>
+            </svg>
+          </div>
+
+          {/* Plane 3 — circular loop animation */}
+          <motion.div
+            className="absolute pointer-events-none hidden sm:block"
+            style={{ top: "18%", right: "22%", zIndex: 4 }}
+            animate={{
+              x:      [0,  32,  0, -32,   0],
+              y:      [0, -16, -28, -16,   0],
+              rotate: [0,  12,   0, -12,   0],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              times: [0, 0.25, 0.5, 0.75, 1],
+            }}
+          >
+            {/* Dashed ellipse trail */}
+            <svg viewBox="0 0 100 70" style={{ position: "absolute", top: -20, left: -34, width: 100, height: 70, pointerEvents: "none", opacity: 0.3 }}>
+              <ellipse cx="50" cy="35" rx="42" ry="22" fill="none" stroke="white" strokeWidth="1.5" strokeDasharray="5 4" />
+            </svg>
+            <svg viewBox="0 0 300 260" style={{ width: 38, height: 32, fill: "white", opacity: 0.6 }}>
+              <path d="M290,115 L192,115 L150,8 L128,8 L150,115 L52,115 L30,84 L6,84 L18,145 L6,206 L30,206 L52,175 L150,175 L128,282 L150,282 L192,175 L290,175 C290,175 316,145 290,115 Z"/>
+            </svg>
+          </motion.div>
+
+          {/* City skyline silhouette */}
+          <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ opacity: 0.13 }}>
+            <svg viewBox="0 0 1440 90" preserveAspectRatio="none" className="w-full" style={{ height: 60 }}>
+              <path fill="white" d="M0,90 V65 H40 V45 H70 V20 H95 V5 H115 V0 H135 V5 H155 V20 H175 V45 H195 V30 H215 V8 H235 V30 H255 V45 H275 V55 H295 V38 H315 V18 H335 V38 H355 V55 H375 V42 H400 V28 H420 V42 H440 V55 H460 V65 H480 V52 H500 V38 H520 V52 H540 V65 H560 V58 H580 V48 H605 V58 H625 V70 H645 V58 H665 V48 H685 V60 H705 V72 H725 V60 H745 V52 H765 V65 H785 V75 H805 V62 H825 V50 H845 V62 H865 V72 H885 V62 H905 V72 H930 V80 H950 V68 H970 V58 H990 V68 H1010 V78 H1030 V65 H1055 V72 H1075 V80 H1095 V68 H1115 V78 H1140 V84 H1160 V74 H1180 V80 H1205 V86 H1225 V76 H1250 V82 H1270 V88 H1290 V78 H1315 V84 H1340 V88 H1365 V82 H1390 V88 H1415 V90 H1440 V90 Z"/>
+            </svg>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 max-w-4xl mx-auto px-6 py-16 md:py-24">
+            <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+              <p className="font-body text-xs font-bold tracking-[0.35em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.7)" }}>
                 Destination Briefing Guide
               </p>
-              <h1 className="font-condensed font-black text-white text-4xl sm:text-5xl lg:text-6xl tracking-wide leading-tight">
+              <h1 className="font-condensed font-black text-white leading-none mb-5" style={{ fontSize: "clamp(2.8rem, 8vw, 5.5rem)" }}>
                 {dest.name}
               </h1>
-              {dest.country && (
-                <div className="flex items-center justify-center gap-1.5 mt-4">
-                  <MapPin className="w-4 h-4" style={{ color: "rgba(255,255,255,0.7)" }} />
-                  <span className="font-body text-sm font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>{dest.country}</span>
-                </div>
-              )}
-              {dest.tagline && (
-                <p className="font-body text-sm md:text-base mt-3 max-w-md mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
-                  {dest.tagline}
-                </p>
-              )}
             </motion.div>
           </div>
         </div>
@@ -3204,58 +3541,83 @@ function PreviewContent() {
         )}
       </AnimatePresence>
 
-      {/* ── PORTRAIT VIDEO SECTION (destination page only) ── */}
+      {/* ── VIDEO SECTION ── */}
       {dest && (
-      <div className="py-16 px-4 lg:px-10 relative overflow-hidden" style={{ backgroundColor: isDark ? "#111111" : "#F9F7F5" }}>
-        <div
-          className="absolute inset-0"
-          style={{ background: "radial-gradient(circle at center, rgba(255,153,19,0.06) 0%, transparent 70%)" }}
-        />
-        <div className="max-w-[1500px] mx-auto text-center mb-8 relative z-10">
-          <p className="text-xs font-bold tracking-[0.3em] uppercase mb-2" style={{ color: ORANGE }}>
-            Destination Briefing Video
-          </p>
-          <h2 className="font-condensed font-black text-[#111] text-3xl lg:text-4xl">Watch Before You Travel</h2>
-          <p className="text-sm mt-2 max-w-md mx-auto" style={{ color: "#666" }}>
-            Your official travel briefing video — watch to prepare for your upcoming trip.
-          </p>
-        </div>
+      <div className="relative overflow-hidden" style={{ backgroundColor: "#111111" }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 40%, rgba(255,153,19,0.1) 0%, transparent 65%)" }} />
+        <div className="w-full px-6 lg:px-12 xl:px-20 py-16 md:py-20 relative z-10 flex flex-col items-center">
 
-        <div className="relative z-10 flex justify-center px-4 w-full">
-          {dest.videoUrl ? (
-            <BriefingVideo videoUrl={dest.videoUrl} name={dest.name} />
-          ) : (
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              transition={{ duration: 0.3 }}
-              className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] w-full"
-              style={{ maxWidth: 360, aspectRatio: "9/16" }}
-            >
-              <img src={dest.heroImage} alt={dest.name} className="absolute inset-0 w-full h-full object-cover opacity-30" />
-              <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
-              <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 rounded-full animate-ping" style={{ background: "rgba(255,153,19,0.2)" }} />
+          {/* Text — centered */}
+          <motion.div
+            className="text-center mb-10"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6 }}
+          >
+            <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: ORANGE }}>
+              Important Reminder For You
+            </p>
+            <h2 className="font-condensed font-black text-white leading-tight mb-4" style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)" }}>
+              Watch Before You Travel
+            </h2>
+            <p className="font-body text-sm lg:text-base leading-relaxed max-w-sm mx-auto" style={{ color: "rgba(255,255,255,0.5)" }}>
+              A quick video to help you prepare, know the essentials, and enjoy a smooth trip!
+            </p>
+            {/* Decorative flight path */}
+            <div className="mt-6 flex items-center justify-center gap-2" style={{ opacity: 0.35 }}>
+              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ORANGE }} />
+              <div className="w-24 border-t-2 border-dashed" style={{ borderColor: ORANGE }} />
+              <Plane className="w-5 h-5 -rotate-45" style={{ color: ORANGE }} />
+              <div className="w-24 border-t-2 border-dashed" style={{ borderColor: ORANGE }} />
+              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ORANGE }} />
+            </div>
+          </motion.div>
+
+          {/* Video — centered */}
+          <motion.div
+            className="flex justify-center w-full"
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            {dest.videoUrl ? (
+              <BriefingVideo videoUrl={dest.videoUrl} name={dest.name} />
+            ) : (
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.3 }}
+                className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#111] w-full"
+                style={{ maxWidth: 360, aspectRatio: "9/16" }}
+              >
+                <img src={dest.heroImage} alt={dest.name} className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                <div className="absolute inset-0 bg-black/70 backdrop-blur-[2px]" />
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 rounded-full animate-ping" style={{ background: "rgba(255,153,19,0.2)" }} />
+                    <div
+                      className="relative w-20 h-20 rounded-full flex items-center justify-center"
+                      style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
+                    >
+                      <Play className="w-8 h-8 text-white/70 ml-1" />
+                    </div>
+                  </div>
+                  <h3 className="font-condensed font-black text-white text-2xl mb-3">Briefing Video Coming Soon</h3>
+                  <p className="font-body text-gray-400 text-sm max-w-xs leading-relaxed mb-7">
+                    We're preparing the official travel briefing video for {dest.name}.
+                  </p>
                   <div
-                    className="relative w-20 h-20 rounded-full flex items-center justify-center"
-                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)" }}
+                    className="px-7 py-3 rounded-full border text-xs font-bold tracking-[0.25em] uppercase"
+                    style={{ borderColor: ORANGE, color: ORANGE, background: "rgba(255,153,19,0.05)" }}
                   >
-                    <Play className="w-8 h-8 text-white/70 ml-1" />
+                    + Stay Tuned
                   </div>
                 </div>
-                <h3 className="font-condensed font-black text-white text-2xl mb-3">Briefing Video Coming Soon</h3>
-                <p className="font-body text-gray-400 text-sm max-w-xs leading-relaxed mb-7">
-                  We're preparing the official travel briefing video for {dest.name}.
-                </p>
-                <div
-                  className="px-7 py-3 rounded-full border text-xs font-bold tracking-[0.25em] uppercase"
-                  style={{ borderColor: ORANGE, color: ORANGE, background: "rgba(255,153,19,0.05)" }}
-                >
-                  + Stay Tuned
-                </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </motion.div>
+
         </div>
       </div>
       )}
@@ -3263,7 +3625,7 @@ function PreviewContent() {
       {/* ── Da Nang Package Selector ── */}
       {isDanang && (
         <div style={{ backgroundColor: "#FFFFFF" }} className="py-10 px-4 border-b border-gray-100">
-          <div className="max-w-3xl mx-auto">
+          <div className="w-full px-6 lg:px-12 xl:px-20">
             <p className="text-xs font-bold tracking-[0.3em] uppercase text-center mb-1" style={{ color: "#FF9913" }}>
               Your Package
             </p>
@@ -3309,7 +3671,7 @@ function PreviewContent() {
 
           {/* Contact Panel + Emergency Numbers — ORANGE */}
           <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-            <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12">
+            <div className="w-full px-6 lg:px-12 xl:px-20 py-12">
               <div className="space-y-8">
                 <SectionErrorBoundary>
                   <ContactPanel briefing={briefing} booking={booking} theme={orangeTheme} />
@@ -3323,9 +3685,10 @@ function PreviewContent() {
 
           {/* 1. Welcome — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
-                <WelcomeSection briefing={briefing} pkg={pkg} theme={theme} />
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="city" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+                <WelcomeSection briefing={briefing} pkg={pkg} theme={theme} heroImage={dest?.heroImage} />
               </div>
             </div>
           </SectionErrorBoundary>
@@ -3333,7 +3696,7 @@ function PreviewContent() {
           {/* 2 & 3. Inclusions + Exclusions — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                 <InclusionsSection pkg={pkg} briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3342,8 +3705,9 @@ function PreviewContent() {
           {/* 4. Itinerary Timeline — DARK */}
           {(pkg?.itinerary?.length > 0 || briefing?.itinerary?.length > 0) && (
             <SectionErrorBoundary>
-              <div style={{ backgroundColor: "#FFFFFF" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+                <TravelCardBg variant="city" />
+                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <BriefingSection label="Day by Day" title="Itinerary Timeline" theme={theme}>
                     <ItineraryTimeline
                       itinerary={pkg?.itinerary?.length > 0 ? pkg.itinerary : briefing.itinerary}
@@ -3359,7 +3723,7 @@ function PreviewContent() {
           {/* 5. Travel Information Center — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                 <TravelInfoCenter briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3367,8 +3731,9 @@ function PreviewContent() {
 
           {/* 6. Arrival Instructions — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="luggage" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <ArrivalSection briefing={briefing} theme={theme} />
               </div>
             </div>
@@ -3377,7 +3742,7 @@ function PreviewContent() {
           {/* 7. Transfer Instructions — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                 <TransferSection briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3385,8 +3750,9 @@ function PreviewContent() {
 
           {/* 8. Hotel Check-In — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="luggage" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <HotelSection briefing={briefing} theme={theme} />
               </div>
             </div>
@@ -3395,7 +3761,7 @@ function PreviewContent() {
           {/* 9. Tour Reminders — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                 <RemindersSection briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3404,8 +3770,9 @@ function PreviewContent() {
           {/* Do's and Don'ts — DARK */}
           {briefing.dosAndDonts && (
             <SectionErrorBoundary>
-              <div style={{ backgroundColor: "#FFFFFF" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+                <TravelCardBg variant="city" />
+                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={theme}>
                     <DosAndDonts
                       dos={briefing.dosAndDonts.dos}
@@ -3422,7 +3789,7 @@ function PreviewContent() {
           {briefing.immigrationAdvisory?.length > 0 && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                   <BriefingSection label="Philippine Immigration" title="Immigration Advisory" theme={orangeTheme}>
                     <div className="mb-4">
                       <p className="font-body text-base leading-relaxed" style={{ color: orangeTheme.textSecondary }}>
@@ -3438,8 +3805,9 @@ function PreviewContent() {
 
           {/* Shopping Advisory — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="city" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={theme} />
               </div>
             </div>
@@ -3448,7 +3816,7 @@ function PreviewContent() {
           {/* Requirements — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                 <RequirementsSection pkg={pkg} theme={orangeTheme} />
               </div>
             </div>
@@ -3457,8 +3825,9 @@ function PreviewContent() {
           {/* Important Notices — DARK */}
           {pkg?.importantNotices?.length > 0 && (
             <SectionErrorBoundary>
-              <div style={{ backgroundColor: "#FFFFFF" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+                <TravelCardBg variant="city" />
+                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <ImportantNoticesSection pkg={pkg} theme={theme} />
                 </div>
               </div>
@@ -3469,7 +3838,7 @@ function PreviewContent() {
           {briefing.checklist?.length > 0 && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                   <BriefingSection label="Pre-Departure" title="Travel Readiness Checklist" theme={orangeTheme}>
                     <TravelChecklist
                       items={briefing.checklist}
@@ -3484,8 +3853,9 @@ function PreviewContent() {
 
           {/* What to Bring — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="luggage" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <WhatToBringCarousel items={briefing.whatToBring || []} theme={theme} />
               </div>
             </div>
@@ -3494,7 +3864,7 @@ function PreviewContent() {
           {/* Outfit Guide — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                 <OutfitGuide theme={orangeTheme} />
               </div>
             </div>
@@ -3502,8 +3872,9 @@ function PreviewContent() {
 
           {/* Destination Guide — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="city" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <DestinationGuideSection briefing={briefing} slug={slug} theme={theme} />
               </div>
             </div>
@@ -3512,7 +3883,7 @@ function PreviewContent() {
           {/* Connectivity Guide — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                 <ConnectivitySection briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3521,8 +3892,9 @@ function PreviewContent() {
           {/* FAQ — DARK */}
           {briefing.faqs?.length > 0 && (
             <SectionErrorBoundary>
-              <div style={{ backgroundColor: "#FFFFFF" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+                <TravelCardBg variant="city" />
+                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <BriefingSection label="Common Questions" title="Frequently Asked Questions" theme={theme}>
                     <BriefingFAQ faqs={briefing.faqs} theme={theme} />
                   </BriefingSection>
@@ -3535,7 +3907,7 @@ function PreviewContent() {
           {briefing.assistanceContacts && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                   <BriefingSection label="Contact Us" title="Need Assistance?" theme={orangeTheme}>
                     <NeedAssistance contacts={briefing.assistanceContacts} theme={orangeTheme} />
                   </BriefingSection>
@@ -3546,8 +3918,9 @@ function PreviewContent() {
 
           {/* Testimonials — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="luggage" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} reviewRefreshKey={reviewRefreshKey} />
               </div>
             </div>
@@ -3557,7 +3930,7 @@ function PreviewContent() {
           {booking?.gdx && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
                   <RateMyService theme={orangeTheme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={handleReviewSaved} />
                 </div>
               </div>
@@ -3566,8 +3939,9 @@ function PreviewContent() {
 
           {/* Referral — DARK */}
           <SectionErrorBoundary>
-            <div style={{ backgroundColor: "#FFFFFF" }}>
-              <div className="max-w-3xl mx-auto px-5 lg:px-6 py-12 lg:py-16">
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="city" />
+              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <ReferralSection theme={theme} />
               </div>
             </div>

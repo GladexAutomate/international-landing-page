@@ -9,6 +9,8 @@
 export const hongkongBriefing = {
 
   // ─── 1. WELCOME MESSAGE ──────────────────────────────────────────────────
+  welcomeImage: "/images/welcome-hk.png",
+
   welcomeMessage: {
     title: "Official Hong Kong Briefing",
     subtitle: "4D3N Hong Kong SAR — 2026",
