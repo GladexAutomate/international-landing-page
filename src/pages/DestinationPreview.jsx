@@ -3723,6 +3723,23 @@ function PreviewContent() {
             </SectionErrorBoundary>
           )}
 
+          {/* Optional Tours & Activities — DARK */}
+          {globaltixTours.length > 0 && (
+            <SectionErrorBoundary>
+              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+                <TravelCardBg variant="city" />
+                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+                  <OptionalToursSection
+                    tours={globaltixTours}
+                    cartTourIds={cart.tours.map((t) => t.tour?.id)}
+                    onAdd={(tour) => setBookingModalTour(tour)}
+                    theme={theme}
+                  />
+                </div>
+              </div>
+            </SectionErrorBoundary>
+          )}
+
           {/* 5. Travel Information Center — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
