@@ -1976,9 +1976,12 @@ function OptionalToursSection({ tours, cartTourIds, onAdd, theme }) {
                   style={{ backgroundColor: ORANGE }}
                 >
                   <span className="font-condensed font-black text-lg text-white">
-                    ₱{tour.price.toLocaleString()}
+                    {tour.currency === "JPY" ? "¥" : tour.currency === "USD" ? "$" : "₱"}
+                    {tour.price.toLocaleString()}
                   </span>
-                  <span className="font-body text-[10px] text-white ml-1 opacity-80">/adult</span>
+                  <span className="font-body text-[10px] text-white ml-1 opacity-80">
+                    {tour.currency && tour.currency !== "PHP" ? tour.currency : "/adult"}
+                  </span>
                 </div>
 
                 {/* Added-to-cart indicator */}

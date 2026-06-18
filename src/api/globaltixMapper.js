@@ -115,7 +115,7 @@ export function mapGlobtixProductToTour(product) {
     category,
     tags:                 parseTags(product.keywords),
     price,
-    currency:             "PHP",
+    currency:             product.currency || "PHP",
     bookingOptions:       [],
     inclusions:           extractValues(product.inclusions),
     exclusions:           extractValues(product.exclusions),

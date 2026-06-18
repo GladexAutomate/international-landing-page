@@ -30,6 +30,34 @@ async function _getCatalogue() {
   return _catalogue;
 }
 
+// ── Destination slug → country name (for "All Cities" product filtering) ─────
+// Used to match products with city = "All Cities" to the correct country.
+const DESTINATION_COUNTRY = {
+  "japan":                  "Japan",
+  "singapore":              "Singapore",
+  "hongkong":               "Hong Kong",
+  "bali":                   "Indonesia",
+  "bali-wisataku":          "Indonesia",
+  "bangkok":                "Thailand",
+  "bangkok-pattaya":        "Thailand",
+  "chiangmai":              "Thailand",
+  "phuket":                 "Thailand",
+  "danang-vietnam":         "Vietnam",
+  "vietnam-hanoi":          "Vietnam",
+  "vietnam-phu-quoc":       "Vietnam",
+  "kuala-lumpur":           "Malaysia",
+  "malaysia-kota-kinabalu": "Malaysia",
+  "cambodia":               "Cambodia",
+  "korea":                  "South Korea",
+  "jeju-korea":             "South Korea",
+  "macau":                  "Macau",
+  "taipei":                 "Taiwan",
+  "beijing-shanghai":       "China",
+  "dubai":                  "UAE",
+  "maldives":               "Maldives",
+  "new-zealand":            "New Zealand",
+};
+
 // ── Destination slug → Globaltix city names ───────────────────────────────────
 // City strings are the EXACT values returned by GET /api/country/getAllCountries
 // and matched against the `city` field in GET /api/product/list.
@@ -55,7 +83,7 @@ const DESTINATION_CITIES = {
   "macau":                  ["Macau"],
   "korea":                  ["Seoul"],
   "jeju-korea":             ["Jeju"],
-  "japan":                  ["Tokyo", "Osaka", "Kyoto"],
+  "japan":                  ["Tokyo", "Osaka", "Kyoto", "Hokkaido", "Nara", "Hiroshima", "Sapporo", "Fukuoka", "Okinawa"],
   "taipei":                 ["Taipei"],
   "beijing-shanghai":       ["Beijing", "Shanghai"],
   // ── Middle East / Pacific ─────────────────────────────────────────────────
@@ -90,9 +118,16 @@ export async function getToursForDestination(slug) {
     // 1. Fetch (or return cached) product catalogue for this reseller
     const all = await _getCatalogue();
 
-    // 2. Filter to products whose city is in the destination city list (case-insensitive)
+    // 2. Filter to products whose city is in the destination city list (case-insensitive).
+    // "All Cities" products are also included when they match the destination country.
     const citiesLower = cities.map((c) => c.toLowerCase());
-    const matching = all.filter((p) => citiesLower.includes(p.city?.toLowerCase()));
+    const destCountry = (DESTINATION_COUNTRY[slug] ?? "").toLowerCase();
+    const matching = all.filter((p) => {
+      const cityLower = p.city?.toLowerCase() ?? "";
+      if (!citiesLower.includes(cityLower)) return false;
+      if (cityLower === "all cities") return destCountry && p.country?.toLowerCase() === destCountry;
+      return true;
+    });
     if (matching.length === 0) return [];
 
     // 3. Enrich each match with full product info in parallel
