@@ -39,6 +39,7 @@ const BRIEFINGS = {
   "hongkong":                hongkongBriefing,
   "korea":                   koreaBriefing,
   "japan":                   japanBriefing,
+  "japan-test":              japanBriefing,
   "jeju-korea":              jejuKoreaBriefing,
   "taipei":                  taipeiBriefing,
   "singapore":               singaporeBriefing,

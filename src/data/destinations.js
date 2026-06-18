@@ -1003,6 +1003,7 @@ export const destinations = [
   {
     id: "japan",
     slug: "japan",
+    enableAddOns: false,
     name: "Japan",
     country: "Japan",
     tagline: "Cherry blossoms, neon towers, ancient traditions",
@@ -1053,6 +1054,54 @@ export const destinations = [
         fuelSurcharge: "Fuel surcharge NOT included and subject to change.",
         insuranceNote: "Compulsory travel insurance required.",
         remarks: "Free & Easy with optional guided tours. Dynamic pax-based pricing applies. Hotel subject to availability.",
+      },
+    ],
+  },
+
+  // ============================================================
+  // JAPAN — TEST PAGE (add-ons enabled, internal use only)
+  // ============================================================
+  {
+    id: "japan-test",
+    slug: "japan-test",
+    enableAddOns: true,
+    name: "Japan",
+    country: "Japan",
+    tagline: "Cherry blossoms, neon towers, ancient traditions",
+    packageType: "FREE & EASY",
+    startingPrice: 59999,
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/011d9d868_JAPAN.png",
+    cardImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/011d9d868_JAPAN.png",
+    videoUrl: null,
+    packages: [
+      {
+        code: "GDX-JPN-5D4N",
+        name: "5D4N Osaka Free and Easy",
+        duration: "5 Days / 4 Nights",
+        travelDates: ["Inquire for available dates"],
+        hotelCategories: [
+          {
+            category: "Standard Hotel (Pax-Based Pricing)",
+            hotels: ["Osaka city hotel or similar"],
+            rates: {
+              "9pax": 59999, "8pax": 61999, "7pax": 63999, "6pax": 65999,
+              "5pax": 68999, "4pax": 72999, "3pax": 77999, "2pax": 84999,
+            },
+          },
+        ],
+        highlights: ["Osaka Castle", "Shinsekai District", "Kuromon Ichiba Market", "Nara Deer Park", "Kyoto Historic Sites", "Fushimi Inari Shrine", "Optional Universal Studios Japan"],
+        inclusions: ["Round-trip airfare", "4 nights hotel accommodation", "Daily breakfast", "Private driver-guide", "Airport transfers"],
+        exclusions: ["Tipping fee", "PH Travel Tax", "Japan visa", "Fuel surcharge", "Travel insurance", "Admission fees (unless stated)", "Optional tours"],
+        itinerary: [
+          { day: 1, title: "Arrival in Osaka", activities: ["Arrive at Kansai International Airport", "Private transfer to hotel", "Check-in", "Dotonbori evening walk"] },
+          { day: 2, title: "Optional Osaka City Tour", activities: ["Breakfast", "Optional: Osaka Castle", "Shinsekai district", "Kuromon Market street food experience"] },
+          { day: 3, title: "Optional Kyoto / Nara Tour", activities: ["Breakfast", "Optional: Kyoto Fushimi Inari Shrine", "Nara Deer Park", "Arashiyama Bamboo Grove"] },
+          { day: 4, title: "Optional Universal Studios Japan", activities: ["Breakfast", "Optional: Universal Studios Japan full day", "Harry Potter World", "Return to hotel"] },
+          { day: 5, title: "Departure", activities: ["Breakfast", "Hotel check-out", "Private airport transfer", "Departure from KIX"] },
+        ],
+        optionalTours: ["Universal Studios Japan", "Kyoto & Nara Full-Day Tour", "Hiroshima & Miyajima Island", "Tokyo Day Trip"],
+        fuelSurcharge: "Fuel surcharge NOT included and subject to change.",
+        insuranceNote: "Compulsory travel insurance required.",
       },
     ],
   },

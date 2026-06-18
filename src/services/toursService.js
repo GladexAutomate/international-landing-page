@@ -34,6 +34,7 @@ async function _getCatalogue() {
 // Used to match products with city = "All Cities" to the correct country.
 const DESTINATION_COUNTRY = {
   "japan":                  "Japan",
+  "japan-test":             "Japan",
   "singapore":              "Singapore",
   "hongkong":               "Hong Kong",
   "bali":                   "Indonesia",
@@ -84,6 +85,7 @@ const DESTINATION_CITIES = {
   "korea":                  ["Seoul"],
   "jeju-korea":             ["Jeju"],
   "japan":                  ["Tokyo", "Osaka", "Kyoto", "Hokkaido", "Nara", "Hiroshima", "Sapporo", "Fukuoka", "Okinawa"],
+  "japan-test":             ["Tokyo", "Osaka", "Kyoto", "Hokkaido", "Nara", "Hiroshima", "Sapporo", "Fukuoka", "Okinawa"],
   "taipei":                 ["Taipei"],
   "beijing-shanghai":       ["Beijing", "Shanghai"],
   // ── Middle East / Pacific ─────────────────────────────────────────────────

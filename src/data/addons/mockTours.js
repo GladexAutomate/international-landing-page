@@ -885,5 +885,7 @@ const TOURS_BY_DESTINATION = {
  * @returns {import("../../types/addons").Tour[]}
  */
 export function getToursByDestination(slug) {
-  return TOURS_BY_DESTINATION[slug] ?? [];
+  // "japan-test" reuses the same add-ons as "japan"
+  const key = slug === "japan-test" ? "japan" : slug;
+  return TOURS_BY_DESTINATION[key] ?? [];
 }

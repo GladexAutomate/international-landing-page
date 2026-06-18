@@ -3723,8 +3723,8 @@ function PreviewContent() {
             </SectionErrorBoundary>
           )}
 
-          {/* Optional Tours & Activities — DARK */}
-          {globaltixTours.length > 0 && (
+          {/* Optional Tours & Activities — DARK (only on destinations with enableAddOns: true) */}
+          {dest?.enableAddOns && globaltixTours.length > 0 && (
             <SectionErrorBoundary>
               <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
                 <TravelCardBg variant="city" />
