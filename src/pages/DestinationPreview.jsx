@@ -597,8 +597,8 @@ function WelcomeSection({ briefing, pkg, theme, heroImage }) {
       ? [welcomeMessage]
       : [];
 
-  // welcomeImage in briefing data takes priority → then dest heroImage
-  const imgSrc = briefing?.welcomeImage || heroImage || null;
+  // welcomeImage in briefing data takes priority → then default illustration
+  const imgSrc = briefing?.welcomeImage || "/images/welcome-hk.png";
 
   return (
     <div
