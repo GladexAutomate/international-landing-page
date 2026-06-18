@@ -388,9 +388,9 @@ export default function TourBookingModal({ tour, theme, onClose, onConfirm }) {
     const isGlobtixProduct =
       tour.source === "globaltix" && /^\d+$/.test(String(tour.sourceId ?? ""));
 
-    if (!isGlobtixProduct) {
-      // DEMO MODE ONLY — convert tour.bookingOptions (old or new format) to TourBookingOption[]
-      const mockOpts = (tour.bookingOptions ?? []).map((o) => ({
+    // Shared helper — normalises raw bookingOptions from mock data into TourBookingOption[]
+    function parseMockOptions(rawOptions) {
+      return (rawOptions ?? []).map((o) => ({
         id:                o.id ?? `opt-${o.price}`,
         optionId:          o.optionId   ?? null,
         optionName:        o.optionName ?? o.label ?? o.id,
@@ -407,38 +407,40 @@ export default function TourBookingModal({ tour, theme, onClose, onConfirm }) {
         isCancellable:     o.isCancellable ?? true,
         cancellationNotes: Array.isArray(o.cancellationNotes)
           ? o.cancellationNotes
-          : o.cancellationPolicy
-            ? [o.cancellationPolicy]
-            : [],
+          : o.cancellationPolicy ? [o.cancellationPolicy] : [],
         inclusions:        Array.isArray(o.inclusions) ? o.inclusions : (tour.inclusions ?? []),
         visitDateRequired: o.visitDateRequired ?? tour.requiresBookingDate ?? false,
       }));
-      setOptions(mockOpts);
-      if (mockOpts.length === 0) {
-        setStep("error");
-      } else if (mockOpts.length === 1) {
-        setSelectedOption(mockOpts[0]);
-        setQty(mockOpts[0].minPurchaseQty);
-        setStep(tour.requiresBookingDate ? "date" : "quantity");
-      } else {
-        setStep("options");
-      }
-      return; // no cleanup needed — no async op started
     }
 
-    getBookingOptionsForProduct(tour.sourceId).then((opts) => {
-      if (cancelled) return;
+    // Shared step-setter — used by both live and mock paths
+    function applyOptions(opts) {
       setOptions(opts);
       if (opts.length === 0) {
         setStep("error");
       } else if (opts.length === 1) {
-        // Auto-select single option, skip options step
         setSelectedOption(opts[0]);
         setQty(opts[0].minPurchaseQty);
         setStep(tour.requiresBookingDate ? "date" : "quantity");
       } else {
         setStep("options");
       }
+    }
+
+    if (!isGlobtixProduct) {
+      applyOptions(parseMockOptions(tour.bookingOptions));
+      return; // no cleanup needed — no async op started
+    }
+
+    getBookingOptionsForProduct(tour.sourceId).then((opts) => {
+      if (cancelled) return;
+      // If the live API returns nothing, fall back to the mock bookingOptions on the tour object.
+      // This handles products whose ProductOptions endpoint isn't accessible for this reseller.
+      const finalOpts = opts.length > 0 ? opts : parseMockOptions(tour.bookingOptions);
+      applyOptions(finalOpts);
+    }).catch(() => {
+      if (cancelled) return;
+      applyOptions(parseMockOptions(tour.bookingOptions));
     });
 
     return () => { cancelled = true; };
