@@ -6,6 +6,24 @@ import { getBookingOptionsForProduct } from "../services/bookingService";
 
 const ORANGE = "#FF9913";
 
+function currencySymbol(code) {
+  const map = { JPY: "¥", USD: "$", SGD: "S$", HKD: "HK$", AUD: "A$", EUR: "€", GBP: "£" };
+  return map[code] ?? "₱";
+}
+
+function titleCase(str) {
+  if (!str) return str;
+  if (str === str.toUpperCase()) return str.charAt(0) + str.slice(1).toLowerCase();
+  return str;
+}
+
+function ageLabel(ageFrom, ageTo) {
+  if (ageFrom != null && ageTo != null) return `${ageFrom}–${ageTo} yrs`;
+  if (ageFrom != null) return `${ageFrom}+ yrs`;
+  if (ageTo != null) return `up to ${ageTo} yrs`;
+  return null;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmtDate(isoDate) {
@@ -71,8 +89,9 @@ function StepError({ theme, onRetry }) {
 
 // ── Step: Options ─────────────────────────────────────────────────────────────
 
-function StepOptions({ options, selectedOption, onSelect, theme }) {
+function StepOptions({ options, selectedOption, onSelect, currency, theme }) {
   const { bgCard, border, textPrimary, textSecondary, isDark } = theme;
+  const sym = currencySymbol(currency);
   return (
     <div className="space-y-3">
       <p className="font-body text-sm mb-4" style={{ color: textSecondary }}>
@@ -80,6 +99,10 @@ function StepOptions({ options, selectedOption, onSelect, theme }) {
       </p>
       {options.map((opt) => {
         const isSelected = selectedOption?.id === opt.id;
+        const age = ageLabel(opt.ageFrom, opt.ageTo);
+        const ticketLabel = opt.ticketTypeName
+          ? `${titleCase(opt.ticketTypeName)}${age ? ` (${age})` : ""}`
+          : null;
         return (
           <button
             key={opt.id}
@@ -93,8 +116,8 @@ function StepOptions({ options, selectedOption, onSelect, theme }) {
             <div className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="font-condensed font-black text-base" style={{ color: textPrimary }}>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-condensed font-black text-base leading-snug" style={{ color: textPrimary }}>
                       {opt.optionName}
                     </p>
                     {isSelected && (
@@ -106,6 +129,11 @@ function StepOptions({ options, selectedOption, onSelect, theme }) {
                       </span>
                     )}
                   </div>
+                  {ticketLabel && (
+                    <p className="font-body text-xs mb-1" style={{ color: ORANGE }}>
+                      {ticketLabel}
+                    </p>
+                  )}
                   <p className="font-body text-xs" style={{ color: textSecondary }}>
                     Min {opt.minPurchaseQty} pax
                     {opt.maxPurchaseQty ? ` · Max ${opt.maxPurchaseQty}` : ""}
@@ -118,7 +146,7 @@ function StepOptions({ options, selectedOption, onSelect, theme }) {
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="font-condensed font-black text-xl" style={{ color: ORANGE }}>
-                    ₱{opt.price.toLocaleString()}
+                    {sym}{opt.price.toLocaleString()}
                   </p>
                   <p className="font-body text-[10px]" style={{ color: textSecondary }}>per pax</p>
                 </div>
@@ -220,11 +248,16 @@ function StepDate({ bookingDate, onDateChange, selectedOption, theme }) {
 
 // ── Step: Quantity ────────────────────────────────────────────────────────────
 
-function StepQuantity({ selectedOption, qty, onQtyChange, bookingDate, theme }) {
+function StepQuantity({ selectedOption, qty, onQtyChange, bookingDate, currency, theme }) {
   const { border, textPrimary, textSecondary, isDark } = theme;
   const min   = selectedOption.minPurchaseQty;
   const max   = selectedOption.maxPurchaseQty;
   const total = qty * selectedOption.price;
+  const sym   = currencySymbol(currency);
+  const age   = ageLabel(selectedOption.ageFrom, selectedOption.ageTo);
+  const ticketLabel = selectedOption.ticketTypeName
+    ? `${titleCase(selectedOption.ticketTypeName)}${age ? ` (${age})` : ""}`
+    : null;
 
   return (
     <div className="space-y-5">
@@ -239,8 +272,13 @@ function StepQuantity({ selectedOption, qty, onQtyChange, bookingDate, theme }) 
         <p className="font-condensed font-black text-xl leading-tight" style={{ color: textPrimary }}>
           {selectedOption.optionName}
         </p>
+        {ticketLabel && (
+          <p className="font-body text-xs mt-0.5 font-semibold" style={{ color: ORANGE }}>
+            {ticketLabel}
+          </p>
+        )}
         <p className="font-body text-sm mt-0.5" style={{ color: textSecondary }}>
-          ₱{selectedOption.price.toLocaleString()} per participant
+          {sym}{selectedOption.price.toLocaleString()} per participant
         </p>
         {bookingDate && (
           <p className="font-body text-xs mt-1.5 flex items-center gap-1.5" style={{ color: textSecondary }}>
@@ -292,10 +330,10 @@ function StepQuantity({ selectedOption, qty, onQtyChange, bookingDate, theme }) 
       >
         <div>
           <p className="font-body text-xs" style={{ color: textSecondary }}>
-            {qty} × ₱{selectedOption.price.toLocaleString()}
+            {qty} × {sym}{selectedOption.price.toLocaleString()}
           </p>
           <p className="font-condensed font-black text-4xl" style={{ color: ORANGE }}>
-            ₱{total.toLocaleString()}
+            {sym}{total.toLocaleString()}
           </p>
         </div>
         <p className="font-body text-xs pb-1" style={{ color: textSecondary }}>Total</p>
@@ -361,6 +399,7 @@ export default function TourBookingModal({ tour, theme, onClose, onConfirm }) {
         sku:               o.sku ?? null,
         price:             o.price ?? 0,
         nettPrice:         o.nettPrice ?? o.price ?? 0,
+        currency:          o.currency ?? tour.currency ?? "PHP",
         minPurchaseQty:    o.minPurchaseQty ?? 1,
         maxPurchaseQty:    o.maxPurchaseQty ?? null,
         ageFrom:           o.ageFrom ?? null,
@@ -439,8 +478,9 @@ export default function TourBookingModal({ tour, theme, onClose, onConfirm }) {
 
   const showNav = step !== "loading" && step !== "error";
 
+  const currency = selectedOption?.currency ?? tour.currency ?? "PHP";
   const nextLabel = step === "quantity"
-    ? `Add to Trip  ·  ₱${(qty * (selectedOption?.price ?? 0)).toLocaleString()}`
+    ? `Add to Trip  ·  ${currencySymbol(currency)}${(qty * (selectedOption?.price ?? 0)).toLocaleString()}`
     : "Continue";
 
   return (
@@ -524,6 +564,7 @@ export default function TourBookingModal({ tour, theme, onClose, onConfirm }) {
               options={options}
               selectedOption={selectedOption}
               onSelect={setSelectedOption}
+              currency={currency}
               theme={theme}
             />
           )}
@@ -541,6 +582,7 @@ export default function TourBookingModal({ tour, theme, onClose, onConfirm }) {
               qty={qty}
               onQtyChange={setQty}
               bookingDate={bookingDate}
+              currency={currency}
               theme={theme}
             />
           )}

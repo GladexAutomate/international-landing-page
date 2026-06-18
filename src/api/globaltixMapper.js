@@ -39,6 +39,14 @@ function parseTags(keywords) {
   return keywords.split(/[&,]/).map((t) => t.trim().toLowerCase()).filter(Boolean);
 }
 
+function cleanOptionName(raw) {
+  if (!raw || typeof raw !== "string") return raw;
+  return raw
+    .replace(/^itinerary-/i, "")    // strip "itinerary-" prefix
+    .replace(/-\d{1,2}:\d{2}$/, "") // strip trailing time e.g. "-16:00"
+    .trim();
+}
+
 // ── ProductOptions mapper ─────────────────────────────────────────────────────
 
 /**
@@ -61,12 +69,13 @@ export function mapGlobtixOptionsToBookingOptions(optionsData) {
       result.push({
         id:                `${opt.id}-${tt.id}`,
         optionId:          opt.id,
-        optionName:        opt.name,
+        optionName:        cleanOptionName(opt.name),
         ticketTypeId:      tt.id,
         ticketTypeName:    tt.name,
         sku:               tt.sku,
         price:             tt.originalPrice,
         nettPrice:         tt.nettPrice,
+        currency:          opt.currency || "PHP",
         minPurchaseQty:    tt.minPurchaseQty ?? 1,
         maxPurchaseQty:    tt.maxPurchaseQty ?? null,
         ageFrom:           tt.ageFrom ?? null,
