@@ -47,86 +47,6 @@ export const danang6d4nBriefing = {
   ],
 
   // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila to Da Nang — Son Tra Peninsula · Canaan Island · Hoi An",
-      activities: [
-        "Depart from Manila via VietJet Air and fly to Da Nang International Airport.",
-        "Upon arrival, meet and greet with your Gladex tour guide at the arrival hall.",
-        "First stop: Son Tra Peninsula — admire the iconic Lady Buddha statue overlooking the South China Sea.",
-        "Next: Canaan Island — enjoy a relaxing visit including a fun coconut boat ride experience.",
-        "Afternoon: Explore the beautiful and historic Hoi An Ancient Town — a UNESCO World Heritage Site.",
-        "Dinner at a group restaurant, then transfer to the hotel and check in.",
-        "Overnight stay in Da Nang.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Ba Na Hills — Golden Bridge · French Village · Cable Car",
-      activities: [
-        "After breakfast, prepare for one of the highlights of the trip.",
-        "Full-day visit to Ba Na Hills — experience the world-renowned cable car ride to the summit at 1,487 m.",
-        "Walk the iconic Golden Bridge (Cầu Vàng) — held by giant stone hands, Vietnam's most photographed landmark.",
-        "Explore the stunning French-inspired architecture and the Fantasy Park amusement area.",
-        "Enjoy breathtaking panoramic mountain and coastal views from the summit.",
-        "Quick stop at a local mini supermarket for personal shopping on the way back.",
-        "Dinner, then transfer back to the hotel for overnight stay.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Da Nang City Tour I — APEC Park · Latex Shop · Jewelry Shop · Pink Church (B/L/D)",
-      activities: [
-        "After breakfast, begin exploring the city of Da Nang.",
-        "Visit a local latex shop — see demonstrations of natural latex products and local craftsmanship.",
-        "Stroll through the scenic APEC Park along the Han River waterfront.",
-        "Shopping stop at a local jewelry boutique.",
-        "Visit Da Nang Cathedral, known as the Pink Church — one of the city's most recognizable landmarks.",
-        "Dinner, then transfer back to the hotel for overnight stay.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Da Nang City Tour II — Cham Museum · Dragon Bridge · Love Bridge · Silk Shop (B/L/D)",
-      activities: [
-        "After breakfast, continue the Da Nang city tour.",
-        "Visit the Museum of Cham Sculpture — home to more than 2,000 ancient Cham artefacts, the largest collection of Cham sculpture in the world.",
-        "See the iconic Dragon Bridge (Cầu Rồng) spanning the Han River.",
-        "Stroll the romantic Love Bridge (Cầu Tình Yêu) — a scenic riverside attraction popular for photos and evening walks.",
-        "Shopping stop at a silk boutique for traditional Vietnamese silk products.",
-        "Dinner, then transfer back to the hotel for overnight stay.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Hai Van Pass · Lang Co Beach · Treasure Shop — Final Day in Da Nang (B/L/D)",
-      activities: [
-        "After breakfast, depart for the scenic drive along the Vietnamese coastline.",
-        "Visit local treasure shops and experience authentic Vietnamese coffee and bánh mì (Vietnamese bread).",
-        "Scenic drive through the legendary Hai Van Pass (Đèo Hải Vân) — one of Vietnam's most spectacular coastal mountain roads.",
-        "Stop at Lang Co Beach — a beautiful white-sand coastal stretch with stunning ocean views.",
-        "Return to Da Nang. Final dinner and overnight stay at the hotel.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 6,
-      title: "Da Nang to Manila — Departure Day",
-      activities: [
-        "After breakfast, check out of the hotel.",
-        "Final transfer to Da Nang International Airport.",
-        "Complete airport check-in and immigration procedures for your return flight.",
-        "Board VietJet Air flight back to Manila.",
-        "Arrive in Manila with unforgettable memories from Vietnam.",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── 5. TRAVEL INFORMATION CENTER ────────────────────────────────────────
   travelInformation: {
@@ -644,9 +564,7 @@ export const danang6d4nBriefing = {
       contacts: [
         {
           label: "Gladex Messenger",
-          value: "m.me/GladexTours",
           type: "messenger",
-          url: "https://m.me/771470123003758",
         },
         {
           label: "Gladex WhatsApp",
@@ -826,7 +744,6 @@ export const danang6d4nBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

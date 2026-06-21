@@ -35,83 +35,6 @@ export const phuketBriefing = {
     "Alcoholic beverages",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Arrival in Phuket — Patong Beach Check-In & Bangla Road Evening",
-      activities: [
-        "Depart Manila — fly to Phuket International Airport (HKT) via AirAsia, Cebu Pacific, Thai AirAsia X, or Thai Airways",
-        "Arrive HKT — proceed through immigration (TDAC must be completed before boarding)",
-        "Collect baggage and clear customs; meet Gladex Tours representative at arrivals hall",
-        "Private transfer from Phuket Airport to Patong Beach hotel (~45–60 minutes)",
-        "Hotel check-in (3:00 PM); settle in and freshen up",
-        "Late afternoon — explore Patong Beach: 3 km of golden sand, beach chairs, watersports",
-        "Evening — walk Bangla Road: Phuket's legendary entertainment street, neon lights, live music, street food stalls, and night market vendors",
-        "Dinner on own account — recommended: Jae Oh's Boat Noodles (Patong) or grilled seafood at beachfront restaurants",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Phi Phi Islands Full-Day Speedboat Tour",
-      activities: [
-        "Early morning departure by speedboat from Phuket pier",
-        "Visit Maya Bay on Phi Phi Leh — iconic turquoise lagoon made famous by 'The Beach' (limited entry — check current status)",
-        "Snorkeling at Pileh Lagoon and Shark Point — vibrant coral reef and tropical fish",
-        "Explore Phi Phi Don village — the larger inhabited island with restaurants and beachfront shops",
-        "Viking Cave visit — sea swallow nest collection site with ancient cave murals",
-        "Monkey Beach — optional encounter with the island's resident monkeys",
-        "Bamboo Island (Ko Mai Phai) — pristine white sand beach for swimming and relaxation",
-        "Return speedboat to Phuket pier; transfer back to hotel",
-        "Evening free — optional Muay Thai boxing at Bangla Boxing Stadium",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Phang Nga Bay — James Bond Island & Sea Canoe",
-      activities: [
-        "Morning departure by longtail boat or speedboat from Phuket to Phang Nga Bay",
-        "Cruise through dramatic limestone karst towers rising from emerald green water",
-        "Visit Ko Tapu (James Bond Island) — the iconic needle-rock used in 'The Man with the Golden Gun'",
-        "Sea canoe through hidden hongs (sea caves) and mangrove channels inaccessible by larger boats",
-        "Visit Koh Panyee — floating Muslim fishing village built on stilts over the water; lunch at floating restaurant",
-        "Explore Talu Island cave and emerald green lagoons by kayak",
-        "Return to Phuket by afternoon; transfer to hotel",
-        "Evening free in Patong — recommended: Fantasea cultural show (optional, own cost) or Soi Bangla night market",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Big Buddha, Wat Chalong, Old Phuket Town & Kata/Karon Beach",
-      activities: [
-        "Morning visit to Big Buddha — 45-metre white marble Maraville Buddha on Nakkerd Hill; free entry; panoramic island views",
-        "Visit Wat Chalong — Phuket's most important Buddhist temple; ornate gold-spired complex with sacred relics",
-        "Drive through Old Phuket Town — Sino-Portuguese colonial shophouses, street art murals, local boutiques, and Kopitiam (coffee houses)",
-        "Browse Sunday Walking Street / Weekend Market (if applicable on day of visit)",
-        "Afternoon at Kata Beach or Karon Beach — clear turquoise water, snorkeling, or simply relaxing on the sand",
-        "Optional: Promthep Cape viewpoint at sunset — Phuket's most famous panoramic cliff at the southern tip",
-        "Evening dinner at Rawai Seafood Market — pick your fresh catch and have it cooked to order at adjacent restaurants",
-        "Return to hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Morning Beach / Pool Time, Last Shopping & Departure",
-      activities: [
-        "Morning free — last dip at Patong Beach or relax by hotel pool",
-        "Final shopping at Jungceylon Mall (Patong) or Central Festival Phuket for Thai snacks, silk scarves, and souvenirs",
-        "Check-out from hotel by 12:00 PM; store luggage at concierge if needed",
-        "Last street food fix — Pad Thai from Patong street stalls, roti with condensed milk, or mango sticky rice",
-        "Private transfer from hotel to Phuket International Airport (HKT)",
-        "Check-in at airport; proceed through Thai immigration and security",
-        "Board return flight to Manila — safe travels!",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -583,7 +506,6 @@ export const phuketBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -730,7 +652,6 @@ export const phuketBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -55,7 +55,6 @@ export default function PackageFAQ({ faqs = [] }) {
       </div>
 
       <a
-        href="https://m.me/771470123003758?ref=2438158"
         target="_blank"
         rel="noopener noreferrer"
         className="inline-block mt-4 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all hover:opacity-80"

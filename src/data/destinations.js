@@ -172,6 +172,24 @@ export const destinations = [
   },
 
   // ============================================================
+  // HONGKONG PRIVATE (airline packages)
+  // ============================================================
+  {
+    id: "hongkong-private",
+    slug: "hongkong-private",
+    name: "Hong Kong",
+    country: "Hong Kong SAR",
+    tagline: "Neon nights and jade mountains collide",
+    promoLabel: "AIRLINE PACKAGES",
+    packageType: "PRIVATE",
+    startingPrice: 26999,
+    heroImage: "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
+    cardImage:  "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/304a7c916_HONGKONG.png",
+    videoUrl: "https://drive.google.com/file/d/1V6iFsPCQURF_RTUYVLQhNq9qLg_SGNb_/preview",
+    packages: [],
+  },
+
+  // ============================================================
   // HONGKONG
   // ============================================================
   {
@@ -313,6 +331,44 @@ export const destinations = [
   },
 
   // ============================================================
+  // DANANG VIETNAM — PRIVATE / AIRLINE PACKAGES
+  // ============================================================
+  {
+    id: "danang-private",
+    slug: "danang-private",
+    name: "Da Nang Private",
+    country: "Vietnam",
+    tagline: "Golden bridges and ancient towns await",
+    promoLabel: "PRIVATE PACKAGE",
+    packageType: "PRIVATE TOUR",
+    startingPrice: 22999,
+    heroImage: "https://images.unsplash.com/photo-1578894381163-e72c17f2d45f?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1555400038-63f5ba517a47?w=800&q=80",
+    videoUrl: "https://drive.google.com/file/d/1yeltD8t0ibNSt5ATW6efk1HGDoSmB1Y7/preview",
+    packages: [
+      {
+        code: "GDX-DAN-PRIVATE",
+        name: "Da Nang Private Package",
+        duration: "Varies",
+        travelDates: ["2026 dates available — inquire now"],
+        hotelCategories: [],
+        highlights: ["Hoi An Ancient Town", "Coconut Village", "Bana Hills", "Golden Bridge", "Dragon Bridge"],
+        inclusions: [],
+        exclusions: [],
+        itinerary: [],
+        visaInfo: "E-visa required for Philippine passport holders.",
+        termsAndConditions: "Rates per person. E-visa processing fee is separate.",
+        importantNotices: ["Vietnam e-visa must be secured before departure."],
+        requirements: ["Valid passport (min 6 months)", "Vietnam e-Visa"],
+        links: [
+          { label: "eTravel Registration", url: "https://etravel.gov.ph/" },
+          { label: "Vietnam e-Visa", url: "https://evisa.xuatnhapcanh.gov.vn" },
+        ],
+      },
+    ],
+  },
+
+  // ============================================================
   // BANGKOK + PATTAYA
   // ============================================================
   {
@@ -394,7 +450,6 @@ export const destinations = [
         links: [
           { label: "eTravel Registration", url: "https://etravel.gov.ph/" },
           { label: "Thailand TDAC", url: "https://tdac.immigration.go.th" },
-          { label: "Book via Messenger", url: "https://m.me/771470123003758?ref=2438158" },
           { label: "Visa Stamp Philippines", url: "https://www.facebook.com/visastampph.2" },
           { label: "Bangkok Video Preview", url: "https://bit.ly/GDX-BANGKOK-VID" },
         ],
@@ -516,6 +571,78 @@ export const destinations = [
         remarks: "Hotel subject to availability. Similar category will be substituted if needed. No early check-in. No late check-out.",
       },
     ],
+  },
+
+  // ============================================================
+  // SHANGHAI MINI KYOTO — PAL (Philippine Airlines)
+  // ============================================================
+  {
+    id: "beijing-shanghai-pal",
+    slug: "beijing-shanghai-pal",
+    name: "Shanghai Mini Kyoto",
+    country: "China",
+    tagline: "Nianhua Bay glowing lanterns & Shanghai skyline",
+    promoLabel: "AIRLINE",
+    packageType: "GROUP TOUR",
+    startingPrice: null,
+    heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
+    videoUrl: null,
+    packages: [],
+  },
+
+  // ============================================================
+  // SHANGHAI MINI KYOTO — PRIVATE (Shenzhen Airlines)
+  // ============================================================
+  {
+    id: "beijing-shanghai-private",
+    slug: "beijing-shanghai-private",
+    name: "Shanghai Mini Kyoto",
+    country: "China",
+    tagline: "Nianhua Bay glowing lanterns & Shanghai skyline",
+    promoLabel: "AIRLINE",
+    packageType: "GROUP TOUR",
+    startingPrice: null,
+    heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
+    videoUrl: null,
+    packages: [],
+  },
+
+  // ============================================================
+  // SHANGHAI MINI KYOTO — CEBU PACIFIC
+  // ============================================================
+  {
+    id: "beijing-shanghai-cebu-pacific",
+    slug: "beijing-shanghai-cebu-pacific",
+    name: "Shanghai Mini Kyoto",
+    country: "China",
+    tagline: "Nianhua Bay glowing lanterns & Shanghai skyline",
+    promoLabel: "AIRLINE",
+    packageType: "GROUP TOUR",
+    startingPrice: null,
+    heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
+    videoUrl: null,
+    packages: [],
+  },
+
+  // ============================================================
+  // HONGKONG – SHENZHEN – ZHUHAI (Cebu Pacific)
+  // ============================================================
+  {
+    id: "hongkong-shenzhen-zhuhai",
+    slug: "hongkong-shenzhen-zhuhai",
+    name: "Hongkong–Shenzhen–Zhuhai",
+    country: "Hong Kong / China",
+    tagline: "Three cities, one unforgettable journey",
+    promoLabel: "AIRLINE",
+    packageType: "GROUP TOUR",
+    startingPrice: null,
+    heroImage: "https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=800&q=80",
+    videoUrl: null,
+    packages: [],
   },
 
   // ============================================================
@@ -1179,37 +1306,52 @@ export const destinations = [
     videoUrl: null,
     packages: [
       {
-        code: "GDX-TPE-3D2N",
-        name: "3D2N Taipei Free and Easy with Suggested Walking Tour",
-        duration: "3 Days / 2 Nights",
-        travelDates: ["Inquire for available dates"],
+        code: "GDX-TWTPE5N1B1",
+        name: "5D4N Taipei Taiwan Highlights Tour — 2026",
+        duration: "5 Days / 4 Nights",
+        travelDates: ["2026 dates available — inquire now"],
         hotelCategories: [
-          { category: "Standard Hotel 3★", hotels: ["Standard Taipei hotel or similar"], rates: { twin: 27999, triple: 26499, solo: 43999, childNoBed: 21999 } },
-          { category: "4-Star Hotel", hotels: ["4-star Taipei hotel or similar"], rates: { twin: 33999, triple: 31999, solo: 52999, childNoBed: 25999 } },
+          { category: "Standard 3★ (Ximending / Zhongxiao area)", hotels: ["Standard Taipei city hotel or similar"], rates: { twin: 27999, triple: 26499, solo: 43999, childNoBed: 21999 } },
         ],
-        highlights: ["Historic Old Town Walking Tour", "Ximending Shopping District", "Shilin Night Market", "Optional Taipei 101 visit", "National Palace Museum (optional)", "Golden Age Walking Tour"],
-        inclusions: ["Round-trip airfare", "2 nights hotel accommodation", "Daily breakfast", "Airport transfers", "Suggested walking tour itinerary", "English-speaking guide (city orientation)"],
-        exclusions: ["Compulsory driver/guide tipping", "Taipei 101 admission (optional)", "Fuel surcharge", "Travel insurance", "Personal expenses", "Transfer surcharge (late arrival)"],
+        highlights: ["Yehliu Geopark — Queen's Head Rock", "Jiufen Old Street — lanterns at dusk", "Shifen Sky Lanterns & Waterfall", "National Palace Museum", "Chiang Kai-shek Memorial Hall", "Longshan Temple", "Ximending Shopping District", "Taipei Historic & Golden Age Walking Tours"],
+        inclusions: [
+          "Round-trip airfare ticket (except for land arrangement package)",
+          "Round-way private airport transfer (NO guide)",
+          "Hotel accommodation with daily breakfast",
+          "Air-conditioned vehicle for SIC (Seat-In-Coach) tour",
+          "English-speaking guide for SIC tour",
+          "Entrance tickets and admission fees for SIC tour (except for those who do not book tours)",
+          "Local insurance during tour — for those who avail tours (walking tours not covered)",
+        ],
+        exclusions: [
+          "Extra baggage allowance",
+          "Tipping fee for driver and guide — US$8.00 per guest per day",
+          "Meals & beverages",
+          "Travel insurance (EXCEPT FOR THOSE WHO ALREADY PAID)",
+          "PH Travel Tax (EXCEPT FOR THOSE WHO ALREADY PAID)",
+          "Single supplement (EXCEPT FOR THOSE WHO ALREADY PAID)",
+          "Expenses of a personal nature",
+        ],
         itinerary: [
-          { day: 1, title: "Arrival in Taipei", activities: ["Arrive at Taoyuan International Airport", "Transfer to hotel", "Check-in", "Ximending shopping district evening walk"] },
-          { day: 2, title: "Suggested Walking Tour", activities: ["Breakfast", "Old Town Taipei walking tour", "Longshan Temple", "Dihua Street heritage walk", "Golden Age Walking Tour area", "Shilin Night Market"] },
-          { day: 3, title: "Departure", activities: ["Breakfast", "Hotel check-out", "Optional: Taipei 101 / National Palace Museum morning visit", "Airport transfer", "Departure"] },
+          { day: 1, title: "Arrival at Taiwan Taoyuan International Airport | Hotel Check-In", activities: ["Upon arrival, proceed through Customs Clearance", "Turn RIGHT at the arrivals hall — find your driver/tour guide holding a name signage", "Transfer to hotel for check-in", "Hotel Check-In: 2:00 PM – 4:00 PM | Check-Out: 11:00 AM – 12:00 NN"] },
+          { day: 2, title: "Day 2 · Day 3 · Day 4 — Tour Options", activities: ["Tour Option A: Yehliu, Jiufen & Pingxi Day Tour (Daily)", "Tour Option B: Taipei City Tour with National Palace Museum (Tue–Sun)", "Tour Option C: Walking Tours — Historic, Old Town, or Golden Age (Daily)", "For your exact tour dates and schedule, please refer to your travel itinerary."] },
+          { day: 5, title: "Departure Day | Hotel Check-Out | Airport Transfer", activities: ["Breakfast", "Hotel Check-Out: 11:00 AM – 12:00 NN", "Transfer to the airport for departure", "Please be at the lobby 10 minutes before your pick-up schedule"] },
         ],
-        optionalTours: ["Taipei 101 Observation Deck", "National Palace Museum", "Jiufen Old Street Day Trip", "Yehliu Geopark Tour"],
-        visaInfo: "Philippine passport holders may enter Taiwan visa-free for up to 14 days under the visa-exempt program (confirm current status before travel).",
-        termsAndConditions: "Free & Easy format. Compulsory tipping applies. Fuel surcharge mandatory. Transfer surcharge for late arrival/departure.",
+        optionalTours: ["Taipei 101 Observation Deck", "Sun Moon Lake Day Trip", "Taroko Gorge Tour", "Beitou Hot Springs"],
+        visaInfo: "Philippine passport holders are eligible for visa-free entry to Taiwan for up to 14 days — confirm current policy before travel.",
+        termsAndConditions: "Tipping fee for driver and guide is mandatory (US$8.00 per person per day). Fuel surcharge may apply. Hotel check-in 2PM, check-out 12NN.",
         importantNotices: [
-          "Compulsory driver and guide tipping applies — excluded from package.",
-          "Transfer surcharge applies for late arrival or departure outside operating hours.",
-          "Taiwan entry: confirm current visa-exempt status before travel.",
-          "Walking tour is suggested — you are free to adjust.",
+          "Confirm current Taiwan visa-free policy for Philippine passports before departure.",
+          "Taiwan uses 110V electricity — check charger voltage label before plugging in.",
+          "Carry NT$ cash — night markets and local restaurants are predominantly cash-based.",
+          "Tipping fee (US$8/person/day) is compulsory and excluded from the package.",
           "⚠️ PERSONAL TRANSACTIONS NOT ALLOWED.",
         ],
-        requirements: ["Valid passport (min 6 months)", "Taiwan entry requirements (confirm visa-exempt status)", "eTravel Registration — https://etravel.gov.ph/"],
+        requirements: ["Valid passport (min 6 months)", "Taiwan visa-free entry (confirm status)", "eTravel Registration (https://etravel.gov.ph/)"],
         links: [{ label: "eTravel Registration", url: "https://etravel.gov.ph/" }],
-        fuelSurcharge: "Fuel surcharge NOT included and subject to change.",
+        fuelSurcharge: "Fuel surcharge is NOT included, mandatory to pay, and may vary depending on travel date.",
         insuranceNote: "Compulsory travel insurance required.",
-        remarks: "Free & Easy format. Suggested walking tours provided. Hotel subject to availability.",
+        remarks: "Hotel subject to availability. Tour schedules may change due to weather or operational requirements. Itinerary is subject to change without prior notice.",
       },
     ],
   },

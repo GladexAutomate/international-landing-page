@@ -333,7 +333,6 @@ export const koreaBriefing = {
   assistanceContacts: [
     { label: "Gladex Tours Hotline", value: "+63 917 XXX XXXX" },
     { label: "Email", value: "support@gladextours.com" },
-    { label: "Facebook", value: "m.me/gladextours" },
   ],
 
   dosAndDonts: {

@@ -18,6 +18,22 @@ const GDX_PATTERN         = /^[0-9]+$/;
 const DOMESTIC_PORTAL_URL = "https://domestic-landing-page.vercel.app/";
 const REDIRECT_SECONDS    = 3;
 
+// Destinations with complete, accurate briefing pages.
+// Any valid international booking whose slug is NOT in this set gets sent
+// to the "briefing pending" page instead of the destination page.
+const READY_SLUGS = new Set([
+  "danang-vietnam",
+  "danang-private",
+  "hongkong",
+  "hongkong-private",
+  "singapore",
+  "taipei",
+  "beijing-shanghai-private",
+  "beijing-shanghai-pal",
+  "beijing-shanghai-cebu-pacific",
+  "hongkong-shenzhen-zhuhai",
+]);
+
 // ── Status types ───────────────────────────────────────────────────────────────
 const STATUS = {
   IDLE:               "idle",
@@ -412,9 +428,13 @@ export default function GdxSearchSection() {
         // international slug. Catches bookings cached before detection was in
         // place and any destination not in the international KEYWORD_MAP.
         const cachedSlug = resolveDestinationSlug(cached.booking);
-        if (isDomesticBooking(cached.booking) || !cachedSlug) {
+        if (isDomesticBooking(cached.booking)) {
           setShowWrongPortal(true);
           setStatus(STATUS.WRONG_PORTAL);
+          return;
+        }
+        if (!cachedSlug || !READY_SLUGS.has(cachedSlug)) {
+          navigate("/briefing-pending", { state: { booking: cached.booking, gdx: query } });
           return;
         }
         setBooking(cached.booking);
@@ -479,10 +499,9 @@ export default function GdxSearchSection() {
         return;
       }
       const resolvedSlug = resolveDestinationSlug(fullBooking);
-      if (!resolvedSlug) {
-        // Not a recognized international destination — send to domestic portal.
-        setShowWrongPortal(true);
-        setStatus(STATUS.WRONG_PORTAL);
+      if (!resolvedSlug || !READY_SLUGS.has(resolvedSlug)) {
+        // Destination not yet recognized or briefing not ready.
+        navigate("/briefing-pending", { state: { booking: fullBooking, gdx: query } });
         return;
       }
 

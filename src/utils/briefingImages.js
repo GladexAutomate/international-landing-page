@@ -18,7 +18,9 @@ import { briefingImages } from "virtual:briefing-images";
  */
 const SLUG_TO_FOLDER = {
   "danang-vietnam":         "danang",
+  "danang-private":         "danang",
   "hongkong":               "hongkong",
+  "hongkong-private":       "hongkong",
   "jeju-korea":             "jeju-korea",
   "bali-wisataku":          "bali-wisataku",
   "maldives-maafushi":      "maldives-maafushi",
@@ -27,7 +29,11 @@ const SLUG_TO_FOLDER = {
   "vietnam-hanoi":          "vietnam-hanoi",
   "kuala-lumpur":           "kuala-lumpur",
   "bangkok-pattaya":        "bangkok-pattaya",
-  "beijing-shanghai":       "beijing-shanghai",
+  "beijing-shanghai":         "beijing-shanghai",
+  "beijing-shanghai-private": "beijing-shanghai",
+  "beijing-shanghai-pal":           "beijing-shanghai",
+  "beijing-shanghai-cebu-pacific":  "beijing-shanghai",
+  "hongkong-shenzhen-zhuhai":       "hongkong",
   "new-zealand":            "new-zealand",
   "tri-city":               "tri-city",
   "twin-city":              "twin-city",

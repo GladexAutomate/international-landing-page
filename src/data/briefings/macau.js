@@ -34,54 +34,6 @@ export const macauBriefing = {
     "Ferry transfer fees if routing via Hong Kong (check with your Gladex coordinator)",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila Departure → Macau Arrival — Colonial Squares & City First Look",
-      activities: [
-        "Depart from Ninoy Aquino International Airport (NAIA). If routing via Hong Kong: clear Hong Kong immigration at HKIA, then proceed to the Sky Pier (HKIA) for the ferry to Macau (approximately 1 hour). If direct flight via Air Macau or Cebu Pacific: arrive directly at Macau International Airport (MFM).",
-        "Arrive at Macau Ferry Terminal (Outer Harbour) or Taipa Ferry Terminal and clear Macau Immigration. Philippine passport holders are visa-free for 30 days — no visa required.",
-        "Collect luggage and clear Macau Customs. Declare cash over MOP 120,000.",
-        "Gladex Tours representative will meet you at the arrivals area or ferry terminal exit.",
-        "Transfer to hotel. Standard check-in is 3:00 PM. Casino-hotels on the Cotai Strip require a credit card or cash deposit at check-in.",
-        "Afternoon: Explore Senado Square (Largo do Senado) — UNESCO-listed wave-mosaic cobblestone square surrounded by pastel-coloured colonial buildings. The heart of Macau's historic district.",
-        "Walk from Senado Square to the Ruins of St. Paul's Cathedral — 700 metres through souvenir-lined Rua de São Paulo. The illuminated stone façade at night is Macau's defining image.",
-        "Evening: Stroll around Macau Tower area promenade and view from below. Optional: Macau Tower Observation Deck (admission applies). Dinner at a Macanese restaurant near Senado Square.",
-        "Casino orientation walk — freely enter and walk through any casino lobby (passport required for entry into the gaming floor). No obligation to gamble.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Cotai Strip, A-Ma Temple, Taipa Village & Egg Tarts",
-      activities: [
-        "Morning: Breakfast at hotel. Board the free casino shuttle bus (all major Cotai Strip resorts operate free shuttles from Ferry Terminal) to the Cotai Strip.",
-        "Venetian Macau — Asia's largest single-structure hotel and casino. Walk through the Grand Canal Shoppes — an indoor recreation of Venice's Grand Canal complete with hand-painted ceilings, gondolas, and costumed performers. Free to enter and explore.",
-        "Galaxy Macau and City of Dreams — walk through the spectacular casino-resort lobbies. The Galaxy's Sky Habitat outdoor area features a wave pool and river pool visible from the lobby level.",
-        "Grand Lisboa Casino and Hotel — the most architecturally dramatic building in Macau. The golden lotus-shaped dome rises from a 54-storey neon tower. The exterior is one of Macau's most photographed landmarks.",
-        "Afternoon: A-Ma Temple — Macau's oldest temple, dating to 1488 (predating Portuguese settlement). Dedicated to A-Ma, the goddess of seafarers — the name 'Macau' derives from this temple. Incense-filled, atmospheric, and free to enter.",
-        "Taipa Village — traditional residential village of Portuguese colonial houses on Taipa Island. Wander the lane of Rua do Cunha (Souvenir Street) for Macanese preserved foods, almond cookies, and bakkwa (beef jerky).",
-        "Egg tart stop: Koi Kei Bakery (best in Taipa Village for fresh, local-style egg tarts) or ask your guide about Lord Stow's Bakery satellite location. Try the original Lord Stow's egg tart if your itinerary permits a Coloane side trip.",
-        "Evening: Dinner in Taipa Village at a Macanese or Portuguese restaurant. Return to hotel via casino shuttle or taxi.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Coloane Village, Lighthouse, Last Shopping & Departure",
-      activities: [
-        "Morning: Breakfast at hotel. Check-out by 12:00 PM — store luggage with hotel concierge if needed.",
-        "Coloane Village — the most tranquil neighbourhood in Macau. A sleepy former fishing village at the southern tip of Coloane Island. Visit the Chapel of St. Francis Xavier, Coloane Village Square, and the colorful waterfront.",
-        "Lord Stow's Bakery (original location) in Coloane Village — the source of the original Macau Portuguese egg tart recipe, created by English baker Andrew Stow in 1989. Always a queue — arrive early for the freshest batch.",
-        "Lighthouse Hill (Guia Fortress) — the Guia Fort and lighthouse (the oldest lighthouse on the China coast, built 1865) sit on Macau's highest point. The 360-degree panoramic views over the city, Pearl River Delta, and distant Zhuhai skyline are spectacular.",
-        "Last souvenir shopping at Senado Square area — Rua de São Paulo shops for local products: almond cookies, beef jerky (bakkwa), Macau Wine, Portuguese canned goods (sardines, bacalhau), and traditional Macanese ceramics.",
-        "Lunch at a local eatery in the historic district before departure.",
-        "Transfer to Macau Ferry Terminal (Outer Harbour) or Taipa Ferry Terminal for the ferry back to Hong Kong (if via HK) or to Macau International Airport (MFM) for direct return flight.",
-        "Arrive in Manila. End of the Gladex Tours Macau City & Casino Tour.",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -418,7 +370,6 @@ export const macauBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -485,7 +436,6 @@ export const macauBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
   },

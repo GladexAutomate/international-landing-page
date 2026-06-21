@@ -43,81 +43,6 @@ export const newZealandBriefing = {
   ],
 
   // ─── ITINERARY ─────────────────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Auckland | Arrival & Viaduct Harbour",
-      activities: [
-        "Depart Manila on connecting flight (approx. 10–12 hours total travel including layover)",
-        "Arrive Auckland International Airport (AKL)",
-        "IMPORTANT: All food items must be declared at NZ biosecurity — declare even sealed snacks",
-        "Pass through customs and biosecurity screening",
-        "Transfer to Auckland city hotel (approx. 25 min from airport)",
-        "Check in and freshen up",
-        "Evening walk to Viaduct Harbour — Auckland's lively waterfront precinct",
-        "Dinner at Viaduct restaurants (seafood recommended — green-lipped mussels!)",
-        "Optional: View Auckland Sky Tower lit up at night from Viaduct (free)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Waitomo Glowworm Caves + Hobbiton Movie Set",
-      activities: [
-        "Early breakfast and depart Auckland south (approx. 2.5h drive)",
-        "Waitomo Glowworm Caves — magical 30-minute boat tour through limestone cave under millions of bioluminescent glowworms (Arachnocampa luminosa, endemic to NZ)",
-        "Drive to Matamata (approx. 45 min from Waitomo)",
-        "Hobbiton Movie Set — 2-hour guided walking tour through The Shire as used in Lord of the Rings and The Hobbit trilogies",
-        "See Bag End, the Party Tree, working water mill, and 44 hobbit holes",
-        "End tour at The Green Dragon Inn — included drink (Southfarthing Ale or cider)",
-        "Return to Auckland (approx. 2h drive)",
-        "Evening free — optional Ponsonby Road bars/restaurants or early rest",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Rotorua — Geothermal Wonders & Māori Culture",
-      activities: [
-        "Depart Auckland to Rotorua (approx. 2.5h drive south-east)",
-        "Wai-O-Tapu Thermal Wonderland — Lady Knox Geyser eruption at 10:15am (daily), Champagne Pool (vivid orange-rimmed hot spring), Artist's Palette, Rainbow Crater",
-        "Lunch break in Rotorua town (rotisserie chicken from Pak'nSave or local café)",
-        "Te Puia Māori Cultural Village — Pōhutu Geyser (largest active geyser in Southern Hemisphere), kiwi house (see nocturnal kiwi birds!), traditional Māori weavers and carvers at work, geothermal mud pools",
-        "Evening Māori hāngi dinner — traditional steam-cooked feast (lamb, chicken, kumara/sweet potato, potatoes, bread) cooked underground with heated rocks",
-        "Kapa haka cultural performance — haka, poi, waiata (traditional songs), stick games",
-        "Overnight in Rotorua",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Rotorua Free Activities → Return Auckland",
-      activities: [
-        "Optional morning: Skyline Rotorua Gondola + luge (scenic gondola ride up Mount Ngongotahā, thrilling luge carts down — NZD 40–55 per person, not included)",
-        "Optional: Rotorua Museum / Te Ara Ahi Geothermal Boardwalk (free outdoor walk through steaming vents)",
-        "Optional: Redwood Treewalk Rotorua (elevated walkway through ancient redwood forest, NZD 32 adult)",
-        "Afternoon drive back to Auckland (2.5h)",
-        "Auckland highlights: Auckland Domain + War Memorial Museum (New Zealand's national museum, free entry grounds)",
-        "Mount Eden volcanic crater summit (free, panoramic 360° city, harbour, and Rangitoto Island views)",
-        "Evening: Ponsonby Road (Auckland's trendiest dining strip) for dinner",
-        "Optional: Britomart precinct for cocktails",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Auckland City + Departure",
-      activities: [
-        "Morning optional: Waiheke Island (40-min Fullers ferry from downtown Ferry Building, NZD 44 return — vineyards, olive groves, beautiful bays — not included)",
-        "Alternatively: Auckland Sky Tower interior visit + optional SkyJump bungy (Sky Tower entry NZD 32 adult)",
-        "Queen Street last shopping — duty-free, NZ woolens, Manuka honey, pineapple lumps",
-        "Britomart/Newmarket for boutique NZ design labels",
-        "Transfer to Auckland International Airport",
-        "Check-in and depart Auckland for Manila (via connecting city)",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── TRAVEL INFORMATION ────────────────────────────────────────────────────
   travelInformation: {
@@ -502,7 +427,6 @@ export const newZealandBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -660,7 +584,6 @@ export const newZealandBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

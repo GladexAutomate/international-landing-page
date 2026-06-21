@@ -43,94 +43,6 @@ export const chiangmaiBriefing = {
   ],
 
   // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila to Chiang Mai — Arrival · Night Bazaar · Street Food Welcome",
-      activities: [
-        "Depart from Manila and fly to Chiang Mai International Airport (CNX) — direct or via Bangkok (BKK/DMK).",
-        "No visa required for Philippine passport holders — receive a 30-day visa-free stamp at immigration. Present your Thailand TDAC (Digital Arrival Card) reference.",
-        "After immigration clearance and baggage collection, meet your Gladex tour guide at the Arrivals Hall.",
-        "Transfer to your hotel in the Chiang Mai Old City area — approximately 15–20 minutes from the airport.",
-        "Hotel check-in. Standard check-in time is 2:00 PM — early check-in subject to availability.",
-        "Evening orientation and welcome dinner at the Chiang Mai Night Bazaar (Chang Klan Road) — one of Thailand's most famous nightly markets.",
-        "Explore the Night Bazaar food stalls and try your first bowl of Khao Soi — Chiang Mai's signature coconut curry noodle soup.",
-        "Optional evening stroll along the Old City moat and Tha Phae Gate — the iconic 700-year-old main gate of the ancient walled city.",
-        "Overnight stay in Chiang Mai.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Doi Inthanon National Park — Thailand's Highest Peak · Twin Pagodas · Waterfalls · Hill Tribe Village",
-      activities: [
-        "After breakfast, depart early for a full-day tour of Doi Inthanon National Park — approximately 1.5 hours from Chiang Mai city.",
-        "Doi Inthanon is Thailand's highest peak at 2,565 m — significantly cooler than the city. Bring a jacket.",
-        "First stop: Wachirathan Waterfall — a powerful multi-tiered cascade surrounded by lush forest.",
-        "Visit the Twin Royal Pagodas (Napaphon Phumisiri and Naphapol Phumisiri) — built in honour of the King and Queen, with spectacular mountain views and manicured gardens.",
-        "Trek to the summit of Doi Inthanon — the highest point in Thailand, surrounded by montane cloud forest and rare birds.",
-        "Optional: Doi Pui Hmong Hill Tribe Village — authentic Northern Thai hill tribe community with traditional crafts and costumes.",
-        "Lunch at a local restaurant near the park.",
-        "Return to Chiang Mai in the late afternoon.",
-        "Dinner at your leisure — explore Nimmanhaemin Road cafés or the Night Bazaar area.",
-        "Overnight stay in Chiang Mai.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Elephant Nature Park — Ethical Elephant Encounter (NO Riding)",
-      activities: [
-        "After breakfast, depart for Elephant Nature Park — Chiang Mai's premier ethical elephant rescue sanctuary.",
-        "IMPORTANT: This is a NO-RIDING, NO-PERFORMANCE sanctuary. Elephants have been rescued from logging and tourism industries and live freely in a natural environment.",
-        "Full-day activities at the sanctuary: feed the elephants nutritious fruits, walk alongside them in the jungle, and watch them bathe and play in the river.",
-        "Learn about each elephant's rescue story and the conservation work done at the sanctuary.",
-        "Included lunch at the sanctuary's vegetarian buffet.",
-        "Optional: Bathe with elephants in the river (depending on current sanctuary policy — check with your guide).",
-        "Return to Chiang Mai in the late afternoon.",
-        "Free evening — explore the Old City or Sunday Walking Street on Wualai Road if visiting on a Sunday.",
-        "Overnight stay in Chiang Mai.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Doi Suthep Temple · Old City Temples · Wualai Walking Street",
-      tourOptions: [
-        { name: "Chiang Mai City Private Tour", note: "THB 1,800 · Private guided city tour — flexible schedule and stops", img: "https://product-image.globaltix.com/gtImage/4a9ca3f5-d28c-4f5d-ba4c-1790390de3c3" },
-        { name: "Muay Thai — Kalare Night Bazaar Boxing Stadium", note: "THB 600 · Evening Muay Thai match at the Night Bazaar · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/d903a024-3db4-43bf-8cf7-da04944833f5" },
-        { name: "Muay Thai — Loi Kroh Boxing Stadium", note: "THB 1,000 · Premium evening Muay Thai match · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/a757c047-4f59-4da8-ae83-c96669ee5bf2" },
-      ],
-      activities: [
-        "After breakfast, depart for Wat Phra That Doi Suthep — Chiang Mai's most sacred and iconic temple perched at 1,073 m above the city.",
-        "Ascend via the 306-step Naga staircase (or cable car) to the golden chedi with sweeping panoramic views of the entire Chiang Mai valley.",
-        "Observe the golden chedi, Buddha images, and temple bells. Dress code strictly enforced — long pants and covered shoulders required.",
-        "Return to the city for the Old City temple walking tour.",
-        "Visit Wat Chedi Luang — one of Chiang Mai's oldest temples, once home to the Emerald Buddha, with a partially collapsed 15th-century chedi.",
-        "Visit Wat Phra Singh — Chiang Mai's most revered temple, housing the famous Phra Singh Buddha image and classic Lanna-style architecture.",
-        "Afternoon stop at Tha Phae Gate — the iconic main gate of the 700-year-old fortified Old City, a perfect photo spot.",
-        "Evening: Wualai Walking Street (Saturdays) or Night Bazaar — the best place for handcrafted silver jewelry, teak wood handicrafts, lacquerware, and Northern Thai textiles.",
-        "Dinner in the Old City area.",
-        "Overnight stay in Chiang Mai.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Sticky Waterfall (Bua Thong) · Cooking Class (Optional) · Departure",
-      activities: [
-        "After breakfast, morning visit to Bua Thong Sticky Waterfall (Nam Tok Bua Tong) — a unique limestone waterfall where you can walk directly up the cascades without slipping, unlike any other waterfall in the world.",
-        "Return to Chiang Mai for optional activities before departure.",
-        "Optional: Chiang Mai cooking class — learn to make Khao Soi, Tom Kha Gai, and Pad Thai from scratch at a local cooking school (includes a morning market visit at your own expense).",
-        "Last-minute shopping at the Night Bazaar or Nimmanhaemin Road concept stores.",
-        "Hotel checkout. Secure luggage with the front desk if your flight is in the evening.",
-        "Transfer to Chiang Mai International Airport (CNX) for your return flight to Manila.",
-        "Complete check-in, immigration, and departure procedures.",
-        "Safe flight home with memories of temples, elephants, and the best food in Thailand.",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── 5. TRAVEL INFORMATION ───────────────────────────────────────────────
   travelInformation: {
@@ -603,7 +515,6 @@ export const chiangmaiBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -754,7 +665,6 @@ export const chiangmaiBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

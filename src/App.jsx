@@ -7,6 +7,7 @@ import PageNotFound from './lib/PageNotFound';
 import Home from './pages/Home';
 import DestinationPreview from './pages/DestinationPreview';
 import TourPackagePage from './pages/TourPackagePage';
+import BriefingPendingPage from './pages/BriefingPendingPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/destination/:slug" element={<DestinationPreview />} />
           <Route path="/preview/:slug" element={<DestinationPreview />} />
           <Route path="/tour-packages/:slug" element={<TourPackagePage />} />
+          <Route path="/briefing-pending" element={<BriefingPendingPage />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>

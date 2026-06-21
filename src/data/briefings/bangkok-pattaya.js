@@ -42,87 +42,6 @@ export const bangkokPattayaBriefing = {
     "Laundry, telephone, and minibar charges at hotels",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila Departure — Bangkok Arrival — Honey Bee Farm — Asiatique",
-      activities: [
-        "Arrive at NAIA 4–5 hours before your international flight to Bangkok",
-        "Proceed to your airline check-in counter with passport and booking reference",
-        "After check-in, proceed to BI Departure Hall — present passport, boarding pass, and round-trip ticket",
-        "Show eTravel QR code when requested at BI departure",
-        "Fly Manila (MNL) → Bangkok Suvarnabhumi (BKK) — approx. 3.5 hours",
-        "Upon arrival, proceed through immigration (Thailand TDAC must be registered in advance)",
-        "Collect baggage and meet your Gladex Tours representative at the Arrivals Hall",
-        "Transfer to Bangkok hotel — check-in (standard 2:00 PM; early subject to availability)",
-        "Afternoon visit: Honey Bee Farm — interactive bee farm experience, taste honey products",
-        "Evening: Asiatique The Riverfront — Bangkok's most atmospheric night market along the Chao Phraya River",
-        "Return to hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Bangkok — Gems Gallery — Wat Arun — Wat Pho — Noah Dinner Cruise",
-      activities: [
-        "Breakfast at hotel",
-        "Morning: Gems Gallery Bangkok — Thailand's largest showcaseof Thai gemstones and gold jewelry",
-        "Riverboat crossing to Wat Arun (Temple of Dawn) — explore the intricate porcelain mosaic spires",
-        "Walk to nearby Wat Pho — see the magnificent 46-meter gold-plated Reclining Buddha",
-        "Afternoon free for shopping or exploration near the Chao Phraya riverside",
-        "Evening: Noah Luxury Dinner Cruise — dinner and live entertainment sailing the Chao Phraya River at night",
-        "Return to Bangkok hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Bangkok → Pattaya — Nong Nooch Village — Pattaya Beach Evening",
-      tourOptions: [
-        { name: "Alcazar Cabaret Show Pattaya", note: "THB 800 · GT Recommended · World-famous Pattaya cabaret and cultural show · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/257a5fe5-9d48-4e01-8b43-9790479d3936" },
-      ],
-      activities: [
-        "Breakfast at hotel",
-        "Check out of Bangkok hotel",
-        "Private coach transfer Bangkok → Pattaya (approx. 1.5–2 hours via the expressway)",
-        "Check in at Pattaya hotel",
-        "Full afternoon: Nong Nooch Village — elephant show, Thai classical cultural performance, world-class botanical garden with topiary art and theme gardens",
-        "Return to hotel; freshen up",
-        "Evening: Pattaya Beach — sunset stroll along the main beachfront, optional waterfront dinner",
-        "Free evening — Walking Street area for those who wish to explore (exercise caution)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Coral Island (Koh Larn) — Snorkeling — Pattaya Walking Street Night",
-      activities: [
-        "Breakfast at hotel",
-        "Morning: Transfer to Bali Hai Pier for speedboat departure to Koh Larn (Coral Island)",
-        "Full beach day on Koh Larn — crystal-clear water, white sand, snorkeling gear available for rent",
-        "Lunch on the island (own expense — seafood stalls on the beach)",
-        "Return speedboat to Pattaya in the afternoon",
-        "Rest at hotel",
-        "Optional evening: Pattaya Walking Street — Pattaya's famous entertainment strip (adults only, exercise caution)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Central Festival Mall — Drive Back to Bangkok — Departure",
-      activities: [
-        "Breakfast at hotel",
-        "Check out of Pattaya hotel",
-        "Morning: Central Festival Pattaya Beach — last chance for shopping before departure",
-        "Private coach transfer Pattaya → Bangkok Suvarnabhumi Airport (approx. 1.5–2 hours)",
-        "Optional stop: Icon Siam Bangkok riverside mall (time permitting)",
-        "Arrive at Suvarnabhumi Airport — minimum 3 hours before international departure",
-        "Check in, proceed through immigration, and board your return flight to Manila",
-        "Arrive Manila — end of the Bangkok + Pattaya Twin City Tour",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -531,7 +450,6 @@ export const bangkokPattayaBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -666,7 +584,6 @@ export const bangkokPattayaBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
   },

@@ -33,62 +33,6 @@ export const bangkokBriefing = {
     "Other items not mentioned or specified",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Bangkok Arrival",
-      activities: [
-        "Upon arrival at Suvarnabhumi / Don Mueang Airport, meet and greet with the agency representative at the meeting area.",
-        "After that, enjoy your SIC transfer going to the hotel for check-in.",
-        "Then enjoy free time in the afternoon — perfect for exploring nearby streets, trying local food, or simply relaxing after the flight.",
-        "Overnight stay at the hotel.",
-        "NOTE: All departing international passengers in the Philippines are required to register through the E-Travel Portal within 72 hours before departure — https://etravel.gov.ph/",
-        "All non-Thai nationals entering Thailand by air, land, or sea must complete the Thailand Digital Arrival Card (TDAC) online before arrival — https://tdac.immigration.go.th",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Day 2 / 3 / 4 — Your Scheduled Tours",
-      tourOptions: [
-        { name: "Calypso Cabaret Bangkok", note: "THB 500 · Iconic Thai cabaret show at Asiatique The Riverfront · Instant confirmation", img: "https://product-image.globaltix.com/gtImage/2c0bdf11-12aa-4a84-b605-93bf20b96b02" },
-        { name: "Bangkok Private Tour with Baiyoke Tower Buffet", note: "THB 3,200 · Private city tour + all-you-can-eat buffet at Baiyoke Sky Tower", img: "https://product-image.globaltix.com/gtImage/8cfb57ba-2146-48d6-a527-f23056550dbc" },
-        { name: "Ayutthaya Private Tour", note: "THB 3,800 · Full-day private tour to Thailand's ancient capital — UNESCO World Heritage Site", img: "https://product-image.globaltix.com/gtImage/93647399-a9a6-4055-bfa6-9d14ec791588" },
-      ],
-      activities: [
-        "Please refer to your travel itinerary for your scheduled tours and their corresponding dates, including any optional tours you may have availed.",
-        "Bangkok City Tour – Option 1: Pick up at hotel lobby 08:00–08:30 AM. Sites: Wat Saket (Golden Mountain), Wat In (Standing Buddha), Lucky Temple, WILLS Gems Gallery. With tour guide and roundtrip SIC transfer. After tour, free time at your own leisure.",
-        "Bangkok City Tour – Option 2: Pick up at hotel lobby 08:00–08:30 AM. Sites: Wat Arun (Temple of Dawn), roundtrip boat transfer along the Chao Phraya River, Lucky Temple, WILLS Gems Gallery. With tour guide and roundtrip SIC transfer. After tour, free time at your own leisure.",
-        "Bangkok City Tour – Option 3: Pick up at hotel lobby 08:00–08:30 AM. Sites: Canal Tour, Biggest Sitting Buddha, Fish Feeding, Lucky Temple, Wills Gems. With tour guide and roundtrip SIC transfer. After tour, free time at your own leisure.",
-        "Bangkok Tour – White Orchid River Dinner Cruise: Pick up at hotel lobby 05:30 PM. Welcome drink on open deck overlooking the Chao Phraya River. Luxurious international and Thai dinner buffet with a fusion of global flavors, complete with coffee, tea, and desserts. Entertained by a vibrant Bangkok-style cabaret show. Duration: 5:30 PM – 10:00 PM. Drop off at hotel. Overnight at the hotel.",
-        "Bangkok Tour – Chaophraya Princess Dinner Cruise: Pick up at hotel lobby 05:30 PM. Scenic cruise along the Chao Phraya River passing historic landmarks such as Wat Kanlaya, Wat Arun, and the Grand Palace. 2-hour international buffet with a fusion of global cuisines, coffee, tea, and water included. Live music on board. Duration: 5:30 PM – 10:00 PM. Drop off at hotel. Overnight at the hotel.",
-        "Bangkok Tour – Floating Market (Half Day): Pick up at hotel lobby 07:00 AM (may vary depending on hotel location). Floating Market with boat ride and roundtrip SIC transfer. Explore the floating market aboard a traditional paddle boat or longtail boat, shop for local handicrafts and souvenirs, savor authentic Thai street food such as Pad Thai, Boat Noodles, and Mango Sticky Rice, and witness traditional coconut sugar-making and coconut shell carving demonstrations.",
-        "Bangkok Tour – Floating Market and Elephant Riding (2 Activities): Pick up at hotel lobby 07:00 AM (may vary depending on hotel location). Floating Market & Elephant Riding with roundtrip SIC transfer. Explore the floating market aboard a traditional paddle boat or longtail boat, shop for local handicrafts and souvenirs, savor authentic Thai street food, and experience an amazing elephant ride through scenic surroundings.",
-        "Bangkok Tour – Karen Long Neck + Floating Market, Crocodile Farm, Elephant Theme Show and Riding w/ Lunch: Pick up at hotel lobby 07:00 AM (may vary depending on hotel location). With tour guide and roundtrip SIC transfer. Experience a fun-filled day with a visit to the Karen Long Neck Village, a scenic floating market boat ride, thrilling crocodile farm shows, an exciting elephant theme show, and an unforgettable elephant riding experience, complete with a delicious local lunch.",
-        "Bangkok Tour – Bangkok Temple and Grand Palace: Pick up at hotel lobby 08:00 AM (may vary depending on hotel location). Bangkok Temple and Grand Palace with lunch, tour guide, and roundtrip SIC transfer. Discover the cultural heart of Bangkok with a visit to the Grand Palace, the historic royal residence since 1782, and explore nearby sacred temples that showcase Thailand's rich heritage, intricate architecture, and spiritual traditions.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Day 2 / 3 / 4 — Your Scheduled Tours (continued)",
-      activities: [
-        "Please refer to your travel itinerary for your scheduled tours on this day.",
-        "Tour schedules vary per package — see your travel voucher for the full details of your booked tours and their corresponding dates.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Departure — Check Out and Transfer to Airport",
-      activities: [
-        "After breakfast, prepare for check-out and coordinate hotel pick-up with the tour guide for your transfer back to the airport.",
-        "It's time to say goodbye to Bangkok and head back home with unforgettable memories!",
-        "If may free time po kayo, you may call us directly at +63 917 875 2200 for faster assistance.",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   beforeTravel: [
     "Ensure your passport is valid for at least six (6) months from your travel date.",
@@ -529,7 +473,6 @@ export const bangkokBriefing = {
       category: "Gladex Customer Care",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -676,7 +619,6 @@ export const bangkokBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
     tagline: "Kung may concerns or need assistance during the tour, maaari kayong mag-contact sa inyong tour coordinator or directly sa Gladex Travel and Tours. Thank you for choosing Gladex! We look forward to giving you a smooth, safe, and memorable Bangkok experience!",

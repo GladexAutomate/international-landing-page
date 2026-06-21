@@ -37,65 +37,6 @@ export const maldivesMaafushiBriefing = {
   ],
 
   // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila to Male — Arrival & Maafushi Guesthouse Check-In",
-      activities: [
-        "Depart Manila via connecting flight (Sri Lankan Airlines, Singapore Airlines, or Malaysia Airlines via Colombo, Singapore, or Kuala Lumpur).",
-        "Arrive at Velana International Airport (MLE), Male, Maldives.",
-        "Proceed to Immigration — Philippine passport holders receive a free 30-day tourist visa on arrival.",
-        "Collect baggage and clear customs. Proceed to the Male speedboat jetty as directed by Gladex Tours.",
-        "Board speedboat to Maafushi Island — approximately 20–30 minutes across the South Male Atoll.",
-        "Check in to your Maafushi guesthouse.",
-        "Afternoon: head to Bikini Beach — relax on the white sand and take your first swim in Maafushi's crystal-clear lagoon.",
-        "Evening: explore the local island main street, browse local cafes, and enjoy dinner at a guesthouse restaurant.",
-        "Overnight at Maafushi guesthouse.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Full-Day Snorkeling Excursion — Cocoa Island, Turtle Point & Sandbank Lunch",
-      activities: [
-        "Morning breakfast at the guesthouse.",
-        "Full-day boat excursion: depart for the Cocoa Island snorkeling area in South Male Atoll.",
-        "First snorkeling stop: coral garden reef — encounter sea turtles, reef sharks, moray eels, and vibrant reef fish.",
-        "Second snorkeling stop: shark and ray watching point — black-tip reef sharks, nurse sharks, and eagle rays in the wild.",
-        "Midday: sandbank picnic — boat pulls up to a remote uninhabited white sandbank rising barely above the ocean. Swim, sunbathe, and enjoy a packed lunch in the middle of the Indian Ocean.",
-        "Afternoon snorkeling at a second reef site before returning to Maafushi.",
-        "Evening: walk the island, visit local shops, and dinner at the guesthouse.",
-        "Overnight at Maafushi guesthouse.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Dolphin Watching Cruise, Freediving Intro & Local Island Evening",
-      activities: [
-        "Morning: early sunrise dolphin watching cruise — spinner dolphins are encountered almost daily in the South Male Atoll channels.",
-        "Return to the island for breakfast.",
-        "Late morning: optional freediving introduction class with a certified Maafushi instructor — ideal for beginners.",
-        "Afternoon: local island walk — stroll Maafushi's colourful streets, visit the Friday Mosque, meet locals, and explore the guesthouse strip.",
-        "Late afternoon: last swim at Bikini Beach — catch the golden hour light over the lagoon.",
-        "Evening: Maafushi night market (seasonal) — local snacks, street food, and island atmosphere.",
-        "Overnight at Maafushi guesthouse.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Departure Day — Last Swim, Check-Out & Male Airport",
-      activities: [
-        "Final morning: last swim at Bikini Beach or relaxed breakfast at the guesthouse.",
-        "Check out of the guesthouse by 12:00 noon.",
-        "Speedboat transfer back to Velana International Airport, Male.",
-        "Proceed to check-in counter, complete departure immigration, and board your connecting flight home.",
-        "Arrive in Manila with unforgettable memories from the Maldives.",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── 5. TRAVEL INFORMATION CENTER ────────────────────────────────────────
   travelInformation: {
@@ -582,7 +523,6 @@ export const maldivesMaafushiBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -729,7 +669,6 @@ export const maldivesMaafushiBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

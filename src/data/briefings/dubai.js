@@ -36,87 +36,6 @@ export const dubaiBriefing = {
     "Excess baggage fees",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila Departure → Dubai Arrival — Welcome to the City of Gold",
-      activities: [
-        "Depart from Ninoy Aquino International Airport (NAIA). Check airline guidelines for check-in time — arrive at least 3 hours before international flight.",
-        "Flight to Dubai International Airport (DXB) via Emirates, flydubai, Cebu Pacific connecting, Philippine Airlines, or Etihad — approximately 8–9 hours.",
-        "Arrive at DXB Terminal 1 or 3. Proceed to immigration — biometric capture (fingerprint and photo) is conducted for all first-time visitors.",
-        "Collect luggage and clear customs. Declare cash over AED 60,000 and any restricted items.",
-        "Gladex Tours representative will meet you at the arrivals hall with a name board.",
-        "Transfer to hotel. Standard check-in is 3:00 PM — early check-in subject to availability and hotel policy.",
-        "Evening: Optional stroll around Dubai Mall and Burj Khalifa (exterior view and fountain show). The Dubai Fountain fires every 30 minutes from 6:00 PM — a spectacular free show at the foot of the Burj.",
-        "Welcome dinner at a Filipino or Lebanese restaurant in the Deira area.",
-        "Early rest recommended to recover from jet lag — UAE time is 4 hours ahead of Philippines.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Desert Safari — Dunes, Camels, Bedouin Camp & BBQ Dinner",
-      activities: [
-        "Morning: Leisurely breakfast at hotel. Free time for rest or nearby souvenir shopping.",
-        "Afternoon: Desert Safari pickup from hotel (usually around 2:30–3:00 PM). Travel by 4WD vehicle to the Al Lahbab desert (approximately 45 minutes from Dubai city centre).",
-        "Dune bashing — exhilarating off-road ride over the red sand dunes of the Dubai desert in a 4WD Land Cruiser. Seat belts are mandatory.",
-        "Dune top photo stop — panoramic views of the endless red desert under the late afternoon sun. Golden hour photography opportunity.",
-        "Camel riding at the Bedouin camp — mount and ride a traditional camel for photos and the authentic experience.",
-        "Sandboarding available — board down the face of the dunes (equipment provided by guide).",
-        "Quad biking available at optional extra cost — confirm with your Gladex guide.",
-        "Bedouin camp: Welcome with Arabic coffee (qahwa) and dates. Henna painting, traditional Arabic costume dress-up for photos.",
-        "Live entertainment: Belly dance performance, Tanoura whirling dance (spinning skirt dance), and fire show.",
-        "Lavish Arabic BBQ dinner buffet under the stars — featuring grilled meats, hummus, salads, fresh bread, and dessert.",
-        "Return transfer to hotel by 9:30–10:00 PM.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Dubai City Tour — Heritage, Gold, Creek & Palm Jumeirah",
-      activities: [
-        "Morning: Breakfast at hotel. Early start for the full day city tour.",
-        "Dubai Frame — 150-metre architectural marvel on the border of old and new Dubai. The glass bridge walkway connects the two sides and offers split views of historic Deira and modern Downtown Dubai. Entrance fee: approximately AED 50.",
-        "Al Fahidi Historical Neighbourhood (Dubai Museum) — explore Dubai's ancient past inside the Al Fahidi Fort, the oldest existing building in Dubai (1787). Exhibits trace Dubai's transformation from a fishing and pearl-diving village to a global metropolis.",
-        "Deira Gold Souk — wander through the covered market of over 250 gold retailers. One of the world's most concentrated collections of gold jewellery. Bargaining is expected and encouraged.",
-        "Deira Spice Souk — just minutes from the Gold Souk, the atmospheric lanes of the Spice Souk are filled with saffron, frankincense, dried herbs, and exotic spices. Great for photos and affordable souvenirs.",
-        "Abra (traditional wooden boat) ride across Dubai Creek — AED 1 per person. Cross the historic waterway connecting Deira and Bur Dubai on a traditional wooden ferry, watching cargo dhows loaded with goods.",
-        "Jumeirah Mosque visit — one of the most beautiful mosques in Dubai, open to non-Muslim visitors on select mornings. Dress code strictly enforced — women must wear abaya (provided at entrance).",
-        "Palm Jumeirah Drive — scenic drive through the iconic palm-shaped artificial island. Photo stop with views of Atlantis The Palm and the Dubai Marina skyline.",
-        "Optional: Palm Monorail ride for aerial views over the Palm fronds.",
-        "Evening: Return to hotel or optional dinner at a Dubai Marina or JBR beach restaurant.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Dubai Mall, Burj Khalifa & Global Village Evening",
-      activities: [
-        "Morning: Breakfast at hotel. Leisurely start — free morning for rest or hotel area exploration.",
-        "Dubai Mall — the world's largest shopping mall with over 1,200 stores. Explore the Dubai Aquarium and Underwater Zoo (entrance included in mall access or separate ticket), indoor ice rink, VR Park, and countless dining options.",
-        "Dubai Fountain Show — the world's largest choreographed fountain system fires daily at the base of Burj Khalifa. Day shows at 1:00 PM and 1:30 PM; evening shows every 30 minutes from 6:00 PM to 11:00 PM.",
-        "Optional: Burj Khalifa At The Top (Level 124) — the world's tallest observation deck at 452 metres above ground. Book in advance to avoid queues. Separate entrance fee applies (approximately AED 149–399 depending on level and time).",
-        "Afternoon free time: Shopping at Dubai Mall, or explore nearby Dubai Souk Al Bahar (Arabic-themed mall with Burj Khalifa views).",
-        "Evening: Global Village (seasonal — October to April) — an open-air festival park where 90+ countries present their culture, cuisine, and crafts in themed national pavilions. Filipino pavilion is usually present.",
-        "Dinner at Global Village food street or return to hotel area for dinner.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Free Morning — Last Shopping & Departure",
-      activities: [
-        "Morning: Breakfast at hotel. Check-out by 12:00 PM (noon) — store luggage with hotel concierge if flight is in the evening.",
-        "Last-minute shopping at Deira Gold Souk, Spice Souk, or Dubai Mall for final souvenirs and gifts.",
-        "Lunch at a Filipino restaurant in Deira — there are many Pinoy eateries in the Deira and Naif area catering to the large Filipino community.",
-        "Gladex representative will coordinate departure transfer to Dubai International Airport (DXB).",
-        "Arrive at DXB at least 3 hours before international departure. Check-in, immigration, and security at Dubai International can take significant time during peak hours.",
-        "Duty-free shopping inside DXB — excellent selection of perfumes, chocolates (Al Nassma camel milk chocolates), electronics, and Arabic souvenirs.",
-        "Board flight back to Manila. Arrive in the Philippines the following morning (overnight flight).",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -470,7 +389,6 @@ export const dubaiBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -540,7 +458,6 @@ export const dubaiBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
   },

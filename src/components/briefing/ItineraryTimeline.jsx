@@ -98,7 +98,7 @@ function DayCard({ day, title, activities, tourOptions, galleryImages, theme }) 
   );
 }
 
-export default function ItineraryTimeline({ itinerary = [], theme, slug }) {
+export default function ItineraryTimeline({ itinerary = [], theme, slug, postNote }) {
   if (!itinerary.length) return null;
 
   return (
@@ -126,7 +126,9 @@ export default function ItineraryTimeline({ itinerary = [], theme, slug }) {
           const images =
             item.galleryImages?.length > 0
               ? item.galleryImages
-              : getBriefingDayImages(slug, item.day);
+              : item.dayRange?.length > 0
+                ? item.dayRange.flatMap(d => getBriefingDayImages(slug, d))
+                : getBriefingDayImages(slug, item.day);
 
           return (
             <div key={i} className="relative">
@@ -147,6 +149,16 @@ export default function ItineraryTimeline({ itinerary = [], theme, slug }) {
           );
         })}
       </div>
+
+      {/* Post-itinerary note */}
+      {postNote && (
+        <div
+          className="mt-6 mx-auto max-w-2xl rounded-2xl px-6 py-4 text-center text-sm font-medium"
+          style={{ backgroundColor: "#FFF3E0", border: "1.5px solid #FF9913", color: "#7a4500" }}
+        >
+          {postNote}
+        </div>
+      )}
 
       {/* Safe travels banner */}
       <div className="mt-8 flex justify-center">

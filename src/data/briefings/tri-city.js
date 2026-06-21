@@ -38,76 +38,6 @@ export const triCityBriefing = {
     "Excess baggage charges",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Singapore Changi Airport (SIN) | Check-in | Merlion Park + Marina Bay | Gardens by the Bay Supertrees | Hawker Dinner",
-      activities: [
-        "Depart Manila via Cebu Pacific, Philippine Airlines, AirAsia, or Scoot to Singapore Changi International Airport (SIN)",
-        "Philippine passport holders enter Singapore visa-free — no advance visa application required",
-        "Arrive at Changi Airport — one of the world's most spectacular airports. If time permits before hotel transfer, explore the free Jewel Changi waterfall (RAIN.VORTEX — the world's tallest indoor waterfall at 40 metres). Jewel is connected to Terminal 1.",
-        "Purchase a Singapore tourist SIM card at the Changi arrivals hall SIM kiosks (Singtel, StarHub, or M1) — or activate a pre-purchased eSIM",
-        "Meet your Gladex Tours representative at the arrivals exit with a name board",
-        "Private transfer to Singapore hotel in the city centre — check in and freshen up",
-        "Evening: Merlion Park and Marina Bay Sands waterfront — walk the Marina Bay promenade, photograph the iconic Merlion fountain against the glittering Marina Bay Sands hotel and casino backdrop",
-        "Gardens by the Bay Supertrees: the free outdoor Supertree Grove is spectacular after dark when the illuminated steel supertrees glow against the Singapore skyline. The outdoor area is always free to enter.",
-        "Dinner at a Singapore hawker centre — the world's most beloved street food institution. Try Chicken Rice (Hainanese), Char Kway Teow, Laksa, or Satay at communal food court-style venues where generations of hawkers have perfected their single dish",
-        "Return to hotel — Batam ferry day tomorrow",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Singapore Half-Day City Tour | Merlion, Chinatown, Little India, Arab Street, Clarke Quay | Afternoon: Sentosa Island or Gardens by the Bay",
-      activities: [
-        "Breakfast at hotel — Singapore city tour departs from hotel",
-        "Merlion Park: begin at Singapore's most recognisable landmark — the half-lion, half-fish Merlion statue at the mouth of the Singapore River with Marina Bay Sands behind. The most photographed spot in Singapore.",
-        "Chinatown: explore the colourful shophouse streets, Buddha Tooth Relic Temple, Chinatown Complex Hawker Centre (one of Singapore's best), and souvenir shops along Pagoda Street and Trengganu Street",
-        "Little India: a sensory burst of flower garlands, spice shops, gold jewellery, and the scent of incense along Serangoon Road and Tekka Centre. The Sri Veeramakaliamman Temple is a spectacular piece of South Indian architecture.",
-        "Arab Street and Bugis: the Muslim quarter centred on the golden-domed Sultan Mosque — a beautiful piece of Moorish architecture surrounded by fabric shops, Malay restaurants, and the Kampong Glam heritage precinct",
-        "Clarke Quay: Singapore's most vibrant riverside entertainment district — converted colonial warehouses now house restaurants, bars, and clubs along the Singapore River. Best at dusk when the coloured facades glow in the river reflection.",
-        "Afternoon free choice: Option A — Sentosa Island (cable car or walking bridge, Siloso Beach, Universal Studios exterior, iFly Singapore). Option B — Gardens by the Bay Cloud Forest and Flower Dome (SGD 28, Singapore's most spectacular indoor garden). Option C — Orchard Road shopping (Singapore's premier retail street).",
-        "Evening: Clarke Quay for dinner and the Singapore River nightlife atmosphere, or return to hotel and prepare for tomorrow's Batam full-day tour",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "BATAM INDONESIA Full-Day Tour | Ferry | Ocarina Beach | Nagoya Hill Mall | Mega-Cheap Seafood Lunch | Barelang Bridge",
-      activities: [
-        "Breakfast at hotel — early departure for Harbourfront Ferry Terminal, Singapore",
-        "Board Batam ferry from Harbourfront (HarbourFront Ferry Terminal) — approximately 45-minute high-speed ferry crossing to Batam Center Ferry Terminal, Indonesia",
-        "IMPORTANT: Batam Indonesia Visa-on-Arrival required at Batam Center Ferry Terminal — USD 35 per person, paid at the immigration counter upon arrival (Batam Free Trade Zone)",
-        "Indonesian immigration and customs at Batam Center — straightforward process. Have USD 35 per person in cash ready.",
-        "Transfer to Ocarina Resort and beach area — Batam's most popular leisure destination on the Batam coast. Relax on the beach and enjoy the dramatic view across the strait toward Singapore's skyline (visible on a clear day).",
-        "Nagoya Hill Shopping Mall: Batam's premier shopping destination — electronics, fashion, watches, bags, sportswear, and souvenirs at prices dramatically lower than Singapore or Manila. A major draw for Singapore day-trippers. Practice bargaining at independent shops; prices at mall stores are generally fixed.",
-        "BATAM SEAFOOD LUNCH: the absolute highlight for many — a full spread of fresh lobster, mud crab, tiger prawns, clams, and fish at a Batam seafood restaurant for a fraction of Singapore prices. Lobster at Batam: SGD 30–50 per kg. The same lobster in Singapore: SGD 150–250. The savings are extraordinary. This meal alone is worth the ferry ride.",
-        "Maha Vihara Duta Maitreya Buddhist Temple: one of the largest Buddhist temple complexes in Southeast Asia — a striking series of ornate halls, pagodas, and a massive Maitreya Buddha statue. A beautiful contrast to the shopping.",
-        "Barelang Bridge (Coastal Bridge): drive across the famous series of six bridges connecting several of Batam's islands — scenic coastal drive with ocean views and photo opportunities from the bridge tops",
-        "Return to Batam Center Ferry Terminal for the evening ferry back to Singapore Harbourfront",
-        "Return to hotel in Singapore — an incredible amount of country, food, and culture packed into one day",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "LEGOLAND MALAYSIA Full Day | Johor Bahru (1hr via Causeway) | 70+ Rides | LEGO City | Miniland Asia | Dinner Singapore | Departure",
-      activities: [
-        "Breakfast at hotel — check out and store luggage at the front desk",
-        "Depart for Johor Bahru, Malaysia by coach across the Johor-Singapore Causeway — approximately 1 hour including the border crossing. Have passport ready for both Singapore exit and Malaysia entry immigration (both visa-free for Philippine passports).",
-        "Arrive at Legoland Malaysia in Nusajaya, Johor Bahru — Southeast Asia's first LEGOLAND theme park and one of Malaysia's top family attractions",
-        "LEGOLAND Theme Park: 7 themed areas with 70+ rides, shows, and attractions — LEGO City (police car and fire truck rides), Imagination (roller coasters), Adventure (boat rides and dinosaurs), Kingdoms (castle rides), LEGO Technic, DUPLO Valley (for young children), and the extraordinary Miniland Asia featuring scaled LEGO recreations of iconic Asian landmarks (Kuala Lumpur Twin Towers, Angkor Wat, The Great Wall, and more)",
-        "LEGOLAND Water Park (if included): Southeast Asia's only LEGOLAND Water Park — water slides, wave pool, and build-your-own LEGO raft experience. Bring your swimwear and change of clothes.",
-        "Lunch at Legoland food outlets — various cuisines available within the park",
-        "Afternoon: continue exploring the park at your own pace — LEGO stores within the park for official LEGOLAND merchandise and sets",
-        "Depart Legoland and return to Singapore via Causeway — allow extra time as the Causeway can be congested on weekends and public holidays",
-        "Collect luggage from hotel, transfer to Changi Airport — allow at least 2.5–3 hours before your Manila flight",
-        "Last chance at Changi: Jewel RAIN.VORTEX waterfall, Shiseido Forest Valley, or departure hall shopping before your flight",
-        "Board flight back to Manila — end of your Gladex Tours 4D3N Tri-City adventure!",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -563,7 +493,6 @@ export const triCityBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -713,7 +642,6 @@ export const triCityBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
   },

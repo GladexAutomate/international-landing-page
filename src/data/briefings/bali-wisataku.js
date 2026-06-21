@@ -43,80 +43,6 @@ export const baliWisaktuBriefing = {
   ],
 
   // ─── ITINERARY ─────────────────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Bali | VOA Arrival & Seminyak Sunset",
-      activities: [
-        "Depart Manila — flight to Ngurah Rai International Airport (DPS), Denpasar, Bali",
-        "IMPORTANT: Have USD 35 cash ready for Visa-on-Arrival payment at the airport",
-        "Arrive DPS — proceed to VOA counter (NOT immigration line) first to pay USD 35 and receive VOA stamp",
-        "After VOA, proceed to immigration with stamped passport, then baggage claim",
-        "Private air-conditioned transfer to 4-star hotel in Seminyak or Canggu area",
-        "Check in, freshen up, relax",
-        "Evening: Seminyak Beach sunset walk — one of Bali's most iconic sunset spots",
-        "Welcome dinner at a Seminyak restaurant (rooftop sunset dining recommended)",
-        "Optional: Seminyak nightlife strip exploration (Ku De Ta, Potato Head beach clubs in the area)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Nusa Penida Island — Full Day Premium Excursion",
-      activities: [
-        "Early departure — speedboat from Sanur Harbor (approx. 45–50 min each way)",
-        "KELINGKING BEACH (Pantai Kelingking): The iconic 'T-Rex dinosaur cliff' — dramatic limestone headland in the shape of a Tyrannosaurus Rex rising from brilliant turquoise water. Viewpoint photos from the cliff top (200m above sea). Optional: hike down to the beach below (difficult, 45 min each way, steep and slippery — guide's discretion based on conditions).",
-        "ANGEL'S BILLABONG: A natural infinity pool carved into the volcanic rock shelf at the ocean's edge. Turquoise tidal pool with crashing waves around it — extraordinary photography. Accessible only at low tide and calm sea conditions.",
-        "BROKEN BEACH (Pantai Pasih Uug): A natural stone arch forming a circle over the sea — waves crash through the arch creating spectacular spray. Walk the clifftop rim for the best angles.",
-        "CRYSTAL BAY: Snorkeling with Mola Mola (oceanic sunfish — endemic to this area Aug–Oct) and manta rays. The bay has exceptionally clear water and healthy coral with abundant marine life.",
-        "Lunch included on Nusa Penida (local warung on the island)",
-        "Return speedboat to Sanur Harbor, private transfer to hotel",
-        "Rest and dinner at leisure",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Ubud — Cooking Class, Rice Terraces & Monkey Forest",
-      activities: [
-        "Private transfer from hotel to Ubud (approx. 1.5–2h from Seminyak)",
-        "BALINESE COOKING CLASS: Morning session at a traditional family compound kitchen in Ubud. Learn to prepare 3 classic Balinese dishes (typically: Nasi Goreng, Babi Guling, Lawar, or Saté Lilit). Includes market walk, spice introduction, hands-on cooking, and eating your creations for lunch.",
-        "TEGALLALANG RICE TERRACES: The most photogenic rice terraces in Bali — stepped UNESCO-listed green terraces cascading down a valley. Best photography from the warung viewpoints (small entry fee RP 15,000). Swing and photo installations available (optional extra).",
-        "TIRTA EMPUL HOLY SPRING TEMPLE: The sacred water purification temple where Balinese Hindus perform melukat (ritual cleansing) in the spring-fed pools. Sarong required (provided). Respectful observation or optional participation in the purification ritual.",
-        "SACRED MONKEY FOREST SANCTUARY (Ubud): 700+ Balinese macaques roaming free among ancient temple ruins draped in moss. The monkeys WILL try to grab bags, food, glasses, and hats — hold everything tightly. Brilliant for wildlife photography.",
-        "UBUD ROYAL PALACE (Puri Saren Agung) + UBUD ART MARKET: Royal palace exterior, traditional architecture. Ubud Market: silver jewellery, Batik fabric, sarongs, handmade bags, paintings.",
-        "Return to hotel, dinner at leisure",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Tanah Lot Sunset + Uluwatu Kecak Fire Dance + Jimbaran Dinner",
-      activities: [
-        "Afternoon: Private transfer to South Bali peninsula (cliff temples circuit)",
-        "GWK CULTURAL PARK (Garuda Wisnu Kencana): The towering 121m Garuda Wisnu Kencana statue — the third tallest statue in the world — depicting Vishnu riding the mythical Garuda bird. Cultural performances in the park.",
-        "TANAH LOT TEMPLE (sunset timing): The iconic sea temple built on a volcanic rock outcropping in the ocean, accessible on foot at low tide. At sunset, the orange sky silhouettes the temple against the crashing waves — one of Bali's most-photographed views. Private photo time allocated.",
-        "ULUWATU TEMPLE (clifftop): Perched dramatically on a 70m vertical sea cliff at Bali's southern tip, Uluwatu commands sweeping views of the Indian Ocean. Sacred monkey territory — hold bags firmly. Sunset here is extraordinary.",
-        "KECAK FIRE DANCE at Uluwatu (included — reserved seats): The famous open-air amphitheatre Kecak fire performance at Uluwatu Temple begins at sunset. 150+ barechested men chanting 'cak' in interlocking rhythms retell the Ramayana epic while fire-walking performers dance dramatically at dusk. One of the most visually spectacular cultural performances in Southeast Asia.",
-        "JIMBARAN BAY SEAFOOD BBQ DINNER (included): Beachfront dining on the white sand of Jimbaran Bay under the stars. Fresh seafood grilled over coconut husk: lobster, tiger prawns, fish, crab, and squid. Candles, gentle waves, and the evening breeze — an incredibly romantic and memorable Bali experience.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Spa Treatment + Free Time + Departure",
-      activities: [
-        "Morning: 60-MINUTE BALINESE SPA (included) — traditional Balinese massage with aromatic oils, hot stone elements, or body scrub (your choice at the partnered spa). The Balinese massage uses long strokes, skin rolling, and gentle pressure point techniques. A deeply relaxing signature Bali experience.",
-        "Optional morning alternative: Waterbom Bali (Asia's #1 waterpark — optional, not included), Bali Safari and Marine Park, or visit Berawa/Canggu beach",
-        "Last souvenir shopping: Seminyak Kuta area (Beachwalk Mall, Kuta Art Market) or Seminyak boutiques for premium Bali brands (Magali Pascal, Biasa, etc.)",
-        "Best souvenirs: Bali salt, coconut oil products, handmade silver jewellery, Batik scarves, Kopi Bali coffee, Balinese paintings",
-        "Final hotel lunch and check-out",
-        "Private transfer to Ngurah Rai International Airport (DPS)",
-        "Depart Bali for Manila",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── TRAVEL INFORMATION ────────────────────────────────────────────────────
   travelInformation: {
@@ -490,7 +416,6 @@ export const baliWisaktuBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -646,7 +571,6 @@ export const baliWisaktuBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

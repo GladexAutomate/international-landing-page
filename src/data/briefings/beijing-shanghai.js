@@ -41,99 +41,6 @@ export const beijingShanghaiBriefing = {
     "Excess baggage fees",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Beijing | Arrival & Wangfujing",
-      activities: [
-        "Depart Manila — fly to Beijing Capital Airport (PEK) or Beijing Daxing (PKX)",
-        "Arrive Beijing — proceed through immigration with passport and valid China L-Visa",
-        "Meet Gladex Tours representative at arrivals hall; transfer to hotel near Wangfujing",
-        "Check-in and freshen up",
-        "Evening: Peking Duck dinner at a traditional Beijing duck restaurant",
-        "After dinner: Walk Wangfujing Pedestrian Street — street food stalls (scorpions, starfish, lamb skewers), shopping malls, and night buzz",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Great Wall of China | Mutianyu Section",
-      activities: [
-        "Morning: Drive to Mutianyu Great Wall (less crowded than Badaling, better restored)",
-        "Take the cable car up to the wall — walk the restored battlements with panoramic mountain views",
-        "Optional: luge ride down (toboggan slide — thrilling and memorable)",
-        "Lunch near the wall area",
-        "Afternoon: Return to Beijing; leisure time or optional Pearl Market visit",
-        "Evening: Peking Duck dinner (second Beijing duck experience — different restaurant style)",
-        "NOTE: Wear comfortable, flat-soled shoes — the Wall involves steep steps and uneven terrain",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Tiananmen Square | Forbidden City | Temple of Heaven | Hutong",
-      activities: [
-        "Morning: Tiananmen Square — the world's largest public square, Gate of Heavenly Peace, Mao Mausoleum exterior",
-        "Enter the Forbidden City (Palace Museum) — Imperial Palace of 24 emperors spanning Ming and Qing dynasties; allow 3 hours",
-        "Lunch in the central Beijing area",
-        "Afternoon: Temple of Heaven — stunning circular Hall of Prayer for Good Harvests set in a vast park",
-        "Early evening: Hutong rickshaw tour — weave through Beijing's ancient narrow alleyways, visit a traditional courtyard house (siheyuan), meet locals",
-        "Dinner in the Hutong area",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Summer Palace | Olympic Park | Depart for Shanghai",
-      activities: [
-        "Morning: Summer Palace — magnificent imperial garden on Kunming Lake; Hall of Benevolence, Long Corridor painted gallery, Marble Boat",
-        "Midday: Olympic Park — Bird's Nest National Stadium and Water Cube (National Aquatics Center) exterior photo stop",
-        "Lunch near Olympic Park area",
-        "Afternoon: Transfer to Beijing airport or train station for Beijing–Shanghai transport (flight ~2h or overnight bullet train)",
-        "Arrive Shanghai — transfer to hotel, check-in",
-        "Evening: Settle in and explore the neighborhood",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "The Bund | Yu Garden | Nanjing Road | Oriental Pearl Tower",
-      activities: [
-        "Morning: The Bund — iconic waterfront promenade lined with colonial-era European buildings facing the ultra-modern Pudong skyline across the Huangpu River",
-        "Yu Garden (Yuyuan Garden) — classical Ming Dynasty garden in the Old City; nearby Yu Garden Bazaar for souvenirs and xiaolongbao",
-        "Lunch: Authentic Xiaolongbao (soup dumplings) at a local Shanghai restaurant",
-        "Afternoon: Nanjing Road pedestrian mall — 6km of shops, department stores, and street entertainment",
-        "Evening: Oriental Pearl Tower observation deck — iconic pink spheres at night offer the best view of the Bund lit up from across the river",
-        "Dinner in Lujiazui financial district",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 6,
-      title: "Shanghai Tower | French Concession | Xintiandi | Farewell Dinner",
-      activities: [
-        "Morning: Shanghai Tower observation deck (Level 118, 546m) — views of the city from the world's 2nd tallest building (632m total height)",
-        "French Concession neighborhood — tree-lined streets, art deco buildings, boutique cafes, and galleries; stroll Wukang Road and Anfu Road",
-        "Lunch in the French Concession — try local brunch spots",
-        "Afternoon: Xintiandi — trendy stone-paved lanes with cafes, restaurants, and boutiques in restored Shikumen stone-gate houses",
-        "Lujiazui Finance District — Three Towers (Shanghai Tower, Jin Mao Tower, World Financial Center) photo stop",
-        "Farewell dinner: Xiaolongbao feast at a top Shanghai dumpling house",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 7,
-      title: "Final Morning | Huangpu River Cruise | Depart PVG",
-      activities: [
-        "Morning: Optional Huangpu River Cruise — see the Bund and Pudong from the water (day cruise available)",
-        "OR: Final shopping at AP Plaza (replica watches and accessories market), Tianzifang artisan lanes, or Lujiazui Mall",
-        "Enjoy a last Shanghai meal — Sheng Jian Bao (pan-fried soup buns), scallion pancakes",
-        "Transfer to Shanghai Pudong International Airport (PVG) for international departure",
-        "Check in for Manila-bound flight; safe travels home!",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -478,7 +385,6 @@ export const beijingShanghaiBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -550,7 +456,6 @@ export const beijingShanghaiBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
   },

@@ -41,81 +41,6 @@ export const maldivesBriefing = {
   ],
 
   // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila to Male — Arrival & Overwater Villa Check-In",
-      activities: [
-        "Depart Manila via connecting flight (Sri Lankan Airlines, Singapore Airlines, or Malaysia Airlines via Colombo, Singapore, or Kuala Lumpur).",
-        "Arrive at Velana International Airport (MLE), Male, Maldives.",
-        "Proceed to Immigration — Philippine passport holders receive a free 30-day tourist visa on arrival.",
-        "Collect baggage and clear customs. Proceed to the speedboat jetty or seaplane terminal as directed.",
-        "Meet your Gladex Tours representative or resort staff at the arrivals hall.",
-        "Transfer to your private resort island by speedboat (20–60 minutes) or seaplane (15–45 minutes scenic flight).",
-        "Check in to your overwater villa — take in the stunning lagoon views and settle in.",
-        "Afternoon: house reef snorkeling — explore the incredible marine life right off your villa steps.",
-        "Evening: sunset on your private villa deck over the Indian Ocean.",
-        "Overnight at overwater villa.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Water Activities Day — Snorkeling, Kayaking & Dolphin Cruise",
-      activities: [
-        "Morning breakfast at the resort restaurant.",
-        "Morning water activities: snorkeling over the house reef, kayaking, and stand-up paddleboarding.",
-        "Relax on the white sand beach or at the infinity pool during midday.",
-        "Afternoon: optional water sports at the resort dive centre — jet ski, parasailing, or beginner scuba diving intro.",
-        "Late afternoon: sunset dolphin watching cruise — encounter pods of wild spinner dolphins leaping alongside the boat.",
-        "Return to the resort for dinner.",
-        "Evening: stargaze from the villa deck over the Indian Ocean — zero light pollution at the resort island.",
-        "Overnight at overwater villa.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Manta Ray / Whale Shark Excursion & Sandbank Picnic",
-      activities: [
-        "Morning breakfast at the resort.",
-        "Full-day boat excursion to Ari Atoll — world-famous for manta ray and whale shark encounters (seasonal May–November for whale sharks).",
-        "Snorkeling with manta rays at cleaning stations — an unforgettable underwater wildlife experience.",
-        "Midday stop at a remote, uninhabited white sandbank in the open Indian Ocean — swim, sunbathe, and enjoy a picnic lunch.",
-        "Afternoon: return to the resort. Relax at the pool or beach.",
-        "Sunset: private resort beach bar for evening drinks and ocean views.",
-        "Overnight at overwater villa.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Local Island Excursion — Maafushi & Resort Spa Evening",
-      activities: [
-        "Morning breakfast at the resort.",
-        "Morning: speedboat excursion to Maafushi local island — experience authentic Maldivian community life, local cafes, and colorful streets.",
-        "Browse the local guesthouse strip for souvenirs, Maldivian snacks, and handicrafts.",
-        "Note: Maafushi is a local Islamic island — dress modestly (cover shoulders and knees) when walking through town.",
-        "Return to resort by early afternoon.",
-        "Afternoon: optional resort spa treatment — traditional Maldivian massage or overwater spa experience.",
-        "Final sunset: romantic dinner at the resort beachfront restaurant.",
-        "Overnight at overwater villa.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Departure Day — Last Swim, Check-Out & Male Airport",
-      activities: [
-        "Final morning: last swim in the villa's private plunge pool or lagoon. Enjoy breakfast one last time at the resort.",
-        "Check out of the overwater villa by 12:00 noon.",
-        "Speedboat or seaplane transfer back to Velana International Airport, Male.",
-        "Proceed to check-in counter, complete departure immigration, and board your connecting flight home.",
-        "Arrive in Manila with unforgettable memories from the Maldives.",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── 5. TRAVEL INFORMATION CENTER ────────────────────────────────────────
   travelInformation: {
@@ -619,7 +544,6 @@ export const maldivesBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -768,7 +692,6 @@ export const maldivesBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

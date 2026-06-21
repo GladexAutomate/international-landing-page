@@ -164,7 +164,7 @@ export const destinationActivities = {
   },
 
   // ============================================================
-  // DANANG VIETNAM
+  // DANANG VIETNAM (+ private variant shares same activities)
   // ============================================================
   "danang-vietnam": {
     cityName: "Da Nang",
@@ -310,6 +310,13 @@ export const destinationActivities = {
   },
 };
 
+// Alias slugs that share the same activities data as another destination
+const SLUG_ALIAS = {
+  "danang-private":   "danang-vietnam",
+  "hongkong-private": "hongkong",
+};
+
 export const getActivitiesForDestination = (slug) => {
-  return destinationActivities[slug] || destinationActivities.default;
+  const resolved = SLUG_ALIAS[slug] || slug;
+  return destinationActivities[resolved] || destinationActivities.default;
 };

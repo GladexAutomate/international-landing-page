@@ -34,14 +34,20 @@ const FUSIOO_ID_MAP = {
 //     jeju-korea before korea.
 const KEYWORD_MAP = [
   // ── Vietnam ────────────────────────────────────────────────────────────────
+  { slug: "danang-private",         keywords: ["danang private", "da nang private", "private danang"] },
   { slug: "danang-vietnam",         keywords: ["da nang", "danang", "da-nang", "hoi an", "vietnam central"] },
   { slug: "vietnam-hanoi",          keywords: ["hanoi", "ha noi"] },
   { slug: "vietnam-phu-quoc",       keywords: ["phu quoc", "phuquoc", "phú quốc"] },
 
   // ── China / Hong Kong / Macau ───────────────────────────────────────────────
+  { slug: "hongkong-private",        keywords: ["hongkong private", "hong kong private", "private hongkong"] },
+  { slug: "hongkong-shenzhen-zhuhai", keywords: ["hk shenzhen zhuhai", "hongkong shenzhen zhuhai", "hong kong shenzhen zhuhai", "shenzhen zhuhai", "4d3n shenzhen", "cebu pacific shenzhen", "hk szx zhuhai"] },
   { slug: "hongkong",               keywords: ["hong kong", "hongkong", "hk ", "h.k.", "hong-kong"] },
   { slug: "macau",                  keywords: ["macau", "macao"] },
-  { slug: "beijing-shanghai",       keywords: ["beijing", "shanghai", "china tour", "beijing shanghai"] },
+  { slug: "beijing-shanghai-pal",          keywords: ["shanghai pal", "philippine airlines shanghai", "pal shanghai", "shanghai philippine airlines"] },
+  { slug: "beijing-shanghai-private",      keywords: ["shanghai mini kyoto", "mini kyoto", "shenzhen airlines shanghai", "shanghai shenzhen", "5d4n shanghai"] },
+  { slug: "beijing-shanghai-cebu-pacific", keywords: ["shanghai cebu pacific", "cebu pacific shanghai", "6d4n shanghai", "shanghai 6d4n", "shanghai ceb"] },
+  { slug: "beijing-shanghai",              keywords: ["beijing", "shanghai", "china tour", "beijing shanghai"] },
 
   // ── Korea ──────────────────────────────────────────────────────────────────
   { slug: "jeju-korea",             keywords: ["jeju"] },            // specific first

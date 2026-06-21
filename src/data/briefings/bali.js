@@ -36,84 +36,6 @@ export const baliBriefing = {
     "Alcoholic beverages",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Arrival in Bali — Kuta/Seminyak Check-In & Sunset Beach",
-      activities: [
-        "Depart Manila — fly to Ngurah Rai International Airport (DPS) via Cebu Pacific, Philippine Airlines, AirAsia, Garuda Indonesia, or Lion Air",
-        "Arrive DPS — proceed to Visa on Arrival counter (pay USD 35 cash — bring exact USD notes)",
-        "Complete immigration and collect baggage; clear customs",
-        "Meet Gladex Tours representative at arrivals hall exit",
-        "Private transfer to Kuta / Seminyak hotel (~20–30 minutes from airport)",
-        "Hotel check-in (3:00 PM); settle in and freshen up",
-        "Late afternoon — stroll Kuta Beach: Bali's original tourist beach, gentle surf, and long sandy stretch",
-        "Evening — Seminyak sunset walk along the beach clubs; dinner at a beachfront restaurant (own account)",
-        "Recommended evening options: Potato Head Beach Club (sunset drinks), La Plancha beachfront dinner, or local warung in Seminyak",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Ubud Full Day — Rice Terraces, Monkey Forest, Art Market & Palace",
-      activities: [
-        "Early morning departure from hotel to Ubud (~1.5 hours from Kuta area)",
-        "Tegallalang Rice Terraces — UNESCO-recognized subak terrace farming on steep Ubud hillsides; stunning photography stop; optional swing over the terraces",
-        "Sacred Monkey Forest Sanctuary — 1,200+ long-tailed macaques roam freely through ancient jungle temple ruins; keep all bags and glasses secured",
-        "Lunch at local Ubud restaurant — Balinese cuisine (own account); recommended: Nasi Campur or Bebek Betutu",
-        "Ubud Art Market (Pasar Seni) — handicrafts, batik, sarongs, wooden carvings, and silver jewelry; bargaining expected",
-        "Ubud Royal Palace (Puri Saren Agung) — ornate Balinese palace complex in the heart of Ubud town; free exterior viewing",
-        "Tjampuhan Ridge Walk (optional, if time permits) — scenic 45-minute jungle trail above the Wos River valley",
-        "Return to hotel in Kuta/Seminyak area; evening free",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Kintamani Highlands — Mount Batur, Tirta Empul & Celuk Silver",
-      activities: [
-        "Morning departure to Kintamani in the central highlands",
-        "Mount Batur panoramic viewpoint — breathtaking caldera views of the active 1,717 m volcano and the vast Lake Batur below; lunch with panoramic volcano view (own account)",
-        "Descend to Tampaksiring — Tirta Empul Water Temple: the sacred spring water temple where Balinese Hindus perform traditional purification rituals in holy bathing pools",
-        "Visitors may participate in the purification ritual — bring a change of clothes and a sarong (provided at entrance)",
-        "Celuk Village — Bali's renowned silver and gold jewelry village; watch artisans at work; excellent quality handcrafted pieces at fair prices",
-        "Optional stop at Balinese traditional healer village (balian) or coffee plantation (kopi luwak tasting)",
-        "Return to hotel; evening free — recommended: dinner at Seminyak or Legian restaurant strip",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "South Bali Temples — Tanah Lot, GWK Cultural Park & Nusa Dua Beach",
-      activities: [
-        "Morning visit to GWK Cultural Park — the towering 121-metre Garuda Wisnu Kencana statue; cultural performances and sweeping panoramas over southern Bali",
-        "Nusa Dua Beach — Bali's most pristine and calm beach resort area; ideal for swimming, snorkeling, and relaxing on white sand (own account — watersports available)",
-        "Lunch at Nusa Dua beachfront warung or resort restaurant (own account)",
-        "Afternoon drive to Tanah Lot — Bali's most iconic sea temple perched on a dramatic offshore rock formation",
-        "Arrive 1 hour before sunset for the best light and to explore the temple grounds",
-        "Watch the sun set directly behind Tanah Lot Temple — Bali's most iconic photograph",
-        "Dinner at Tanah Lot area seafood restaurant or return to Seminyak for evening dining",
-        "Return to hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Morning Beach Free, Uluwatu Temple & Kecak Fire Dance — Departure",
-      activities: [
-        "Morning free — final beach swim at Kuta or Seminyak, or explore Seminyak's boutique shops and cafes",
-        "Hotel check-out by 12:00 PM; store luggage at concierge if needed",
-        "After-lunch departure to Uluwatu on the Bukit Peninsula (southern Bali) — ~45 minutes from Seminyak",
-        "Uluwatu Temple — ancient clifftop sea temple set 70 metres above crashing Indian Ocean waves; stunning panoramic ocean views",
-        "Note: Watch your belongings at Uluwatu — resident monkeys are notorious for snatching phones, sunglasses, and accessories",
-        "Kecak Fire Dance performance at sunset — dramatic Balinese fire dance retelling the Ramayana epic, performed at the clifftop amphitheater",
-        "Depart Uluwatu; transfer to Ngurah Rai International Airport (DPS)",
-        "Check-in and proceed through Indonesian immigration and security",
-        "Board return flight to Manila — safe travels!",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -584,7 +506,6 @@ export const baliBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -731,7 +652,6 @@ export const baliBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

@@ -36,98 +36,6 @@ export const japanBriefing = {
     "Excess baggage charges",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Osaka | Arrive at Kansai International Airport | Dotonbori Orientation",
-      activities: [
-        "Depart Manila via Cebu Pacific, Philippine Airlines, ANA, or JAL to Osaka Kansai International Airport (KIX)",
-        "Arrive at KIX — proceed through immigration, collect baggage, and clear customs",
-        "Meet your Gladex Tours representative at the arrivals hall",
-        "Transfer to hotel in Osaka Namba / Shinsaibashi area — check in and freshen up",
-        "Evening orientation walk at Dotonbori — the neon-lit heart of Osaka",
-        "Dinner at leisure along Dotonbori strip: try takoyaki, okonomiyaki, and ramen",
-        "Photo opportunity at the iconic Glico Running Man sign and Dotonbori canal",
-        "Rest and prepare for full day tomorrow",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Kyoto Day Trip | Fushimi Inari | Kinkaku-ji | Arashiyama Bamboo Grove | Gion District",
-      activities: [
-        "Early breakfast at hotel, then depart for Kyoto by JR train (~15 minutes from Osaka)",
-        "First stop: Fushimi Inari Shrine — walk through thousands of vermilion torii gates winding up the sacred mountain",
-        "Proceed to Kinkaku-ji (Golden Pavilion) — the gleaming gold-covered Zen Buddhist temple perfectly reflected in its mirror pond",
-        "Explore Arashiyama Bamboo Grove — one of Japan's most iconic and photogenic landscapes",
-        "Optional: Tenryu-ji Zen garden and Togetsukyo Bridge in Arashiyama",
-        "Afternoon stroll through Gion District — Kyoto's preserved geisha quarter with traditional machiya townhouses",
-        "Optional visit to Nishiki Market — Kyoto's narrow covered food market with 100+ specialty stalls",
-        "Return to Osaka by JR train for dinner and overnight",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Nara Day Trip | Todai-ji Temple | Free-Roaming Deer | Osaka Shinsaibashi Shopping",
-      activities: [
-        "Morning departure to Nara by express train from Osaka (~45 minutes)",
-        "Visit Nara Deer Park — home to over 1,200 free-roaming sacred Sika deer. Purchase shika senbei (deer crackers) to hand-feed them",
-        "Explore Todai-ji Temple housing Japan's largest bronze Buddha statue (Daibutsu) — 15 metres tall",
-        "Walk through Kasuga Taisha Shrine and the lantern-lined stone path leading to it",
-        "Return to Osaka by midday — free time for shopping and lunch",
-        "Afternoon and evening at Shinsaibashi covered shopping arcade — 600-metre stretch of fashion, electronics, and food",
-        "Optional visit to Kuromon Ichiba Market (Osaka's Kitchen) for fresh seafood and street snacks",
-        "Overnight in Osaka",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Shinkansen to Tokyo | Asakusa & Senso-ji Temple | Akihabara",
-      activities: [
-        "Check out from Osaka hotel after breakfast — transfer to Shin-Osaka Station",
-        "Board the Tokaido Shinkansen (bullet train) to Tokyo (~2.5 hours) — enjoy views of Mount Fuji on clear days",
-        "Arrive at Tokyo Station — transfer to hotel in Asakusa, Shinjuku, or Shibuya area and check in",
-        "Afternoon visit to Asakusa district — explore the historic Senso-ji Temple, Tokyo's oldest and most iconic Buddhist temple",
-        "Stroll Nakamise Shopping Street leading to Senso-ji — packed with traditional crafts, snacks, and souvenirs",
-        "Evening exploration of Akihabara — Tokyo's Electric Town, famous for electronics, anime, manga, and gaming culture",
-        "Dinner at leisure in Akihabara or Asakusa — ramen, izakaya, or conveyor belt sushi",
-        "Overnight in Tokyo",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Tokyo Full Day | Shibuya Crossing | Harajuku | Tokyo Tower | Odaiba",
-      activities: [
-        "Breakfast at hotel — depart for full-day Tokyo exploration",
-        "Shibuya district: experience the world-famous Shibuya Scramble Crossing — the busiest pedestrian intersection on Earth",
-        "Harajuku: visit Takeshita Street for unique youth fashion, crepes, and pop culture. Walk Omotesando for upscale shopping",
-        "Optional: Meiji Jingu Shrine in Harajuku — a tranquil forested Shinto shrine dedicated to Emperor Meiji",
-        "Afternoon visit to Tokyo Tower — the iconic red-and-white Eiffel-inspired lattice tower with observatory views",
-        "Evening trip to Odaiba — the futuristic island in Tokyo Bay with teamLab digital art, Rainbow Bridge views, and Gundam statue",
-        "Optional: teamLab Borderless or teamLab Planets digital art museum (advance tickets strongly recommended)",
-        "Dinner at Odaiba DiverCity or Aqua City shopping complex",
-        "Return to hotel — last night in Japan",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 6,
-      title: "Tsukiji Outer Market | Final Shopping | Departure from Narita / Haneda",
-      activities: [
-        "Early breakfast — check out from hotel and store luggage",
-        "Morning visit to Tsukiji Outer Market — try fresh sushi, tamagoyaki, and seafood skewers for breakfast",
-        "Final shopping time at designated areas: Don Quijote, Shinjuku, or Ginza for tax-free purchases",
-        "Return to hotel, collect luggage, and transfer to Narita International Airport (NRT) or Haneda Airport (HND)",
-        "Complete departure immigration and customs — ensure all tax refund receipts are processed at the airport",
-        "Board flight back to Manila",
-        "Arrive in Manila — end of Gladex Tours Japan package",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -608,7 +516,6 @@ export const japanBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -761,7 +668,6 @@ export const japanBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
   },

@@ -161,7 +161,7 @@ function TestimonialCard({ t, theme }) {
 
   return (
     <div
-      className="rounded-2xl border-2 p-5 sm:p-6 flex flex-col h-full"
+      className="rounded-2xl border-2 p-5 sm:p-6 flex flex-col"
       style={{
         backgroundColor: isClient
           ? isDark ? "#1a1208" : "#FFF8EE"
@@ -172,9 +172,9 @@ function TestimonialCard({ t, theme }) {
       {/* ── Profile header ── */}
       <div className="flex items-start gap-3 mb-4">
         <Avatar t={t} />
-        <div className="flex-1 min-w-0 pt-0.5">
+        <div className="min-w-0 pt-0.5">
           <p
-            className="font-condensed font-bold text-lg leading-tight truncate"
+            className="font-condensed font-bold text-lg leading-tight"
             style={{ color: textPrimary }}
           >
             {t.name}
@@ -184,15 +184,15 @@ function TestimonialCard({ t, theme }) {
               {[t.destination, t.date].filter(Boolean).join(" · ")}
             </p>
           )}
+          {isClient && (
+            <span
+              className="inline-block mt-1 text-xs font-bold tracking-[0.2em] uppercase px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: ORANGE + "20", color: ORANGE }}
+            >
+              Your Review
+            </span>
+          )}
         </div>
-        {isClient && (
-          <span
-            className="shrink-0 self-start text-xs font-bold tracking-[0.2em] uppercase px-2.5 py-1 rounded-full"
-            style={{ backgroundColor: ORANGE + "20", color: ORANGE }}
-          >
-            Your Review
-          </span>
-        )}
       </div>
 
       {/* ── Stars ── */}
@@ -208,76 +208,11 @@ function TestimonialCard({ t, theme }) {
 
       {/* ── Quote ── */}
       <p
-        className="font-body text-base leading-relaxed italic flex-1 mb-4"
+        className="font-body text-base leading-relaxed italic"
         style={{ color: textPrimary }}
       >
         "{t.review}"
       </p>
-
-      {/* ── Photo gallery ── */}
-      {photos.length > 0 && (
-        <>
-          <p
-            className="font-body text-xs font-bold uppercase tracking-[0.18em] mb-2"
-            style={{ color: ORANGE }}
-          >
-            Photos
-          </p>
-          <div className="space-y-1.5 mb-1">
-            {/* 1 photo — full width, natural height */}
-            {photos.length === 1 && (
-              <button
-                onClick={() => setLightboxIndex(0)}
-                className="w-full overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
-                aria-label="View photo"
-              >
-                <img src={photos[0]} alt="Photo 1" className="w-full h-auto block rounded-xl" />
-              </button>
-            )}
-
-            {/* 2 photos — side by side, natural height */}
-            {photos.length === 2 && (
-              <div className="grid grid-cols-2 gap-1.5">
-                {photos.map((url, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setLightboxIndex(i)}
-                    className="overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
-                    aria-label={`View photo ${i + 1}`}
-                  >
-                    <img src={url} alt={`Photo ${i + 1}`} className="w-full h-auto block rounded-xl" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* 3 photos — first full width, then 2 side by side */}
-            {photos.length >= 3 && (
-              <>
-                <button
-                  onClick={() => setLightboxIndex(0)}
-                  className="w-full overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
-                  aria-label="View photo 1"
-                >
-                  <img src={photos[0]} alt="Photo 1" className="w-full h-auto block rounded-xl" />
-                </button>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {photos.slice(1).map((url, i) => (
-                    <button
-                      key={i + 1}
-                      onClick={() => setLightboxIndex(i + 1)}
-                      className="overflow-hidden rounded-xl transition-opacity hover:opacity-90 active:opacity-75 focus:outline-none"
-                      aria-label={`View photo ${i + 2}`}
-                    >
-                      <img src={url} alt={`Photo ${i + 2}`} className="w-full h-auto block rounded-xl" />
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
 
       {/* Lightbox portal */}
       {lightboxIndex !== null && (
@@ -297,7 +232,7 @@ const HARDCODED = [
   {
     name:        "Maria Santos",
     destination: "Da Nang, Vietnam",
-    slugKeywords: ["danang-vietnam", "vietnam-hanoi", "vietnam-phu-quoc"],
+    slugKeywords: ["danang-vietnam", "danang-private", "vietnam-hanoi", "vietnam-phu-quoc"],
     rating: 5,
     review: "Gladex made our Vietnam trip absolutely seamless! The briefing page had everything we needed — no stress, no confusion. The itinerary was perfect from start to finish. 10/10!",
     photo: "/images/testimonials/maria-santos.jpg",
@@ -306,7 +241,7 @@ const HARDCODED = [
   {
     name:        "Jose Reyes",
     destination: "Hong Kong",
-    slugKeywords: ["hongkong", "macau"],
+    slugKeywords: ["hongkong", "hongkong-private", "macau"],
     rating: 5,
     review: "The pre-trip briefing page was incredibly detailed. I loved seeing all the tour options and insurance in one place. Our family of 5 had zero confusion during the entire trip!",
     photo: "/images/testimonials/jose-reyes.jpg",
@@ -390,17 +325,18 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
     if (!slug) return;
     supabase
       .from("reviews")
-      .select("gdx_reference, reviewer_name, rating, comment, photos, created_at")
+      .select("gdx_reference, rating, comment, photos, created_at")
       .eq("destination", slug)
       .gte("rating", 4)
       .order("created_at", { ascending: false })
       .limit(30)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) console.warn("[BriefingTestimonials] fetch error:", error.message);
         if (!data?.length) { setLiveReviews([]); return; }
         const reviews = data
           .filter((r) => String(r.gdx_reference) !== String(gdxReference))
           .map((r) => ({
-            name:     r.reviewer_name || "Gladex Traveler",
+            name:     "Gladex Traveler",
             rating:   r.rating,
             review:   r.comment || "Had a great experience with Gladex Tours!",
             photos:   Array.isArray(r.photos) ? r.photos : [],
@@ -442,8 +378,9 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
   const next = () => { setDir(1);  setActive((a) => (a + 1) % N);     };
 
   const touchX    = useRef(null);
-  const safeActive = active % N;
-  const cards      = [0, 1, 2].map((offset) => ALL[(safeActive + offset) % N]);
+  const safeActive   = active % N;
+  const visibleCount = Math.min(3, N);
+  const cards        = Array.from({ length: visibleCount }, (_, offset) => ALL[(safeActive + offset) % N]);
 
   function onTouchStart(e) { touchX.current = e.touches[0].clientX; }
   function onTouchEnd(e) {
@@ -471,14 +408,12 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
             exit="exit"
             transition={{ duration: 0.28, ease: "easeOut" }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-              <TestimonialCard t={cards[0]} theme={theme} />
-              <div className="hidden md:block">
-                <TestimonialCard t={cards[1]} theme={theme} />
-              </div>
-              <div className="hidden md:block">
-                <TestimonialCard t={cards[2]} theme={theme} />
-              </div>
+            <div className="flex flex-wrap gap-4 items-start">
+              {cards.map((t, i) => (
+                <div key={i} className={i > 0 ? "hidden md:block" : ""} style={{ minWidth: 240, flex: "1 1 0" }}>
+                  <TestimonialCard t={t} theme={theme} />
+                </div>
+              ))}
             </div>
           </motion.div>
         </AnimatePresence>

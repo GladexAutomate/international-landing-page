@@ -24,7 +24,9 @@ import { destinationImages } from "virtual:briefing-images";
 // Maps URL slugs to their image folder names when the two differ.
 // Slugs that ARE the folder name (e.g. "hongkong") need no entry here.
 const SLUG_TO_FOLDER = {
-  "danang-vietnam": "danang",
+  "danang-vietnam":   "danang",
+  "danang-private":   "danang",
+  "hongkong-private": "hongkong",
 };
 
 /**

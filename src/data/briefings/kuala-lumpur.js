@@ -39,72 +39,6 @@ export const kualaLumpurBriefing = {
     "Alcoholic beverages",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Arrival in Kuala Lumpur — Hotel Check-In, Bukit Bintang & Jalan Alor Night Food Street",
-      activities: [
-        "Depart Manila — fly to Kuala Lumpur International Airport (KLIA for Philippine Airlines, Malaysia Airlines, Batik Air) or KLIA2 (for Cebu Pacific and AirAsia)",
-        "Arrive KUL — proceed through immigration (visa-free for Philippine passport holders, 30 days); collect baggage and clear customs",
-        "Private transfer to hotel in Bukit Bintang or Chow Kit area — approximately 45–55 minutes from KLIA or KLIA2",
-        "Alternatively, take the KLIA Ekspres train (28 minutes, RM 55 one-way) to KL Sentral, then taxi or Grab to hotel",
-        "Hotel check-in (2:00 PM); freshen up and settle in",
-        "Evening — explore Bukit Bintang: KL's premier shopping and entertainment district; Pavilion KL, Lot 10, and the Fahrenheit88 mall strip",
-        "Dinner at Jalan Alor Night Food Street — KL's most famous outdoor food street; steamed seafood, satay grilled over charcoal, char kway teow, Hokkien mee, and fresh fruit juices",
-        "After dinner — walk to KLCC Park for the Petronas Twin Towers fountain light show at 8:00 PM and 9:00 PM (free outdoor viewing)",
-        "Return to hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "KL City Tour — Petronas Twin Towers, KL Tower, Central Market & Petaling Street",
-      activities: [
-        "Morning visit to Petronas Twin Towers — the iconic 88-floor twin skyscrapers that define the KL skyline; book the morning Skybridge + Observation Deck time slot (RM 89; book online in advance at petronastwintowers.com.my)",
-        "Skybridge on Level 41 and 42 connecting both towers — world's highest double-deck bridge at its opening; Observation Deck on Level 86 for panoramic KL views",
-        "KLCC Park outdoor exploration — 50-acre landscaped park below the towers; fountains, jogging path, children's water play area, and the best ground-level tower photography angles",
-        "Lunch at Suria KLCC Mall (own account) — 6-floor upscale shopping mall beneath the towers with diverse food court and restaurant options",
-        "Afternoon visit to KL Tower (Menara KL) — 421-metre telecommunications tower on Bukit Nanas hill; Observation Deck at 276 metres offers arguably better 360° panoramic views of KL than Petronas (RM 69)",
-        "Central Market Pasar Seni — KL's heritage art-deco market building; Malaysian handicrafts, batik fabric, silverware, pewter, traditional musical instruments, and cultural goods",
-        "Petaling Street Chinatown — KL's famous Chinatown district; iconic red-lantern archway gate, busy street market, replica goods, fresh fruit stalls, traditional coffee shops, and bargain hunting",
-        "Evening free — Changkat Bukit Bintang (restaurant and bar street) recommended for dinner",
-        "Return to hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Batu Caves, Sunway Pyramid & Optional Genting Highlands",
-      activities: [
-        "Morning departure by train from KL Sentral to Batu Caves station — KTM Komuter train, approximately 30 minutes, RM 7 round trip",
-        "Batu Caves: a dramatic limestone hill rising 100 metres above the jungle, with 272 rainbow-painted steps leading to the Sri Subramaniam Hindu Temple inside — one of Malaysia's most iconic landmarks",
-        "At the base: Ramayana Cave (ornate painted scenes from Hindu epic), Dark Cave (optional paid tour — rare cave ecosystem), and the enormous golden statue of Lord Murugan at the steps entrance",
-        "Watch resident long-tailed macaque monkeys at the base — secure bags and avoid direct eye contact",
-        "Return by train to KL Sentral",
-        "Afternoon at Sunway Pyramid — a spectacular Egyptian-pyramid themed mega-mall in Petaling Jaya (30 minutes by Grab); home to Sunway Lagoon Theme Park (optional, own account), indoor ice rink, and vast dining and shopping options",
-        "Optional alternative: Genting Highlands day trip — Malaysia's mountain resort complex at 1,800 metres (1-hour drive from KL); cool mountain air, outdoor SkyWorlds theme park, and Resorts World Genting (own account)",
-        "Evening return to Bukit Bintang area; dinner at Jalan Alor for a second visit or explore Pavilion KL's restaurant floor",
-        "Return to hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "KL Tower (if not Day 2), National Mosque, KLCC Last Shopping & Departure",
-      activities: [
-        "Morning visit to Masjid Negara (National Mosque) — Malaysia's principal mosque in the heart of KL; free entry; striking modernist architecture with a 73-metre minaret and a star-shaped roof; dress code strictly enforced (full cover required, robes provided at entrance free of charge)",
-        "Brief stop at Merdeka Square (Dataran Merdeka) — the historic square where Malaysian independence was declared in 1957; 95-metre flagpole, colonial-era buildings, and KL City Gallery",
-        "Last shopping at Suria KLCC Mall — Malaysia's most upscale mall beneath the Petronas Towers; best selection of local and international brands, souvenir shops, and local snack stores",
-        "Lunch at KLCC or nearby (own account)",
-        "Pick up Malaysian pasalubong: Brahim's curry paste packs, Hacks sweets, Old Town White Coffee sachets, Beryl's chocolate, traditional Malay kuih in vacuum-sealed packs, and Pandan coconut cookies",
-        "Hotel check-out by 12:00 PM; store luggage at concierge if needed",
-        "Private transfer to KLIA or KLIA2 — allow 90 minutes travel time with traffic",
-        "Check-in at airport; proceed through Malaysian immigration and security",
-        "Board return flight to Manila — safe travels!",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -582,7 +516,6 @@ export const kualaLumpurBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -729,7 +662,6 @@ export const kualaLumpurBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

@@ -39,74 +39,6 @@ export const cambodiaBriefing = {
   ],
 
   // ─── ITINERARY ─────────────────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Siem Reap | Pub Street & Old Market",
-      activities: [
-        "Depart Manila on connecting flight to Siem Reap Angkor International Airport (SAI)",
-        "IMPORTANT: Have Cambodia e-Visa QR code ready on phone before arrival",
-        "Arrive SAI — present passport and e-Visa QR code at immigration",
-        "Collect baggage and transfer to hotel in Siem Reap central area",
-        "Check in and rest",
-        "Evening: Siem Reap Pub Street (the lively heart of Siem Reap nightlife — street food, cocktails, bars)",
-        "Old Market area (Psar Chas) — souvenirs, silk scarves, street food, massage parlours",
-        "Dinner: Khmer BBQ (grill-your-own pork, chicken, seafood at your table, plus shabu-shabu broth)",
-        "Briefing: Tomorrow's Angkor sunrise requires a 4:00–4:30am wake-up. Set multiple alarms tonight.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Angkor Wat Sunrise + Angkor Thom Complex",
-      activities: [
-        "Wake-up 4:00–4:30am — tuk-tuk departs hotel at 4:30am to arrive Angkor before 5:00am",
-        "ANGKOR WAT SUNRISE: Watch the sun rise behind the iconic five towers of Angkor Wat reflected in the reflection pond — one of the world's most breathtaking travel moments",
-        "Morning: Explore Angkor Wat interior (galleries with 800m of bas-relief carvings depicting Hindu epics, the Churning of the Sea of Milk, and epic battles)",
-        "Climb to upper galleries for panoramic views of the jungle and temple complex",
-        "ANGKOR THOM: The great walled city of Angkor — South Gate (giant face statues), Bayon Temple (54 towers with 216 serene smiling faces — King Jayavarman VII), Baphuon, Elephant Terrace, Terrace of the Leper King",
-        "Afternoon rest at hotel (beat the midday heat)",
-        "Sunset: Phnom Bakheng hill temple — sunset views over Angkor Wat through the jungle",
-        "Evening dinner and rest",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Remote Temples: Ta Prohm + Banteay Srei + Tonle Sap Lake",
-      activities: [
-        "Morning: TA PROHM — the iconic 'Tomb Raider temple' where Angelina Jolie filmed Lara Croft. Ancient silk-cotton and strangler fig tree roots have slowly consumed the stone galleries over 800 years creating hauntingly beautiful ruins — jungle nature vs. human architecture",
-        "BANTEAY SREI — 'Citadel of Women' — 30km from Siem Reap. Built in 967 AD, entirely of pink sandstone. Considered the finest stone carvings in all of Khmer art — intricate devatas and apsaras (celestial dancers) carved in extraordinary detail. Often called 'the jewel of Khmer art'",
-        "Afternoon: TONLE SAP LAKE — Southeast Asia's largest freshwater lake, a UNESCO Biosphere Reserve. Boat tour of floating village (entire communities of houses, schools, shops, and temples built on stilts or on floating platforms that rise and fall 9 meters with the season)",
-        "Evening: Free time at Pub Street or optional Apsara dance cultural dinner show (optional extra cost)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Optional Phnom Penh OR Free Day",
-      activities: [
-        "OPTION A — Phnom Penh Day Trip (1.5h drive, additional cost): Killing Fields of Choeung Ek (powerful memorial to the Khmer Rouge genocide 1975–1979 — mandatory audio tour), Tuol Sleng/S-21 Genocide Museum (former high school converted to interrogation prison), Royal Palace and Silver Pagoda, Central Market",
-        "OPTION B — Free Day in Siem Reap: morning traditional Khmer massage at local spa (USD 8–12/hour), Angkor National Museum (world-class collection of Khmer statues and history, USD 12 entry), Preah Ang Chek Preah Ang Chorm Royal Shrine, souvenir shopping at Angkor Night Market or Old Market",
-        "Afternoon: Last chance Angkor pass activities (3-day pass allows return visits) — Banteay Kdei, Pre Rup temple (brick pyramid), or East Mebon",
-        "Evening: Farewell Siem Reap dinner at local Khmer restaurant — try Amok Trey fish curry",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Last Temple Visit + Departure",
-      activities: [
-        "Morning: Optional early temple visit (Banteay Samré — quiet, beautiful, less-visited — or Pre Rup sunrise)",
-        "Souvenir shopping: Old Market (Psar Chas) or Angkor Night Market area for last-minute gifts",
-        "Best Cambodia souvenirs: stone-carved Angkor replicas, silk scarves, Kampot pepper, local coffee, stone Apsara statues, handmade silver jewellery",
-        "Lunch at local Khmer restaurant near hotel",
-        "Transfer to Siem Reap Angkor International Airport (SAI)",
-        "Depart Siem Reap for Manila via connecting city",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── TRAVEL INFORMATION ────────────────────────────────────────────────────
   travelInformation: {
@@ -471,7 +403,6 @@ export const cambodiaBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -629,7 +560,6 @@ export const cambodiaBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

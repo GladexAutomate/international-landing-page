@@ -39,72 +39,6 @@ export const jejuKoreaBriefing = {
     "Jeju Black Pork BBQ dinner (own account — recommended to budget ₩20,000–35,000 per person)",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Jeju International Airport (CJU) | Check-In | Dongmun Traditional Market",
-      activities: [
-        "Depart Manila via Jeju Air (direct flight from MNL to CJU, approximately 3.5 hours) or via Korean Air / Air Busan through Incheon with a domestic connection to Jeju",
-        "Arrive at Jeju International Airport (CJU) — all international and domestic flights arrive at the same terminal; immigration and baggage claim are straightforward",
-        "Philippine passport holders: present passport and visa documents at immigration; biometric fingerprint scan is required for all foreign visitors",
-        "Purchase tourist SIM card (KT / SKT / LGU+ tourist SIM) at the arrivals hall — or collect your pre-ordered Klook SIM at the designated counter",
-        "Meet Gladex Tours representative at the arrivals exit with a name board",
-        "Transfer to hotel in Jeju City — check-in (3:00 PM); freshen up and prepare for a relaxed first evening",
-        "Korea is 1 hour ahead of the Philippines — set your phone clock forward immediately on arrival",
-        "Evening: Dongmun Traditional Market (동문재래시장) — Jeju's oldest and most authentic market dating to 1945; a lively labyrinth of fresh seafood, Jeju tangerines, local snacks, and prepared foods",
-        "Must-eat at Dongmun: Jeju Black Pork BBQ dinner at a nearby restaurant (Heuk Dwaeji — richer and more flavorful than mainland pork); grilled over charcoal at your table",
-        "Try Hallasan Soju — Jeju's own brand of soju featuring Mount Hallasan on the label; widely considered smoother than mainland Korean soju",
-        "Return to hotel; note that Seongsan sunrise requires a very early start tomorrow morning",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "EASTERN JEJU — Seongsan Sunrise Peak, Seopjikoji Cliff, Jeongbang Waterfall, Manjanggul Lava Tube",
-      activities: [
-        "Wake-up call at 4:30 AM — coach departs at 5:00 AM for Seongsan Ilchulbong; sunrise timing is seasonal (approximately 5:30–6:30 AM depending on month)",
-        "Seongsan Ilchulbong (성산일출봉) — UNESCO World Heritage tuff cone formed by a single submarine volcanic eruption approximately 5,000 years ago; rises 182 metres directly from the sea with a massive 90,000m² bowl-shaped crater at the summit",
-        "Ascend 179 stone steps to the crater rim — a 20-minute climb; the sunrise panorama over the crater and the Pacific Ocean is one of the most dramatic natural spectacles in all of Korea and one of Jeju's three UNESCO World Heritage designations",
-        "Entrance: ₩2,000 per person (own account); bring a small flashlight for the pre-dawn climb",
-        "Breakfast at a local restaurant near Seongsan — try hairtail fish jorim (갈치조림) or a simple kimbap and ramen set",
-        "Seopjikoji Cliff (섭지코지) — a dramatic volcanic headland jutting into the sea east of Seongsan; known as a Korean drama filming location (All In, 2002); golden canola fields bloom here in spring; the lighthouse walk offers spectacular cliff-edge views of Seongsan Ilchulbong from the distance",
-        "Jeongbang Waterfall (정방폭포) — one of the only waterfalls in Asia that falls directly into the ocean; a spectacular 23-metre cascade on Jeju's southern coast, surrounded by lush subtropical rock formations; accessible via a short descent of stone steps",
-        "Manjanggul Lava Tube (만장굴) — UNESCO World Heritage lava tube system, one of the world's longest at 13.4km total; the accessible 1km public section features dramatic lava formations, a large lava column, and cool (11°C) underground air — bring a light jacket",
-        "Return to hotel in the late afternoon; evening free — recommended: rest well before tomorrow's full western circuit",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "WESTERN JEJU — Hallim Park, Hyeopjae Beach, O'Sulloc Tea Museum, Jusangjeolli Cliff",
-      activities: [
-        "Breakfast at hotel; depart at 9:00 AM for the western circuit",
-        "Hallim Park (한림공원) — a large botanical garden on the western coast incorporating two natural lava tube caves (Hyeopjae and Ssangyong caves), a subtropical botanical garden, a traditional folk village, and a bonsai garden — a unique combination of Jeju's geological and cultural heritage in one park",
-        "Hyeopjae Beach (협재해수욕장) — Jeju's most celebrated beach; crystal-clear turquoise water (uniquely clear due to the white shell sand seabed), white sand, and a stunning view of Biyangdo Island offshore; Hallasan Mountain visible in the background on clear days; one of the most photogenic beaches in all of Korea",
-        "Lunch nearby: fresh Jeju seafood — recommend galchi (hairtail) gui (grilled) or jorim (braised) at a local coastal restaurant",
-        "O'Sulloc Tea Museum (오설록 티 뮤지엄) — Korea's premier green tea institution set amid gorgeous rolling tea terraces; the museum features exhibits on Korean tea history and culture, and the adjoining Innisfree Jeju House café serves iconic Osulloc green tea ice cream and other Jeju-inspired desserts; the surrounding tea fields are vivid, photogenic, and peaceful",
-        "Jusangjeolli Cliff (주상절리) — dramatic columns of hexagonal basalt formed by ancient lava cooling against the sea; the geometric precision of the 30-50-metre high columns rising from the crashing waves is extraordinary; one of Jeju's most visually striking geological formations and a popular sunset viewpoint",
-        "Optional evening: Jeju Loveland (adults only) — a unique outdoor art sculpture park featuring 140 sculptures exploring themes of love and human form; controversial but considered a Jeju cultural curiosity",
-        "Return to Jeju City hotel; final evening free — last opportunity for black pork BBQ or fresh haenyeo seafood at Dongmun area restaurants",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Hallasan National Park | Bunjae Art Park | Final Jeju Market | Departure",
-      activities: [
-        "Morning visit to Hallasan National Park (한라산국립공원) — South Korea's highest mountain at 1,950 metres and the country's only active shield volcano (though dormant); the mountain is a UNESCO World Heritage site and one of Jeju's three UNESCO designations",
-        "For the group itinerary: visit the Eorimok or Gwaneumsa trail lower sections for forest scenery and Hallasan views — a full summit hike (Seongpanak or Gwaneumsa trails) takes 8–10 hours round trip and is for experienced hikers on independent days only",
-        "Hallasan Visitor Centre has excellent displays on the volcano's geology, wildlife, and endemic plants — the Jeju dark-flow deer (노루) is the island's symbol and often spotted in the national park",
-        "Bunjae Art Park (분재예술원) — an extraordinary private garden featuring hundreds of bonsai trees (bunjae) cultivated over decades by master artist Sung Bum-young; set across a beautiful landscape with mountain views — peaceful, artistic, and uniquely Jeju",
-        "Hotel check-out by 11:00 AM — store luggage with hotel concierge if needed",
-        "Final souvenir shopping at Dongmun Market or Jeju duty-free shops near the airport: Jeju Hallabong tangerines (한라봉 — available December–March), Jeju Black Pig jerky, Osulloc green tea products, Jeju volcanic cosmetics (available year-round)",
-        "Transfer to Jeju International Airport (CJU) — allow at least 2.5 hours before departure for check-in, security, and immigration",
-        "Board flight back to Manila — end of your Gladex Tours Jeju Island package",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -569,7 +503,6 @@ export const jejuKoreaBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -712,7 +645,6 @@ export const jejuKoreaBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
   },

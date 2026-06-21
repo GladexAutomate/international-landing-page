@@ -38,74 +38,6 @@ export const vietnamPhuQuocBriefing = {
     "Alcoholic beverages",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Arrival in Phu Quoc — Resort Check-In, Long Beach & Dinh Cau Night Market",
-      activities: [
-        "Depart Manila — fly to Phu Quoc International Airport (PQC) direct via Vietjet Air, or connect via Ho Chi Minh City (SGN) with Vietnam Airlines or Bamboo Airways",
-        "Arrive PQC — present Vietnam e-Visa and passport at immigration; clear customs and collect baggage",
-        "Meet Gladex Tours representative at arrivals hall exit",
-        "Private transfer to hotel or resort near Long Beach (Bai Truong) — approximately 15 minutes from airport",
-        "Hotel check-in (2:00 PM); freshen up and settle in",
-        "Afternoon — Long Beach (Bai Truong): Phu Quoc's main 20-km stretch of golden sand along the west coast, famous for spectacular Gulf of Thailand sunsets; swim and relax",
-        "Evening — Dinh Cau Night Market: Phu Quoc's most famous night market along the harbor; grilled fresh seafood from the day's catch (lobster per kilo, crab, giant tiger prawns, scallops, squid), souvenir stalls, fresh tropical juices, and street snacks",
-        "Try Hu Tieu Phu Quoc (local rice noodle soup) and fresh coconut water from market vendors",
-        "Return to hotel by late evening",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "An Thoi Islands Full-Day Boat Tour & Phu Quoc Cable Car",
-      activities: [
-        "Early morning breakfast and hotel departure for the An Thoi pier",
-        "Full-day An Thoi Islands speedboat tour — the coral reef archipelago off the southern tip of Phu Quoc Island",
-        "Snorkeling at vibrant coral reef gardens — colorful tropical fish, sea stars, hard and soft corals in clear shallow water",
-        "5–6 island stops including Hon Thom, Hon Roi, Bai Dam, and outlying islets — each with distinct scenery and reef character",
-        "Freshly prepared lunch served on board the boat",
-        "Return from An Thoi Islands to the cable car terminal at An Thoi pier by afternoon",
-        "Phu Quoc Cable Car: the world's longest non-stop tri-cable gondola at 7.9 km — soars over the open Gulf of Thailand from the southern tip of Phu Quoc to Hon Thom Island",
-        "Explore Hon Thom Island or ride the cable car for panoramic ocean views before returning",
-        "Evening return to hotel; dinner on own account at Long Beach restaurants",
-        "Recommended evening: fresh grilled seafood at Dinh Cau harbor or a beachfront Long Beach restaurant",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Vinpearl Safari, Pearl Farm, Fish Sauce Factory & Grand World Evening",
-      activities: [
-        "Morning visit to Vinpearl Safari — SE Asia's largest open-concept wildlife conservation park; home to giraffes, white lions, cheetahs, rhinoceroses, orangutans, zebras, and hundreds of other species roaming semi-freely across vast open terrain",
-        "Safari bus tour through the open park paddocks; walking section through bird aviary and primate habitats",
-        "Visit Phu Quoc Pearl Farm — South Sea Pearls are Phu Quoc's most famous luxury product; see pearl cultivation in the ocean, grading process, and finished pearl jewelry available for purchase",
-        "Visit Phu Quoc Fish Sauce Factory (Nuoc Mam) — Phu Quoc fish sauce holds an EU Geographical Indication designation; see massive traditional fermentation barrels and learn the 12-month production process",
-        "Sample and purchase Phu Quoc fish sauce and Phu Quoc pepper (black and white — among Vietnam's highest quality) as souvenirs",
-        "Afternoon rest at hotel",
-        "Evening — Grand World Phu Quoc: a massive 83-hectare Venice-inspired entertainment complex with illuminated gondola canals, international food streets from around the world, cultural performances, neon light displays, and indoor attractions",
-        "Dinner at Grand World food court or international restaurant row (own account) — wide range of cuisines available",
-        "Return to hotel",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Sao Beach (Bai Sao) Morning, Last Shopping & Departure",
-      activities: [
-        "Early morning departure for Bai Sao (Sao Beach) — a 45–60 minute drive to the southeast tip of Phu Quoc Island",
-        "Bai Sao: widely regarded as Vietnam's most beautiful beach — powdery white sand, calm turquoise-emerald water, and a fringe of coconut palms; calm water ideal for swimming and wading",
-        "Morning swim, photography, and beachside fresh coconut water (vendors on the beach)",
-        "Return drive toward the north; brief stop along Long Beach for last swim or coffee",
-        "Final pearl and souvenir shopping — buy from the Pearl Farm (visited Day 3) or authorized vendors in Duong Dong Town",
-        "Pick up Phu Quoc pasalubong: fish sauce, black and white pepper, dried seafood, cashew nuts, and pearl jewelry",
-        "Hotel check-out by 12:00 PM; store luggage at concierge if needed",
-        "Private transfer to Phu Quoc International Airport (PQC)",
-        "Check-in at PQC for departure flight — direct to Manila or connect via Ho Chi Minh City (SGN)",
-        "Board return flight to Manila — safe travels!",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   travelInformation: {
     beforeDeparture: [
@@ -582,7 +514,6 @@ export const vietnamPhuQuocBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -729,7 +660,6 @@ export const vietnamPhuQuocBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

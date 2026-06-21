@@ -873,6 +873,61 @@ const TOURS_BY_DESTINATION = {
       isInstantConfirmation: true,
     },
     {
+      id: "globaltix-48746",
+      name: "Oyakuen Garden (Aizu) Entrance Ticket",
+      source: "globaltix",
+      sourceId: "48746",
+      sourceProductCode: "48746",
+      sourceCategoryId: "attraction",
+      description: "Visit the Aizu Matsudaira Clan's historic stroll garden in Fukushima — a peaceful 1.7-hectare haven with a pond shaped like the kanji for 'heart', medicinal herb gardens cultivated for 600 years, and seasonal blooms across all four seasons.",
+      images: [{ url: "https://product-image.globaltix.com/live-gtImage/273891d7-3e5f-456b-9234-eacb152ce4b1", isPrimary: true, fallbackUrl: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=80" }],
+      duration: "1–2 Hours",
+      durationMinutes: 90,
+      meetingPoint: "Oyakuen, Higashiyamacho, Aizuwakamatsu, Fukushima",
+      category: "Attraction",
+      tags: ["garden", "fukushima", "aizu", "nature", "historic"],
+      price: 53,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult", 53, { cancellationPolicy: NON_REFUNDABLE }),
+      ],
+      inclusions: ["Oyakuen garden admission"],
+      exclusions: ["Hotel transfer", "Meals"],
+      requiresBookingDate: true,
+      availability: [],
+      minParticipants: 1,
+      isCancellable: false,
+      isInstantConfirmation: true,
+    },
+    {
+      id: "globaltix-38166",
+      name: "7-Day JR Pass — All West Japan Route",
+      source: "globaltix",
+      sourceId: "38166",
+      sourceProductCode: "38166",
+      sourceCategoryId: "attraction",
+      description: "Unlimited 7-day JR travel across all of western Japan — Shinkansen, limited express trains, local trains, JR buses, monorail, and the Miyajima Ferry. Upgrade to Green Class for first-class reclining seats.",
+      images: [{ url: "https://product-image.globaltix.com/live-gtImage/c954b7a8-b80e-4755-8b4b-7a03b2f063cd", isPrimary: true, fallbackUrl: "https://images.unsplash.com/photo-1570521462033-3015e76e7432?w=600&q=80" }],
+      duration: "7 Days (Unlimited Rail)",
+      durationMinutes: 10080,
+      meetingPoint: "Exchange at green ticket machine or JR ticket office (Midori no Madoguchi)",
+      category: "Rail Pass",
+      tags: ["rail pass", "jr", "shinkansen", "western japan", "7 days", "miyajima"],
+      price: 8740,
+      currency: "PHP",
+      bookingOptions: [
+        opt("adult", "Adult", 8740, { cancellationPolicy: NON_REFUNDABLE }),
+        opt("child", "Child", 4370, { cancellationPolicy: NON_REFUNDABLE }),
+      ],
+      inclusions: ["7-day unlimited JR travel (Shinkansen, limited express, local trains)", "JR buses & Miyajima Ferry"],
+      exclusions: ["Non-JR private railways", "Meals", "Hotel transfer"],
+      requiresBookingDate: true,
+      availability: [],
+      minParticipants: 1,
+      isCancellable: false,
+      isInstantConfirmation: true,
+    },
+    {
       id: "globaltix-127845",
       name: "3D Kyoto JAPAN Museum + Sagano Scenic Railway",
       source: "globaltix",
@@ -941,7 +996,8 @@ const TOURS_BY_DESTINATION = {
  * @returns {import("../../types/addons").Tour[]}
  */
 export function getToursByDestination(slug) {
-  // "japan-test" reuses the same add-ons as "japan"
-  const key = slug === "japan-test" ? "japan" : slug;
+  // slug aliases that share add-ons with another destination
+  const ALIAS = { "japan-test": "japan", "danang-private": "danang-vietnam", "hongkong-private": "hongkong" };
+  const key = ALIAS[slug] ?? slug;
   return TOURS_BY_DESTINATION[key] ?? [];
 }

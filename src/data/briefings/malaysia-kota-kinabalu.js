@@ -39,73 +39,6 @@ export const malaysiaKotaKinabaluBriefing = {
   ],
 
   // ─── ITINERARY ─────────────────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila → Kota Kinabalu | Waterfront & Night Market",
-      activities: [
-        "Depart Manila — direct Cebu Pacific flight to Kota Kinabalu (BKI), approx. 2.5 hours",
-        "No visa required for Philippine passport holders — just present valid passport",
-        "Arrive KK, collect baggage, meet Gladex representative",
-        "Check in to hotel in central KK area",
-        "Afternoon Signal Hill Observatory (free — elevated views of KK city, islands, and South China Sea)",
-        "Evening KK Waterfront Night Market — the best fresh seafood in Sabah",
-        "Dinner: fresh grilled prawns, crab, lobster, fish (incredibly affordable vs. Manila)",
-        "Optional after-dinner: Gaya Street night walk or Megalong Arcade night market (street food + souvenirs)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Kinabalu Park (UNESCO) + Poring Hot Springs",
-      activities: [
-        "Early breakfast and depart KK (approx. 1.5h drive through Sabah highlands)",
-        "Arrive Kinabalu Park — UNESCO World Heritage Site since 2000",
-        "Mount Kinabalu viewpoint: on clear mornings, see the 4,095m peak of South East Asia's highest mountain",
-        "Kinabalu Park botanical garden walk — orchids, pitcher plants, rafflesia (world's largest flower — if in bloom!)",
-        "Guided nature trail through ancient lowland rainforest — spot Borneo endemic birds, squirrels, and insects",
-        "Lunch at Kinabalu Park restaurant",
-        "Afternoon Poring Hot Springs — natural sulphur hot spring pools in rainforest setting; canopy walkway (elevated forest bridge, approx. 30m above forest floor)",
-        "Return to KK late afternoon",
-        "Optional evening: Kota Kinabalu City Mosque or Sabah State Mosque (exterior view, stunning dusk reflection)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Tunku Abdul Rahman Marine Park — Island Hopping & Snorkeling",
-      activities: [
-        "Morning: speedboat from KK waterfront jetty to Tunku Abdul Rahman Marine Park",
-        "The marine park consists of 5 islands just 3–8km from the city centre",
-        "Sapi Island — crystal clear turquoise water, white sand beach, BBQ and picnic facilities, jungle hiking trail",
-        "Snorkeling at Sapi reef — abundant coral gardens with clownfish, parrotfish, sea turtles, reef sharks",
-        "Mamutik Island — smaller, quieter island with excellent snorkeling directly off the beach",
-        "All snorkeling equipment provided (mask, fins, snorkel)",
-        "Picnic lunch or beach BBQ on island",
-        "Return to KK by speedboat mid-afternoon",
-        "Free afternoon: Handicraft Market KK (Borneo crafts, beadwork, batik, woodcarving), Signal Hill sunset",
-        "Optional evening: 1Borneo Hypermall or Suria Sabah Mall (shopping, local food court)",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Mari Mari Cultural Village + Departure",
-      activities: [
-        "Morning: Mari Mari Cultural Village (approx. 25 min from KK) — immersive guided tour of 5 Sabahan indigenous tribes",
-        "Kadazan-Dusun longhouse: rice wine (lihing) tasting, traditional weaving, tattooing demonstration",
-        "Bajau (Sea Gypsies) water village: traditional fishing, blowpipe demonstration",
-        "Lundayeh: fire-starting by hand, traditional ceremonies",
-        "Rungus: traditional music, beadwork, longhouse architecture",
-        "Murut: traditional rice storage, jungle survival skills",
-        "Cultural performance and traditional rice wine (lihing) farewell toast",
-        "Return to KK for last shopping and lunch",
-        "Optional: Lok Kawi Wildlife Park (Borneo wildlife — pygmy elephant, proboscis monkey, orangutan — approx. 30 min south of KK)",
-        "Transfer to Kota Kinabalu International Airport for departure",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── TRAVEL INFORMATION ────────────────────────────────────────────────────
   travelInformation: {
@@ -474,7 +407,6 @@ export const malaysiaKotaKinabaluBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -629,7 +561,6 @@ export const malaysiaKotaKinabaluBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {

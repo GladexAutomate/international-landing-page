@@ -42,87 +42,6 @@ export const vietnamHanoiBriefing = {
   ],
 
   // ─── 4. DAILY ITINERARY ──────────────────────────────────────────────────
-  itinerary: [
-    {
-      day: 1,
-      title: "Manila to Hanoi — Arrival · Hoan Kiem Lake · Old Quarter Evening",
-      activities: [
-        "Depart from Manila and fly to Noi Bai International Airport (HAN), Hanoi.",
-        "Prepare your printed Vietnam e-Visa approval letter (LOA) and 2 pcs. 2×2 photos — required at the immigration e-Visa stamping counter.",
-        "After immigration clearance and baggage collection, meet your Gladex tour guide at the arrivals hall.",
-        "Transfer to your hotel in the Hanoi Old Quarter area — approximately 40–50 minutes from the airport.",
-        "Hotel check-in. Standard check-in time is 2:00 PM — early check-in subject to availability.",
-        "Evening orientation walk: Hoan Kiem Lake, the iconic red Huc Bridge, and Ngoc Son Temple (exterior view).",
-        "Stroll through Hang Ngang and Hang Dao streets in the Old Quarter — experience Hanoi's famous 36-street historic merchant district.",
-        "Dinner at a group restaurant featuring Vietnamese cuisine.",
-        "Optional: Bia Hoi Corner at Ta Hien Street — Hanoi's famous fresh draft beer street (VND 5,000–10,000/glass, optional personal expense).",
-        "Overnight stay in Hanoi.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Full-Day Hanoi City Tour — Ho Chi Minh Mausoleum · Temple of Literature · Hoa Lo Prison · Old Quarter",
-      activities: [
-        "After breakfast, proceed with the full-day Hanoi city tour.",
-        "First stop: Ho Chi Minh Mausoleum and Ba Dinh Square — the solemn complex where Ho Chi Minh's embalmed body lies in state. Dress code strictly enforced (no shorts or sleeveless tops). NOTE: Closed on Mondays and Fridays.",
-        "Visit One Pillar Pagoda — one of Vietnam's most iconic symbols, a tiny lotus-shaped pagoda on a single stone pillar built in 1049 AD.",
-        "Proceed to the Temple of Literature (Van Mieu) — Vietnam's first university, founded in 1070 AD. A beautifully preserved Confucian complex of five courtyards, stone turtle stelae, and ancient pavilions.",
-        "Lunch at a local Bun Cha restaurant — Hanoi's famous grilled pork noodle dish (the same dish President Obama ate with Anthony Bourdain in 2016).",
-        "Afternoon visit: Hoa Lo Prison (the 'Hanoi Hilton') — a sobering French colonial prison museum that held Vietnamese revolutionaries and later American POWs.",
-        "Old Quarter afternoon walking tour: Dong Xuan Market (Hanoi's largest covered market), Hang Gai Silk Street, and traditional craft streets.",
-        "Optional evening: Night Market on Hang Dao Street (Fridays–Sundays near Hoan Kiem Lake).",
-        "Dinner and overnight stay in Hanoi.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Hanoi to Halong Bay — Cruise · Kayaking · Limestone Karsts · Sunset on Deck",
-      activities: [
-        "After an early breakfast, depart from Hanoi by air-conditioned coach to Halong Bay (approximately 3.5 hours).",
-        "Arrive at the Halong Bay cruise pier and board your overnight cruise vessel.",
-        "Welcome lunch aboard the cruise as you sail into Halong Bay — UNESCO World Heritage Site with over 2,000 limestone karsts rising from emerald-green waters.",
-        "Afternoon activities: kayaking through sea caves and hidden lagoons, exploring floating fishing villages.",
-        "Visit one of Halong Bay's famous caves (e.g., Thien Canh Son Cave or Sung Sot Cave) — massive stalactite and stalagmite formations.",
-        "Sunset on the sundeck — Halong Bay at golden hour is one of the most photographed scenes in Southeast Asia.",
-        "Fresh seafood dinner on board: prawns, squid, clams, steamed fish — a highlight of the Halong Bay experience.",
-        "Evening stargazing or squid fishing from the deck (complimentary on most cruise vessels).",
-        "Overnight stay on the cruise in Halong Bay.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Halong Bay Morning · Return to Hanoi · Free Evening",
-      activities: [
-        "Wake up early to sunrise over Halong Bay's limestone karsts — one of the world's great dawn panoramas.",
-        "Morning tai chi session on the sundeck (optional, available on most cruises).",
-        "After a late breakfast on board, disembark from the cruise after checkout.",
-        "Return journey by coach from Halong Bay to Hanoi (approximately 3.5 hours).",
-        "Arrive back in Hanoi in the early afternoon. Free time to rest or explore independently.",
-        "Optional afternoon: Vietnam Museum of Ethnology — one of Southeast Asia's finest ethnographic museums showcasing the cultures of Vietnam's 54 ethnic groups.",
-        "Optional evening: St. Joseph's Cathedral exterior visit, Old Quarter night stroll, or egg coffee at the legendary Café Giang (Nguyen Huu Huan Street).",
-        "Dinner at your own leisure in the Old Quarter.",
-        "Overnight stay in Hanoi.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 5,
-      title: "Bat Trang Village (Optional) · Dong Xuan Market · Egg Coffee · Departure",
-      activities: [
-        "After breakfast, optional morning visit to Bat Trang Ceramic Village — 30 minutes from Hanoi, a famous traditional pottery-making village where you can watch artisans at work and buy quality ceramics directly.",
-        "Return to Hanoi for final souvenir shopping at Dong Xuan Market — wholesale prices on clothing, textiles, local snacks, and Vietnamese handicrafts.",
-        "Last stop: Café Giang for the original egg coffee (ca phe trung) — a must-have Hanoi experience before departure.",
-        "Hotel checkout. Secure your luggage with the front desk if needed.",
-        "Transfer to Noi Bai International Airport (HAN) for your return flight to Manila.",
-        "Complete check-in, immigration, and departure procedures.",
-        "Safe flight home with memories of Hanoi and the legendary Halong Bay.",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   // ─── 5. TRAVEL INFORMATION ───────────────────────────────────────────────
   travelInformation: {
@@ -597,7 +516,6 @@ export const vietnamHanoiBriefing = {
       category: "Gladex Tours",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -747,7 +665,6 @@ export const vietnamHanoiBriefing = {
   assistanceContacts: {
     messenger: {
       label: "Chat on Messenger",
-      url: "https://m.me/771470123003758",
       subtext: "Message us anytime",
     },
     whatsapp: {
