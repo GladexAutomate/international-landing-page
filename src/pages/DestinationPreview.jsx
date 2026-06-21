@@ -7,11 +7,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 import { DANANG_PACKAGES, getDanangPackageByBooking } from "../data/briefings/danang-packages.js";
+import { HONGKONG_PACKAGES, getHongkongPackageByBooking } from "../data/briefings/hongkong-packages.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import ScrollControls from "../components/ScrollControls";
 import { resolveVoucher, resolveItinerary, resolveFirstId } from "../services/fusiooDocumentService";
-import { generateItineraryPDF } from "../utils/generateItineraryPDF";
+import { generateVoucherPDF } from "../utils/generateVoucherPDF";
 import {
   getInsurancePlans,
   createCart,
@@ -29,7 +30,6 @@ import OrderSuccessScreen from "../components/OrderSuccessScreen";
 
 // Briefing-specific components
 import BriefingSection from "../components/briefing/BriefingSection";
-import ItineraryTimeline from "../components/briefing/ItineraryTimeline";
 import ImmigrationAdvisory from "../components/briefing/ImmigrationAdvisory";
 import TravelChecklist from "../components/briefing/TravelChecklist";
 import DosAndDonts from "../components/briefing/DosAndDonts";
@@ -1070,7 +1070,8 @@ function RemindersSection({ briefing, theme }) {
     <BriefingSection label="Before Each Tour Day" title="Tour Reminders" theme={theme}>
       <div className="space-y-3">
         {reminders.map((item, i) => {
-          const text = typeof item === "string" ? item : (item.text || "");
+          const text  = typeof item === "string" ? item : (item.text || "");
+          const icon  = typeof item === "object" ? item.icon : null;
           return (
             <div
               key={i}
@@ -1078,10 +1079,10 @@ function RemindersSection({ briefing, theme }) {
               style={{ backgroundColor: "#FFFFFF", borderColor: border }}
             >
               <span
-                className="font-condensed font-black text-sm shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5"
-                style={{ backgroundColor: ORANGE, color: "#fff" }}
+                className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5 text-sm"
+                style={icon ? { fontSize: 18 } : { backgroundColor: ORANGE, color: "#fff", fontFamily: "var(--font-condensed)", fontWeight: 900 }}
               >
-                {i + 1}
+                {icon || (i + 1)}
               </span>
               <span className="font-body text-base leading-relaxed" style={{ color: textSecondary }}>
                 {text}
@@ -1089,6 +1090,35 @@ function RemindersSection({ briefing, theme }) {
             </div>
           );
         })}
+      </div>
+    </BriefingSection>
+  );
+}
+
+// ─── 10b. CONNECTING FLIGHT NOTE ─────────────────────────────────────────────
+function ConnectingFlightSection({ briefing, theme }) {
+  const { textPrimary, textSecondary, border, isDark } = theme;
+  const note = briefing?.connectingFlightNote;
+  if (!note) return null;
+  return (
+    <BriefingSection label="Flight Reminder" title={note.title || "Connecting Flight Reminder"} theme={theme}>
+      <div className="space-y-3">
+        {[note.arrival, note.departure].filter(Boolean).map((leg, i) => (
+          <div key={i} className="rounded-2xl border overflow-hidden" style={{ borderColor: border }}>
+            <div
+              className="flex items-center gap-3 px-5 py-3"
+              style={{ backgroundColor: i === 0 ? ORANGE : isDark ? "#1a1208" : "#FFF3E0" }}
+            >
+              <span className="text-lg">{i === 0 ? "🛬" : "🛫"}</span>
+              <p className="font-condensed font-black text-sm tracking-wide" style={{ color: i === 0 ? "#fff" : ORANGE }}>
+                {leg.label}
+              </p>
+            </div>
+            <div className="px-5 py-4" style={{ backgroundColor: isDark ? "#111" : "#FFFBF7" }}>
+              <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{leg.details}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </BriefingSection>
   );
@@ -1558,64 +1588,51 @@ function PhotoSlider({ items, theme }) {
 }
 
 // ─── 17. DESTINATION GUIDE ───────────────────────────────────────────────────
-// TeenCare-style: solid #FF9913 image frame, photo sits inside with padding, text beside
 function GuideCard({ item, index, textPrimary, textSecondary, fallbackEmoji }) {
   const imageLeft = index % 2 === 0;
   const [imgFailed, setImgFailed] = React.useState(false);
 
-  const imageBox = (
-    <div
-      className="shrink-0 rounded-2xl"
-      style={{
-        width: 136,
-        height: 136,
-        minWidth: 136,
-        backgroundColor: "#FF9913",
-        padding: 10,
-        boxSizing: "border-box",
-      }}
-    >
-      {item.img && !imgFailed ? (
-        <img
-          src={item.img}
-          alt={item.name}
-          className="w-full h-full object-cover rounded-xl"
-          loading="lazy"
-          onError={() => setImgFailed(true)}
-        />
-      ) : (
-        <div
-          className="w-full h-full rounded-xl flex items-center justify-center text-4xl"
-          style={{ backgroundColor: "rgba(255,255,255,0.25)" }}
-        >
-          {item.icon || fallbackEmoji}
-        </div>
-      )}
-    </div>
-  );
-
-  const textBox = (
-    <div className="flex-1 min-w-0 py-1">
-      <p className="font-condensed font-black text-xl leading-snug mb-2" style={{ color: textPrimary }}>
-        {item.name}
-      </p>
-      <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
-        {item.desc || item.description || ""}
-      </p>
-    </div>
-  );
-
   return (
     <div
-      className="flex items-center gap-4 rounded-2xl px-4 py-4"
+      className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-2xl p-4"
       style={{
         backgroundColor: "#FFFFFF",
         border: "1px solid rgba(255,153,19,0.28)",
         boxShadow: "0 3px 18px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.05)",
       }}
     >
-      {imageLeft ? imageBox : textBox}
-      {imageLeft ? textBox : imageBox}
+      {/* Image — always on top on mobile; alternates left/right on sm+ */}
+      <div
+        className={`rounded-2xl shrink-0 w-full h-44 sm:w-[136px] sm:h-[136px] ${!imageLeft ? "sm:order-last" : ""}`}
+        style={{ backgroundColor: "#FF9913", padding: 10, boxSizing: "border-box" }}
+      >
+        {item.img && !imgFailed ? (
+          <img
+            src={item.img}
+            alt={item.name}
+            className="w-full h-full object-cover rounded-xl"
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <div
+            className="w-full h-full rounded-xl flex items-center justify-center text-4xl"
+            style={{ backgroundColor: "rgba(255,255,255,0.25)" }}
+          >
+            {item.icon || fallbackEmoji}
+          </div>
+        )}
+      </div>
+
+      {/* Text */}
+      <div className={`flex-1 min-w-0 ${!imageLeft ? "sm:order-first" : ""}`}>
+        <p className="font-condensed font-black text-xl leading-snug mb-2" style={{ color: textPrimary }}>
+          {item.name}
+        </p>
+        <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+          {item.desc || item.description || ""}
+        </p>
+      </div>
     </div>
   );
 }
@@ -1760,10 +1777,10 @@ function DestinationGuideSection({ briefing, slug, theme }) {
                   </div>
                   <div>
                     {currencyGuide.roughPrices.map((rp, i) => (
-                      <div key={i} className="flex items-start justify-between gap-4 px-5 py-3 border-b last:border-0"
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-4 px-4 sm:px-5 py-3.5 border-b last:border-0"
                         style={{ borderColor: border }}>
-                        <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{rp.item}</p>
-                        <p className="font-body text-xs font-bold shrink-0" style={{ color: ORANGE }}>{rp.price}</p>
+                        <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{rp.item}</p>
+                        <p className="font-body text-sm font-bold text-right sm:shrink-0 sm:ml-2" style={{ color: ORANGE }}>{rp.price}</p>
                       </div>
                     ))}
                   </div>
@@ -1775,7 +1792,7 @@ function DestinationGuideSection({ briefing, slug, theme }) {
                     <div key={i} className="flex items-start gap-2 px-4 py-3 rounded-xl border"
                       style={{ backgroundColor: bgCard, borderColor: border }}>
                       <span className="font-bold mt-0.5 shrink-0" style={{ color: ORANGE }}>✓</span>
-                      <p className="font-body text-xs leading-relaxed" style={{ color: textSecondary }}>{tip}</p>
+                      <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>{tip}</p>
                     </div>
                   ))}
                 </div>
@@ -1830,20 +1847,20 @@ function EmergencyContactsSection({ briefing, theme }) {
         </div>
         <ul className="px-4 py-3 space-y-2">
           {(group.contacts || []).map((c, j) => (
-            <li key={j} className="flex items-center justify-between gap-3 py-1 border-b border-orange-50 last:border-0">
-              <span className="font-body text-sm" style={{ color: "#555" }}>{c.label}</span>
+            <li key={j} className="flex items-center justify-between gap-2 py-1 border-b border-orange-50 last:border-0">
+              <span className="font-body text-sm min-w-0 flex-1" style={{ color: "#555" }}>{c.label}</span>
               {c.url ? (
                 <a href={c.url} target="_blank" rel="noopener noreferrer"
-                  className="font-condensed font-black text-sm shrink-0 hover:opacity-75 transition-opacity" style={{ color: ORANGE }}>
+                  className="font-condensed font-black text-sm shrink-0 text-right hover:opacity-75 transition-opacity" style={{ color: ORANGE }}>
                   {c.value}
                 </a>
               ) : isPhone(c.value) ? (
                 <a href={`tel:${String(c.value).replace(/\D/g, "")}`}
-                  className="font-condensed font-black text-sm shrink-0 hover:opacity-75 transition-opacity" style={{ color: ORANGE }}>
+                  className="font-condensed font-black text-sm shrink-0 text-right hover:opacity-75 transition-opacity" style={{ color: ORANGE }}>
                   {c.value}
                 </a>
               ) : c.value ? (
-                <span className="font-condensed font-black text-sm shrink-0" style={{ color: ORANGE }}>{c.value}</span>
+                <span className="font-condensed font-black text-sm shrink-0 text-right" style={{ color: ORANGE }}>{c.value}</span>
               ) : null}
             </li>
           ))}
@@ -2599,7 +2616,7 @@ function PreviewContent() {
   // status: "idle" | "loading" | "url" | "unavailable"
   const [voucherDoc,      setVoucherDoc]      = useState({ status: "idle", url: null });
   const [itineraryDoc,    setItineraryDoc]    = useState({ status: "idle", url: null });
-  const [bookingExpanded, setBookingExpanded] = useState(false);
+  const [bookingExpanded, setBookingExpanded] = useState(true);
 
   useEffect(() => {
     if (!booking) return;
@@ -2701,16 +2718,44 @@ function PreviewContent() {
   // Use the first package for briefing content (most destinations have one)
   const pkg = dest?.packages?.[0] || null;
 
+  // ── Preview mode — ?preview=<package-key> loads a package without a GDX ──
+  const searchParams     = new URLSearchParams(location.search);
+  const previewKey       = searchParams.get("preview") || null;
+  const isPreviewMode    = !!previewKey;
+
   // ── Da Nang multi-package variant logic ──────────────────────────────────
-  const isDanang = slug === "danang-vietnam";
-  const [selectedDanangKey, setSelectedDanangKey] = useState(null);
-  const autoDetectedDanangPkg = isDanang ? getDanangPackageByBooking(booking) : null;
-  const activeDanangPkg = isDanang
+  // isDanangPrivate = the new private page that shows all airline package buttons
+  // danang-vietnam  = original charter page, no selector, uses baseBriefing
+  const isDanangPrivate = slug === "danang-private";
+  const [selectedDanangKey, setSelectedDanangKey] = useState(
+    () => isDanangPrivate && previewKey ? previewKey : null
+  );
+  const autoDetectedDanangPkg = isDanangPrivate ? getDanangPackageByBooking(booking) : null;
+  const activeDanangPkg = isDanangPrivate
     ? (selectedDanangKey
         ? DANANG_PACKAGES.find((p) => p.key === selectedDanangKey) ?? autoDetectedDanangPkg
         : autoDetectedDanangPkg)
     : null;
-  const briefing = activeDanangPkg ? activeDanangPkg.briefing : baseBriefing;
+
+  // ── Hong Kong multi-package variant logic ─────────────────────────────────
+  // isHongkongPrivate = the private page that shows all airline package buttons
+  // hongkong slug = SAR/charter page with no selector
+  const isHongkongPrivate = slug === "hongkong-private";
+  const [selectedHongkongKey, setSelectedHongkongKey] = useState(
+    () => isHongkongPrivate && previewKey ? previewKey : null
+  );
+  const autoDetectedHongkongPkg = isHongkongPrivate ? getHongkongPackageByBooking(booking) : null;
+  const activeHongkongPkg = isHongkongPrivate
+    ? (selectedHongkongKey
+        ? HONGKONG_PACKAGES.find((p) => p.key === selectedHongkongKey) ?? autoDetectedHongkongPkg
+        : autoDetectedHongkongPkg)
+    : null;
+
+  const briefing = activeDanangPkg
+    ? activeDanangPkg.briefing
+    : activeHongkongPkg
+      ? activeHongkongPkg.briefing
+      : baseBriefing;
 
   // Theme for white sections — neutral background with dark text
   const theme = {
@@ -2866,6 +2911,26 @@ function PreviewContent() {
         />
       </div>
 
+      {/* ── PREVIEW MODE BANNER ── */}
+      {isPreviewMode && (
+        <div
+          className="flex items-center justify-center gap-3 py-2.5 px-4 text-sm font-bold tracking-wide"
+          style={{ backgroundColor: "#1a0800", color: "#FF9913", borderBottom: "2px solid #FF9913" }}
+        >
+          <span>👁</span>
+          <span>PREVIEW MODE</span>
+          <span style={{ color: "#fff", fontWeight: 400 }}>—</span>
+          <span>
+            {activeDanangPkg?.description
+              || activeHongkongPkg?.description
+              || previewKey}
+          </span>
+          <span style={{ color: "rgba(255,153,19,0.55)", fontWeight: 400, fontSize: "0.75rem" }}>
+            · No GDX required
+          </span>
+        </div>
+      )}
+
       {/* ── HERO ── */}
       {dest && (
         <div
@@ -2983,29 +3048,7 @@ function PreviewContent() {
           VIEW MY TRIP BUTTON + TRAVELER DASHBOARD (collapsible)
           ══════════════════════════════════════════════════════════════════════ */}
 
-      {/* "View My Trip" trigger — shown when booking loaded, dashboard collapsed */}
-      {booking && !bookingExpanded && (
-        <div
-          className="px-4 lg:px-10 py-8 flex justify-center transition-colors duration-300"
-          style={{ backgroundColor: bg }}
-        >
-          <motion.button
-            onClick={() => setBookingExpanded(true)}
-            className="inline-flex items-center gap-2 font-body font-bold text-base px-8 py-4 rounded-2xl"
-            style={{ backgroundColor: ORANGE, color: "#080808" }}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.02, boxShadow: "0 0 28px rgba(255,153,19,0.50)" }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <MapPin className="w-5 h-5" />
-            View My Trip
-          </motion.button>
-        </div>
-      )}
-
-      {/* Traveler Dashboard — expands inline when View My Trip is clicked */}
+      {/* Traveler Dashboard — shown automatically when booking is loaded */}
       <AnimatePresence>
         {booking && bookingExpanded && (
           <motion.div
@@ -3132,6 +3175,18 @@ function PreviewContent() {
               { label: "Check-out",          value: fmtDate(booking.check_out) || fmtDate(booking.checkout) },
               { label: "Nights",             value: fmtValue(booking.number_of_nights) },
               { label: "Confirmation No.",   value: fmtValue(booking.hotel_confirmation) || fmtValue(booking.hotel_booking_details) },
+            ],
+          },
+
+          // ── 5. Flight Information ───────────────────────────────────────────
+          {
+            title: "Flight Information",
+            icon: <Plane className="w-4 h-4" />,
+            fields: [
+              { label: "Airline",           value: fmtValue(booking.airlineName) || fmtValue(booking.name_of_airline) },
+              { label: "PNR / Booking Ref", value: fmtValue(booking.pnr) },
+              { label: "Departing Flight",  value: fmtValue(booking.flightDeparture) },
+              { label: "Return Flight",     value: fmtValue(booking.flightReturn) },
             ],
           },
 
@@ -3327,17 +3382,6 @@ function PreviewContent() {
                         <Download className="w-4 h-4" /> View Your Voucher
                       </a>
                     )}
-                    {itineraryDoc?.status === "url" && itineraryDoc.url && (
-                      <a
-                        href={itineraryDoc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                        style={{ backgroundColor: isDark ? "rgba(255,153,19,0.15)" : "rgba(255,255,255,0.25)", color: isDark ? ORANGE : "#FFFFFF", border: `1px solid ${isDark ? "rgba(255,153,19,0.35)" : "rgba(255,255,255,0.45)"}` }}
-                      >
-                        <FileText className="w-4 h-4" /> View Itinerary
-                      </a>
-                    )}
                   </div>
                 </div>
               </motion.div>
@@ -3386,22 +3430,8 @@ function PreviewContent() {
                         Retrieved from your GDX booking record
                       </p>
                     </div>
-                    {/* Right — close button + status badges */}
+                    {/* Right — status badges */}
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      <motion.button
-                        onClick={() => setBookingExpanded(false)}
-                        className="flex items-center gap-1.5 font-body font-semibold text-xs px-3.5 py-1.5 rounded-xl border transition-colors"
-                        style={{
-                          backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-                          borderColor:     isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)",
-                          color: textPrimary,
-                        }}
-                        whileHover={{ scale: 1.03, backgroundColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.09)" }}
-                        whileTap={{ scale: 0.97 }}
-                      >
-                        <X className="w-3.5 h-3.5" />
-                        Close
-                      </motion.button>
                       <span
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-body font-bold text-xs"
                         style={{ backgroundColor: isDark ? "rgba(34,197,94,0.12)" : "#F0FFF4", color: statusColor, border: `1.5px solid ${statusColor}` }}
@@ -3494,42 +3524,15 @@ function PreviewContent() {
                       </a>
                     )}
                     {(voucherDoc.status === "idle" || voucherDoc.status === "unavailable") && (
-                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
-                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.5 }}>
-                        <Download className="w-4 h-4" /> View Your Voucher
+                      <button
+                        onClick={() => generateVoucherPDF({ booking })}
+                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95"
+                        style={{ backgroundColor: ORANGE, color: "#080808" }}
+                      >
+                        <Download className="w-4 h-4" /> Download Booking Voucher
                       </button>
                     )}
 
-                    {/* Itinerary */}
-                    {itineraryDoc.status === "loading" && (
-                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
-                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
-                        <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
-                        Loading Itinerary…
-                      </button>
-                    )}
-                    {itineraryDoc.status === "url" && (
-                      <a href={itineraryDoc.url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border transition-all hover:opacity-80 active:scale-95"
-                        style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: isDark ? "transparent" : "#FFF8F0" }}>
-                        <FileText className="w-4 h-4" /> View Itinerary
-                      </a>
-                    )}
-                    {(itineraryDoc.status === "idle" || itineraryDoc.status === "unavailable") && (briefing?.itinerary?.length || pkg?.itinerary?.length) ? (
-                      <button
-                        onClick={() => generateItineraryPDF({ dest, briefing, pkg, booking })}
-                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border transition-all hover:opacity-80 active:scale-95"
-                        style={{ borderColor: ORANGE, color: ORANGE, backgroundColor: isDark ? "transparent" : "#FFF8F0" }}
-                      >
-                        <Download className="w-4 h-4" /> Download Itinerary
-                      </button>
-                    ) : (itineraryDoc.status === "idle" || itineraryDoc.status === "unavailable") ? (
-                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-not-allowed"
-                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.5 }}>
-                        <FileText className="w-4 h-4" /> View Itinerary
-                      </button>
-                    ) : null}
 
                   </div>
                 </div>
@@ -3626,7 +3629,7 @@ function PreviewContent() {
       )}
 
       {/* ── Da Nang Package Selector ── */}
-      {isDanang && (
+      {isDanangPrivate && (
         <div style={{ backgroundColor: "#FFFFFF" }} className="py-10 px-4 border-b border-gray-100">
           <div className="w-full px-6 lg:px-12 xl:px-20">
             <p className="text-xs font-bold tracking-[0.3em] uppercase text-center mb-1" style={{ color: "#FF9913" }}>
@@ -3666,6 +3669,47 @@ function PreviewContent() {
         </div>
       )}
 
+      {/* ── Hong Kong Package Selector ── */}
+      {isHongkongPrivate && (
+        <div style={{ backgroundColor: "#FFFFFF" }} className="py-10 px-4 border-b border-gray-100">
+          <div className="w-full px-6 lg:px-12 xl:px-20">
+            <p className="text-xs font-bold tracking-[0.3em] uppercase text-center mb-1" style={{ color: "#FF9913" }}>
+              Your Package
+            </p>
+            <h3 className="font-condensed font-black text-[#111] text-2xl text-center mb-1">
+              Select Your Package
+            </h3>
+            <p className="text-xs text-center mb-6" style={{ color: "#888" }}>
+              {autoDetectedHongkongPkg && !selectedHongkongKey
+                ? "Auto-selected based on your booking — tap to switch"
+                : "Tap your package to view the correct briefing"}
+            </p>
+            <div className="flex gap-3 justify-center flex-wrap">
+              {HONGKONG_PACKAGES.map((hpkg) => {
+                const isActive = activeHongkongPkg?.key === hpkg.key;
+                return (
+                  <button
+                    key={hpkg.key}
+                    onClick={() => setSelectedHongkongKey(hpkg.key)}
+                    className="px-7 py-4 rounded-2xl transition-all active:scale-95 text-center min-w-[120px]"
+                    style={
+                      isActive
+                        ? { backgroundColor: "#FF9913", color: "#fff", border: "2px solid #FF9913", boxShadow: "0 4px 16px rgba(255,153,19,0.3)" }
+                        : { backgroundColor: "#F9F7F5", color: "#333", border: "2px solid #E5E7EB" }
+                    }
+                  >
+                    <span className="font-condensed font-black text-2xl block">{hpkg.shortLabel}</span>
+                    <span className="block text-xs font-medium mt-0.5" style={{ opacity: isActive ? 0.85 : 0.6 }}>
+                      {hpkg.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══════════════════════════════════════════════════════════════════════
           BRIEFING SECTIONS — light orange (#FFF4E0) / dark alternating backgrounds
           ══════════════════════════════════════════════════════════════════════ */}
@@ -3674,7 +3718,7 @@ function PreviewContent() {
 
           {/* Contact Panel + Emergency Numbers — ORANGE */}
           <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-            <div className="w-full px-6 lg:px-12 xl:px-20 py-12">
+            <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12">
               <div className="space-y-8">
                 <SectionErrorBoundary>
                   <ContactPanel briefing={briefing} booking={booking} theme={orangeTheme} />
@@ -3690,7 +3734,7 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="city" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <WelcomeSection briefing={briefing} pkg={pkg} theme={theme} heroImage={dest?.heroImage} />
               </div>
             </div>
@@ -3699,36 +3743,19 @@ function PreviewContent() {
           {/* 2 & 3. Inclusions + Exclusions — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                 <InclusionsSection pkg={pkg} briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
           </SectionErrorBoundary>
 
-          {/* 4. Itinerary Timeline — DARK */}
-          {(pkg?.itinerary?.length > 0 || briefing?.itinerary?.length > 0) && (
-            <SectionErrorBoundary>
-              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-                <TravelCardBg variant="city" />
-                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
-                  <BriefingSection label="Day by Day" title="Itinerary Timeline" theme={theme}>
-                    <ItineraryTimeline
-                      itinerary={pkg?.itinerary?.length > 0 ? pkg.itinerary : briefing.itinerary}
-                      theme={theme}
-                      slug={slug}
-                    />
-                  </BriefingSection>
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
 
           {/* Optional Tours & Activities — DARK (only on destinations with enableAddOns: true) */}
           {dest?.enableAddOns && globaltixTours.length > 0 && (
             <SectionErrorBoundary>
               <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
                 <TravelCardBg variant="city" />
-                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <OptionalToursSection
                     tours={globaltixTours}
                     cartTourIds={cart.tours.map((t) => t.tour?.id)}
@@ -3743,7 +3770,7 @@ function PreviewContent() {
           {/* 5. Travel Information Center — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                 <TravelInfoCenter briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3753,7 +3780,7 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <ArrivalSection briefing={briefing} theme={theme} />
               </div>
             </div>
@@ -3762,7 +3789,7 @@ function PreviewContent() {
           {/* 7. Transfer Instructions — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                 <TransferSection briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3772,7 +3799,7 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <HotelSection briefing={briefing} theme={theme} />
               </div>
             </div>
@@ -3781,7 +3808,7 @@ function PreviewContent() {
           {/* 9. Tour Reminders — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                 <RemindersSection briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3792,7 +3819,7 @@ function PreviewContent() {
             <SectionErrorBoundary>
               <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
                 <TravelCardBg variant="city" />
-                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={theme}>
                     <DosAndDonts
                       dos={briefing.dosAndDonts.dos}
@@ -3809,7 +3836,7 @@ function PreviewContent() {
           {briefing.immigrationAdvisory?.length > 0 && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                   <BriefingSection label="Philippine Immigration" title="Immigration Advisory" theme={orangeTheme}>
                     <div className="mb-4">
                       <p className="font-body text-base leading-relaxed" style={{ color: orangeTheme.textSecondary }}>
@@ -3827,7 +3854,15 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="city" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
+                <ConnectingFlightSection briefing={briefing} theme={theme} />
+              </div>
+            </div>
+          </SectionErrorBoundary>
+          <SectionErrorBoundary>
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="city" />
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={theme} />
               </div>
             </div>
@@ -3836,7 +3871,7 @@ function PreviewContent() {
           {/* Requirements — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                 <RequirementsSection pkg={pkg} theme={orangeTheme} />
               </div>
             </div>
@@ -3847,7 +3882,7 @@ function PreviewContent() {
             <SectionErrorBoundary>
               <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
                 <TravelCardBg variant="city" />
-                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <ImportantNoticesSection pkg={pkg} theme={theme} />
                 </div>
               </div>
@@ -3858,7 +3893,7 @@ function PreviewContent() {
           {briefing.checklist?.length > 0 && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                   <BriefingSection label="Pre-Departure" title="Travel Readiness Checklist" theme={orangeTheme}>
                     <TravelChecklist
                       items={briefing.checklist}
@@ -3875,7 +3910,7 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <WhatToBringCarousel items={briefing.whatToBring || []} theme={theme} />
               </div>
             </div>
@@ -3884,7 +3919,7 @@ function PreviewContent() {
           {/* Outfit Guide — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                 <OutfitGuide theme={orangeTheme} />
               </div>
             </div>
@@ -3894,7 +3929,7 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="city" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <DestinationGuideSection briefing={briefing} slug={slug} theme={theme} />
               </div>
             </div>
@@ -3903,7 +3938,7 @@ function PreviewContent() {
           {/* Connectivity Guide — ORANGE */}
           <SectionErrorBoundary>
             <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                 <ConnectivitySection briefing={briefing} theme={orangeTheme} />
               </div>
             </div>
@@ -3914,7 +3949,7 @@ function PreviewContent() {
             <SectionErrorBoundary>
               <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
                 <TravelCardBg variant="city" />
-                <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                   <BriefingSection label="Common Questions" title="Frequently Asked Questions" theme={theme}>
                     <BriefingFAQ faqs={briefing.faqs} theme={theme} />
                   </BriefingSection>
@@ -3927,7 +3962,7 @@ function PreviewContent() {
           {briefing.assistanceContacts && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                   <BriefingSection label="Contact Us" title="Need Assistance?" theme={orangeTheme}>
                     <NeedAssistance contacts={briefing.assistanceContacts} theme={orangeTheme} />
                   </BriefingSection>
@@ -3940,7 +3975,7 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} reviewRefreshKey={reviewRefreshKey} />
               </div>
             </div>
@@ -3950,7 +3985,7 @@ function PreviewContent() {
           {booking?.gdx && (
             <SectionErrorBoundary>
               <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16">
+                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
                   <RateMyService theme={orangeTheme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={handleReviewSaved} />
                 </div>
               </div>
@@ -3961,7 +3996,7 @@ function PreviewContent() {
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="city" />
-              <div className="relative w-full px-6 lg:px-12 xl:px-20 py-12 lg:py-16" style={{ zIndex: 1 }}>
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
                 <ReferralSection theme={theme} />
               </div>
             </div>

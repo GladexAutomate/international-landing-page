@@ -22,7 +22,7 @@ export const singaporeBriefing = {
   ],
 
   briefingExclusions: [
-    "Daily Hotel Breakfast (except hotels with breakfast)",
+    "Daily Hotel Breakfast (for budget hotel bookings — breakfast not included)",
     "Tipping fees for the Local Guides (OPTIONAL)",
     "Philippine Travel Tax (PHP 1,620) — if not yet paid",
     "Security Deposit at the Hotel",
@@ -32,55 +32,8 @@ export const singaporeBriefing = {
     "Optional Tours (except if already availed): Whole day Universal Studios Singapore, Sentosa Admission (Cable Car, Madam Tussauds, Wings of Time)",
   ],
 
-  itinerary: [
-    {
-      day: 1,
-      title: "Singapore Arrival",
-      activities: [
-        "Upon arrival at Singapore Changi Airport, meet and greet with the agency representative at the Arrival Information Counter.",
-        "After that, enjoy your SIC transfer going to the hotel for check-in.",
-        "Then enjoy free time in the afternoon — perfect for exploring nearby streets, trying local food, or simply relaxing after the flight.",
-        "Overnight stay at the hotel.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 2,
-      title: "Singapore City Tour",
-      activities: [
-        "Pick up at the hotel lobby around 08:45 AM to 09:00 AM then proceed to your tour.",
-        "Sites to Visit: Drive past Suntec & Singapore Flyer, Insta Photo Stop at Merlion Park, Thian Hock Theng Temple (China Town), Drive past Little India, Souvenir Shop, Gardens by the Bay (30 minutes stop only — excludes admission to Flower Dome, Cloud Forest & OCBC Skyway).",
-        "After tour, drop off at hotel. Free time in the afternoon.",
-        "Overnight stay at the hotel.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 3,
-      title: "Free Time or Optional Tours",
-      activities: [
-        "Free time in the afternoon — perfect for rest or independent exploration.",
-        "Optional Tour — Universal Studios Singapore: One of the highlights is visiting Universal Studios Singapore. Perfect for making unforgettable memories, watching magical shows, and enjoying thrilling rides. Includes One-day Pass Ticket, Seat-in-Coach (Joiners) Van, and English-speaking driver. Pick-up Time: Between 08:30–08:45 AM | Return Time: 07:00 PM at Universal Studios Coach Bay.",
-        "Optional Tour — Sentosa with Cable Car: Enjoy an exciting afternoon exploring Sentosa Island and experience a scenic Cable Car ride with breathtaking views of Singapore's skyline and harbor. Includes Seat-in-Coach (Joiners) and Driver. Pick-up Time: 02:00 PM | Return Time: 08:15 PM. Sites: Cable Car Sky Pass Round Trip, 4-in-1 MTSG: (Include MT + IOS Live + Boat Ride + Ultimate Film Star Experience), Wings of Time — Standard Seats.",
-        "Optional Tour — Gardens by the Bay: Explore the iconic Supertree Grove, Cloud Forest, and Flower Dome. Available as an add-on — contact Gladex Tours for details.",
-        "Overnight stay at the hotel.",
-      ],
-      galleryImages: [],
-    },
-    {
-      day: 4,
-      title: "Departure — Check Out and Transfer to Airport",
-      activities: [
-        "After breakfast, prepare for check-out and coordinate hotel pick-up for your transfer back to the airport.",
-        "It's time to say goodbye to Singapore and head back home with unforgettable memories!",
-      ],
-      galleryImages: [],
-    },
-  ],
 
   beforeTravel: [
-    "Ensure your passport is valid for at least six (6) months from your travel date.",
-    "Prepare all required immigration documents before departure.",
     "Ang final hotel details, daily itinerary, at pick-up schedules ay ipapadala bago ang tour date.",
   ],
 
@@ -93,14 +46,11 @@ export const singaporeBriefing = {
       "Your final hotel details, travel voucher, and transfer information will be sent approximately 10–15 working days after full payment",
     ],
     uponArrival: [
-      "Proceed through Immigration and collect your luggage",
-      "Connect to airport Wi-Fi or activate your eSIM / mobile data",
-      "Proceed to the Arrival Information Counter",
-      "Look for the assigned driver or representative holding a placard with the lead guest's name",
-      "Present your voucher for verification",
-      "The representative will provide important information regarding your transfers, tour schedules, and departure arrangements",
-      "Driver waiting time is limited to 1 hour and 15 minutes after your flight lands",
-      "If you are unable to locate your representative, immediately contact the local operator using the contact details provided in your voucher",
+      "Free WiFi is available at Changi Airport and Jewel — connect immediately upon landing.",
+      "Purchase a Tourist SIM (Singtel or Starhub) at the arrivals hall kiosks for island-wide 4G/5G coverage.",
+      "Exchange a small amount of SGD at the Changi airport money changers for immediate expenses.",
+      "No time adjustment needed — Singapore Standard Time (SGT, UTC+8) is the same as the Philippines.",
+      "Visit Jewel Changi before leaving the airport — the HSBC Rain Vortex indoor waterfall is free to view.",
     ],
     duringStay: [
       "Keep your passport and valuables secure at all times.",
@@ -120,7 +70,6 @@ export const singaporeBriefing = {
         "Your driver will wait up to 1 hour and 15 minutes after your flight lands. If you experience delays or long queues at Immigration, please inform the Singapore Careline immediately.",
         "After collecting your luggage, please proceed to meet the driver right away.",
         "In case hindi niyo po ma-locate ang driver, you may contact them directly at +65 9677 1120 for immediate assistance.",
-        "We highly recommend downloading WhatsApp before your trip for faster communication and easier coordination with the tour coordinator.",
         "You may purchase a SIM card or exchange currency after meeting the driver.",
         "Please note that no refund or compensation will be provided if the passenger fails to report to the Arrival Information Counter within the allotted waiting time.",
       ],
@@ -135,8 +84,6 @@ export const singaporeBriefing = {
         "Look for the assigned driver or representative holding a placard with the lead guest's name",
         "Present your voucher for verification",
         "The representative will provide important information regarding your transfers, tour schedules, and departure arrangements",
-        "Driver waiting time is limited to 1 hour and 15 minutes after your flight lands",
-        "If you cannot locate your representative, immediately contact the Gladex team or the local operator using the contact details provided in your voucher",
       ],
     },
     {
@@ -408,7 +355,6 @@ export const singaporeBriefing = {
       { label: "Climate", value: "Tropical — hot and humid year-round. Average 28–34°C. Afternoon rain showers are common almost daily. Humidity regularly exceeds 80%. There is no winter." },
       { label: "Religion & Customs", value: "Multi-religious society (Buddhism, Christianity, Islam, Hinduism). Remove shoes at mosques and Hindu temples. Dress modestly at religious sites. No eating on the MRT. Respect all religious observances." },
       { label: "Electricity", value: "230V, Type G outlets (3-pin UK-style). Philippine appliances require a Type G adapter. Most modern electronics (phone chargers, laptops) are dual-voltage and work fine with just an adapter plug." },
-      { label: "Emergency Numbers", value: "Police: 999 | Ambulance & Fire: 995 | Tourist Hotline: 1800-736-2000 | Non-Emergency Police Line: 1800-255-0000" },
     ],
     bestFood: [
       {
@@ -496,7 +442,6 @@ export const singaporeBriefing = {
       category: "Gladex Customer Care",
       icon: "🧡",
       contacts: [
-        { label: "Gladex Messenger", value: "m.me/GladexTours", type: "messenger", url: "https://m.me/771470123003758" },
         { label: "Gladex WhatsApp", value: "+63 917 875 2200", type: "whatsapp", url: "https://wa.me/639178752200" },
         { label: "Gladex Hotline", value: "+63 917 875 2200", type: "phone" },
       ],
@@ -601,7 +546,6 @@ export const singaporeBriefing = {
         "Affidavit of Support (if sponsored)",
         "Sponsor's Valid ID and Financial Documents (if applicable)",
         "Hotel Booking Confirmation",
-        "Roundtrip Flight Ticket",
         "Travel Itinerary",
       ],
       note: "First-time and unemployed travelers are at highest risk of being offloaded at Philippine BI. Prepare a complete, well-organized document folder.",
@@ -634,7 +578,6 @@ export const singaporeBriefing = {
   },
 
   assistanceContacts: {
-    messenger: { label: "Chat on Messenger", url: "https://m.me/771470123003758", subtext: "Message us anytime" },
     whatsapp: { label: "WhatsApp", url: "https://wa.me/639178752200", number: "+63 917 875 2200", subtext: "Available during business hours" },
     hotline: { label: "Gladex Hotline", number: "+63 917 875 2200", subtext: "For urgent travel concerns" },
     tagline: "Kung may concerns or need assistance during the tour, maaari kayong mag-contact sa inyong tour coordinator or directly sa Gladex Travel and Tours. Thank you for choosing Gladex! We look forward to giving you a smooth, safe, and memorable Singapore experience!",
