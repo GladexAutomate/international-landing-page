@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import DestinationPreview from './pages/DestinationPreview';
 import TourPackagePage from './pages/TourPackagePage';
 import BriefingPendingPage from './pages/BriefingPendingPage';
+import JapanEGroupVisa from './pages/JapanEGroupVisa';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/preview/:slug" element={<DestinationPreview />} />
           <Route path="/tour-packages/:slug" element={<TourPackagePage />} />
           <Route path="/briefing-pending" element={<BriefingPendingPage />} />
+          <Route path="/japan-egroup-visa" element={<JapanEGroupVisa />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>
