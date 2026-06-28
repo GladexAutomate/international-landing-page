@@ -124,12 +124,12 @@ function Lightbox({ images, startIndex, onClose }) {
 
 function Avatar({ t }) {
   const [imgError, setImgError] = useState(false);
-  const photoUrl  = t.photos?.[0] ?? t.photo;   // uploaded photo > hardcoded
-  const useImage  = !!photoUrl && !imgError;
-  const color     = avatarColor(t.name);
-  const inits     = initials(t.name);
+  // Only use t.photo (static/hardcoded path) as avatar — never use uploaded review photos
+  const photoUrl = t.photo && !imgError ? t.photo : null;
+  const color    = avatarColor(t.name);
+  const inits    = initials(t.name);
 
-  if (useImage) {
+  if (photoUrl) {
     return (
       <img
         src={photoUrl}
@@ -161,7 +161,7 @@ function TestimonialCard({ t, theme }) {
 
   return (
     <div
-      className="rounded-2xl border-2 p-5 sm:p-6 flex flex-col"
+      className="rounded-2xl border-2 p-4 flex flex-col"
       style={{
         backgroundColor: isClient
           ? isDark ? "#1a1208" : "#FFF8EE"
@@ -213,6 +213,31 @@ function TestimonialCard({ t, theme }) {
       >
         "{t.review}"
       </p>
+
+      {/* ── Photos ── */}
+      {photos.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {photos.slice(0, 3).map((url, i) => (
+            <button
+              key={i}
+              onClick={() => setLightboxIndex(i)}
+              className="relative shrink-0 overflow-hidden rounded-lg focus:outline-none hover:opacity-90 transition-opacity"
+              style={{ width: 64, height: 64, border: `2px solid ${ORANGE}50` }}
+              aria-label={`View photo ${i + 1}`}
+            >
+              <img src={url} alt="" className="w-full h-full object-cover" />
+              {photos.length > 3 && i === 2 && (
+                <div
+                  className="absolute inset-0 flex items-center justify-center font-condensed font-black text-white text-sm"
+                  style={{ backgroundColor: "rgba(0,0,0,0.55)" }}
+                >
+                  +{photos.length - 3}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Lightbox portal */}
       {lightboxIndex !== null && (
@@ -301,6 +326,22 @@ const HARDCODED = [
     photo: "/images/testimonials/miguel-dela-cruz.jpg",
     date:  "May 2025",
   },
+  {
+    name:        "Christine Buenaventura",
+    destination: "Hong Kong",
+    slugKeywords: ["hongkong", "hongkong-cebu-pacific", "hongkong-shenzhen-zhuhai", "macau", "taipei"],
+    rating: 5,
+    review: "Sobrang ganda ng experience namin! Everything was well-coordinated — from the airport pickup to the hotel. Ang briefing page ng Gladex, complete talaga! Babalik kami ulit.",
+    date:  "April 2025",
+  },
+  {
+    name:        "Mark Dela Torre",
+    destination: "Beijing–Shanghai",
+    slugKeywords: ["beijing-shanghai-collective", "beijing-shanghai-pal", "beijing-shanghai-cebu-pacific", "beijing-shanghai", "hanoi-sapa-airasia", "vietnam-hanoi", "chiangmai", "cambodia", "indochina", "kuala-lumpur", "phuket", "malaysia-kota-kinabalu", "dubai", "new-zealand", "twin-city", "tri-city"],
+    rating: 5,
+    review: "Hindi ko akalain na magiging ganito ka-smooth ang aming trip! Ang Gladex team, super helpful at lagi available. Yung briefing — sobrang detailed, walang tanong na hindi nasagot. Highly recommended!",
+    date:  "March 2025",
+  },
 ];
 
 // ── Variants ──────────────────────────────────────────────────────────────────
@@ -377,10 +418,11 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
   const prev = () => { setDir(-1); setActive((a) => (a - 1 + N) % N); };
   const next = () => { setDir(1);  setActive((a) => (a + 1) % N);     };
 
-  const touchX    = useRef(null);
-  const safeActive   = active % N;
+  const touchX     = useRef(null);
+  const safeActive = active % N;
+  // Show up to 3 unique cards — never repeat the same review in one view
   const visibleCount = Math.min(3, N);
-  const cards        = Array.from({ length: visibleCount }, (_, offset) => ALL[(safeActive + offset) % N]);
+  const cards = Array.from({ length: visibleCount }, (_, offset) => ALL[(safeActive + offset) % N]);
 
   function onTouchStart(e) { touchX.current = e.touches[0].clientX; }
   function onTouchEnd(e) {
@@ -408,9 +450,16 @@ export default function BriefingTestimonials({ theme, clientReview, slug, gdxRef
             exit="exit"
             transition={{ duration: 0.28, ease: "easeOut" }}
           >
-            <div className="flex flex-wrap gap-4 items-start">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${visibleCount}, 1fr)`,
+                gap: 12,
+                alignItems: "start",
+              }}
+            >
               {cards.map((t, i) => (
-                <div key={i} className={i > 0 ? "hidden md:block" : ""} style={{ minWidth: 240, flex: "1 1 0" }}>
+                <div key={i} style={{ minWidth: 0 }}>
                   <TestimonialCard t={t} theme={theme} />
                 </div>
               ))}

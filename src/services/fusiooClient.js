@@ -244,6 +244,8 @@ export async function getAppSchema(appId) {
  * Fetches a single record by its Fusioo record ID.
  *
  * Uses in-memory cache — repeated calls for the same ID are instant.
+ * Retries up to 3 times on 429 with staggered backoff to handle rate limits
+ * from concurrent linked-record fetches.
  *
  * @param {string} recordId  e.g. "i563dc5a6d467470496d28a0d9f062a52"
  * @returns {Promise<object|null>}  The record data, or null if not found
@@ -254,18 +256,32 @@ export async function getRecord(recordId) {
   // Return from cache if already fetched in this browser session
   if (_cache.has(recordId)) return _cache.get(recordId);
 
-  try {
-    const resp   = await fusiooGet(`/records/${recordId}`);
-    const record = resp?.data ?? null;
-    _cache.set(recordId, record);
-    return record;
-  } catch (err) {
-    if (err instanceof FusiooError && err.code === "NOT_FOUND") {
-      _cache.set(recordId, null); // cache the miss so we don't retry
-      return null;
+  const MAX_ATTEMPTS = 3;
+  let lastErr;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const resp   = await fusiooGet(`/records/${recordId}`);
+      const record = resp?.data ?? null;
+      _cache.set(recordId, record);
+      return record;
+    } catch (err) {
+      if (err instanceof FusiooError && err.code === "NOT_FOUND") {
+        _cache.set(recordId, null); // cache the miss so we don't retry
+        return null;
+      }
+      if (err instanceof FusiooError && err.code === "RATE_LIMITED" && attempt < MAX_ATTEMPTS) {
+        // Stagger retries with jitter so concurrent fetches don't all retry together
+        const delay = 1200 * attempt + Math.floor(Math.random() * 600);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      lastErr = err;
+      break;
     }
-    throw err;
   }
+
+  throw lastErr;
 }
 
 /**

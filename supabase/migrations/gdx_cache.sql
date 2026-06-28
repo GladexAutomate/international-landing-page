@@ -6,11 +6,30 @@
 
 -- 1. Create the cache table
 CREATE TABLE IF NOT EXISTS gdx_cache (
-  gdx            TEXT        PRIMARY KEY,
-  enriched_data  JSONB       NOT NULL,
-  slug           TEXT,
-  cached_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  gdx              TEXT        PRIMARY KEY,
+  enriched_data    JSONB       NOT NULL,
+  slug             TEXT,
+  lead_name        TEXT,
+  destination_name TEXT,
+  package_name     TEXT,
+  cached_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- 1b. Add columns if the table already exists (safe to run multiple times)
+ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS lead_name        TEXT;
+ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS destination_name TEXT;
+ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS package_name     TEXT;
+
+-- 1c. Backfill destination_name and package_name from existing enriched_data
+UPDATE gdx_cache
+SET
+  destination_name = enriched_data->>'destinationName',
+  package_name = COALESCE(
+    NULLIF(enriched_data->>'collective_package_name', ''),
+    NULLIF(enriched_data->>'type_of_package',         ''),
+    NULLIF(enriched_data->>'transaction_type',         '')
+  )
+WHERE destination_name IS NULL;
 
 -- 2. Index on cached_at so stale-entry queries are fast
 CREATE INDEX IF NOT EXISTS gdx_cache_cached_at_idx

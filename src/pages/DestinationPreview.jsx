@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, MapPin, Check, X, AlertTriangle, ExternalLink, Phone, Globe, Wifi, CreditCard, Plus, Trash2, Download, FileText, User, CalendarDays, Hotel, Plane, Users, Tag, BadgeCheck, Mail, DollarSign, Briefcase, UserCheck, Car, MoreHorizontal, ChevronLeft, ChevronRight, Maximize2, Volume2, VolumeX } from "lucide-react";
@@ -42,6 +42,7 @@ import RateMyService from "../components/RateMyService";
 import ReferralSection from "../components/ReferralSection";
 import { getDestinationImage } from "../utils/destinationImages";
 import { getMediaForSlug } from "../data/mediaConfig";
+import { READY_SLUGS } from "../config/readySlugs";
 
 // ─── PAGE-LEVEL ERROR BOUNDARY ────────────────────────────────────────────────
 // Catches any uncaught render error and shows a recoverable fallback instead
@@ -77,10 +78,11 @@ class SectionErrorBoundary extends React.Component {
     if (this.state.hasError) return null;
     return (
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.07 }}
-        transition={{ duration: 0.55, ease: "easeOut" }}
+        animate={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.04, margin: "0px 0px -40px 0px" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
       >
         {this.props.children}
       </motion.div>
@@ -90,7 +92,7 @@ class SectionErrorBoundary extends React.Component {
 
 const LOGO_URL = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
 const ORANGE = "#FF9913";
-const CARD_BG = "#FFF5EC";
+const CARD_BG = "#FFECD8";
 
 // ─── TRAVEL CARD BACKGROUND DECORATION ──────────────────────────────────────
 function TravelCardBg({ variant = "city" }) {
@@ -2606,6 +2608,13 @@ function PreviewContent() {
   // Scroll to top whenever the slug changes (mobile browser may preserve prior scroll)
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [slug]);
 
+  // Guard: /destination/ routes are client-facing — block unready slugs.
+  // /preview/ routes bypass this check so admins can preview drafts.
+  const isAdminPreview = location.pathname.startsWith("/preview/");
+  if (!isAdminPreview && !READY_SLUGS.has(slug)) {
+    return <Navigate to="/briefing-pending" replace />;
+  }
+
   // ── Read enriched booking passed from GDX search (or sessionStorage fallback) ─
   const booking = location.state?.booking ?? (() => {
     try { return JSON.parse(sessionStorage.getItem("gdx_booking")); } catch { return null; }
@@ -2668,17 +2677,85 @@ function PreviewContent() {
       return [];
     };
 
+    /**
+     * Extracts a direct download URL from a Fusioo file-attachment field value.
+     * Fusioo "File" fields return objects like:
+     *   { filename: "voucher.pdf", url: "https://...", size: 12345 }
+     *   or an array of such objects, or a JSON string of the same.
+     *
+     * Returns the first https:// URL found, or null.
+     */
+    const extractAttachmentUrl = (val) => {
+      if (!val) return null;
+
+      // JSON string → parse first
+      if (typeof val === "string") {
+        const s = val.trim();
+        if (s.startsWith("http")) return s;                // already a plain URL
+        if (s.startsWith("[") || s.startsWith("{")) {
+          try { return extractAttachmentUrl(JSON.parse(s)); } catch {}
+        }
+        return null;
+      }
+
+      // Array → first item that yields a URL
+      if (Array.isArray(val)) {
+        for (const item of val) {
+          const u = extractAttachmentUrl(item);
+          if (u) return u;
+        }
+        return null;
+      }
+
+      // Object → look for common URL keys, then any https:// value
+      if (typeof val === "object") {
+        const URL_KEYS = ["url", "file_url", "download_url", "pdf_url", "uri", "href", "link"];
+        for (const k of URL_KEYS) {
+          if (typeof val[k] === "string" && val[k].startsWith("https://")) return val[k];
+        }
+        // Fallback: any string value that starts with https://
+        for (const v of Object.values(val)) {
+          if (typeof v === "string" && v.startsWith("https://")) return v;
+        }
+      }
+
+      return null;
+    };
+
     // ── Log raw field values + their types ───────────────────────────────────
     console.group("[DOCUMENT AUDIT] Raw booking document fields — GDX", booking.gdx);
-    console.log("typeof booking.voucher          :", typeof booking.voucher,           "→", booking.voucher);
-    console.log("typeof booking.initial_voucher  :", typeof booking.initial_voucher,   "→", booking.initial_voucher);
-    console.log("typeof booking.automated_voucher:", typeof booking.automated_voucher, "→", booking.automated_voucher);
-    console.log("typeof booking.itinerary        :", typeof booking.itinerary,         "→", booking.itinerary);
-    console.log("typeof booking.travel_itinerary :", typeof booking.travel_itinerary,  "→", booking.travel_itinerary);
-    console.log("typeof booking.itinerary_file   :", typeof booking.itinerary_file,    "→", booking.itinerary_file);
+    console.log("booking.voucher          :", booking.voucher);
+    console.log("booking.initial_voucher  :", booking.initial_voucher);
+    console.log("booking.automated_voucher:", booking.automated_voucher);
+    console.log("booking.itinerary        :", booking.itinerary);
+    console.log("booking.travel_itinerary :", booking.travel_itinerary);
+    console.log("booking.itinerary_file   :", booking.itinerary_file);
     console.groupEnd();
 
-    // ── Normalize all voucher fields into a flat array of IDs ────────────────
+    // ── Strategy 1: direct file-attachment URL ────────────────────────────────
+    // Fusioo "File" fields already contain the download URL inside the attachment
+    // object — no extra API call needed.
+    const directVoucherUrl =
+      extractAttachmentUrl(booking.voucher) ||
+      extractAttachmentUrl(booking.initial_voucher) ||
+      extractAttachmentUrl(booking.automated_voucher);
+
+    const directItineraryUrl =
+      extractAttachmentUrl(booking.itinerary) ||
+      extractAttachmentUrl(booking.travel_itinerary) ||
+      extractAttachmentUrl(booking.itinerary_file);
+
+    if (directVoucherUrl) {
+      console.log("[DOCUMENT AUDIT] Voucher: direct attachment URL →", directVoucherUrl);
+      setVoucherDoc({ status: "url", url: directVoucherUrl });
+    }
+    if (directItineraryUrl) {
+      console.log("[DOCUMENT AUDIT] Itinerary: direct attachment URL →", directItineraryUrl);
+      setItineraryDoc({ status: "url", url: directItineraryUrl });
+    }
+
+    // ── Strategy 2: Fusioo App Link record ID → fetch record → extract URL ────
+    // Used when the voucher field is a linked record (not a direct attachment).
     const voucherIds = [
       ...normalizeToIds(booking.voucher),
       ...normalizeToIds(booking.initial_voucher),
@@ -2691,27 +2768,23 @@ function PreviewContent() {
       ...normalizeToIds(booking.itinerary_file),
     ].filter(isFusiooId);
 
-    console.log("[DOCUMENT AUDIT] Normalized voucher IDs  :", voucherIds);
-    console.log("[DOCUMENT AUDIT] Normalized itinerary IDs:", itineraryIds);
+    console.log("[DOCUMENT AUDIT] Voucher record IDs   :", voucherIds);
+    console.log("[DOCUMENT AUDIT] Itinerary record IDs :", itineraryIds);
 
-    // ── Resolve voucher ───────────────────────────────────────────────────────
-    if (voucherIds.length > 0) {
+    if (!directVoucherUrl && voucherIds.length > 0) {
       setVoucherDoc({ status: "loading", url: null });
       resolveVoucher(voucherIds[0])
         .then((url) => setVoucherDoc({ status: url ? "url" : "unavailable", url }))
         .catch(() => setVoucherDoc({ status: "unavailable", url: null }));
-    } else {
-      console.log("[DOCUMENT AUDIT] No valid Fusioo IDs found in voucher fields.");
+    } else if (!directVoucherUrl) {
+      console.log("[DOCUMENT AUDIT] No voucher URL or record ID found — fallback PDF will be used.");
     }
 
-    // ── Resolve itinerary ─────────────────────────────────────────────────────
-    if (itineraryIds.length > 0) {
+    if (!directItineraryUrl && itineraryIds.length > 0) {
       setItineraryDoc({ status: "loading", url: null });
       resolveItinerary(itineraryIds[0])
         .then((url) => setItineraryDoc({ status: url ? "url" : "unavailable", url }))
         .catch(() => setItineraryDoc({ status: "unavailable", url: null }));
-    } else {
-      console.log("[DOCUMENT AUDIT] No valid Fusioo IDs found in itinerary fields.");
     }
   }, [booking?.gdx]); // re-run only if the GDX number changes
 
@@ -3507,31 +3580,6 @@ function PreviewContent() {
                   </div>
                   <div className="px-5 py-4 flex flex-wrap gap-3">
 
-                    {/* Voucher */}
-                    {voucherDoc.status === "loading" && (
-                      <button disabled className="inline-flex items-center gap-2 font-body font-semibold text-sm px-5 py-3 rounded-xl border cursor-wait"
-                        style={{ borderColor: border, color: textSecondary, backgroundColor: isDark ? "#1A1A1A" : "#F5F5F5", opacity: 0.7 }}>
-                        <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="inline-block w-4 h-4 border-2 rounded-full" style={{ borderColor: `${ORANGE}40`, borderTopColor: ORANGE }} />
-                        Loading Voucher…
-                      </button>
-                    )}
-                    {voucherDoc.status === "url" && (
-                      <a href={voucherDoc.url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                        style={{ backgroundColor: ORANGE, color: "#080808" }}>
-                        <Download className="w-4 h-4" /> View Your Voucher
-                      </a>
-                    )}
-                    {(voucherDoc.status === "idle" || voucherDoc.status === "unavailable") && (
-                      <button
-                        onClick={() => generateVoucherPDF({ booking })}
-                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                        style={{ backgroundColor: ORANGE, color: "#080808" }}
-                      >
-                        <Download className="w-4 h-4" /> Download Booking Voucher
-                      </button>
-                    )}
 
 
                   </div>
@@ -3557,8 +3605,9 @@ function PreviewContent() {
           <motion.div
             className="text-center mb-10"
             initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.6 }}
           >
             <p className="text-xs font-bold tracking-[0.3em] uppercase mb-3" style={{ color: ORANGE }}>
@@ -3584,8 +3633,9 @@ function PreviewContent() {
           <motion.div
             className="flex justify-center w-full"
             initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             {dest.videoUrl ? (
@@ -3749,7 +3799,6 @@ function PreviewContent() {
             </div>
           </SectionErrorBoundary>
 
-
           {/* Optional Tours & Activities — DARK (only on destinations with enableAddOns: true) */}
           {dest?.enableAddOns && globaltixTours.length > 0 && (
             <SectionErrorBoundary>
@@ -3850,7 +3899,7 @@ function PreviewContent() {
             </SectionErrorBoundary>
           )}
 
-          {/* Shopping Advisory — DARK */}
+          {/* Connecting Flight Info — CREAM */}
           <SectionErrorBoundary>
             <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
               <TravelCardBg variant="city" />
@@ -3859,20 +3908,22 @@ function PreviewContent() {
               </div>
             </div>
           </SectionErrorBoundary>
+
+          {/* Shopping Advisory — ORANGE */}
           <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="city" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={theme} />
+            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
+                <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={orangeTheme} />
               </div>
             </div>
           </SectionErrorBoundary>
 
-          {/* Requirements — ORANGE */}
+          {/* Requirements — CREAM */}
           <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <RequirementsSection pkg={pkg} theme={orangeTheme} />
+            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+              <TravelCardBg variant="city" />
+              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
+                <RequirementsSection pkg={pkg} theme={theme} />
               </div>
             </div>
           </SectionErrorBoundary>

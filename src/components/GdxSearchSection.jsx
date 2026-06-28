@@ -11,6 +11,7 @@ import { useTheme } from "../lib/ThemeContext";
 import { getFullBookingFromFusioo } from "../services/fusiooService";
 import { resolveDestinationSlug } from "../utils/destinationResolver";
 import { getCachedGdx, setCachedGdx } from "../services/gdxCacheService";
+import { READY_SLUGS } from "../config/readySlugs";
 
 const ORANGE              = "#FF9913";
 const LOGO_URL            = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
@@ -18,21 +19,7 @@ const GDX_PATTERN         = /^[0-9]+$/;
 const DOMESTIC_PORTAL_URL = "https://domestic-landing-page.vercel.app/";
 const REDIRECT_SECONDS    = 3;
 
-// Destinations with complete, accurate briefing pages.
-// Any valid international booking whose slug is NOT in this set gets sent
-// to the "briefing pending" page instead of the destination page.
-const READY_SLUGS = new Set([
-  "danang-vietnam",
-  "danang-private",
-  "hongkong",
-  "hongkong-private",
-  "singapore",
-  "taipei",
-  "beijing-shanghai-private",
-  "beijing-shanghai-pal",
-  "beijing-shanghai-cebu-pacific",
-  "hongkong-shenzhen-zhuhai",
-]);
+// READY_SLUGS imported from src/config/readySlugs.js
 
 // ── Status types ───────────────────────────────────────────────────────────────
 const STATUS = {
@@ -586,7 +573,13 @@ export default function GdxSearchSection() {
             transition={{ duration: 0.6, delay: 0.25 }}
           >
             {/* GDX Number input */}
-            <div className="mb-3">
+            <div className="mb-4">
+              <label
+                className="block font-body text-xs font-bold tracking-[0.2em] uppercase mb-2"
+                style={{ color: ORANGE }}
+              >
+                GDX Number
+              </label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -596,7 +589,7 @@ export default function GdxSearchSection() {
                   resetStatus();
                 }}
                 onKeyDown={(e) => e.key === "Enter" && canSearch && handleSearch()}
-                placeholder="GDX Confirmation / Tour Voucher Number"
+                placeholder="e.g. GDX-12345678"
                 maxLength={20}
                 disabled={isLoading}
                 aria-label="GDX booking number"
@@ -608,10 +601,19 @@ export default function GdxSearchSection() {
                   boxShadow: gdxInput ? `0 0 0 3px rgba(255,153,19,0.12)` : "none",
                 }}
               />
+              <p className="font-body text-xs mt-1.5 pl-1" style={{ color: textSecondary }}>
+                Numbers only — the digits from your booking confirmation (e.g. 12345678)
+              </p>
             </div>
 
             {/* Last Name input */}
             <div className="mb-4">
+              <label
+                className="block font-body text-xs font-bold tracking-[0.2em] uppercase mb-2"
+                style={{ color: ORANGE }}
+              >
+                Last Name
+              </label>
               <input
                 type="text"
                 value={lastNameInput}
@@ -620,7 +622,7 @@ export default function GdxSearchSection() {
                   resetStatus();
                 }}
                 onKeyDown={(e) => e.key === "Enter" && canSearch && handleSearch()}
-                placeholder="Lead Passenger Last Name"
+                placeholder="Lead passenger last name"
                 maxLength={60}
                 disabled={isLoading}
                 aria-label="Lead passenger last name"

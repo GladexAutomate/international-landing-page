@@ -244,6 +244,16 @@ export default function RateMyService({ theme, gdxReference, destination, review
         <p className="font-body text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.85)" }}>
           We'd love to hear about your experience with Gladex Tours!
         </p>
+        {destination && (
+          <div className="mt-4 px-3 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(0,0,0,0.18)" }}>
+            <p className="font-body text-xs font-bold uppercase tracking-[0.18em] mb-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+              Your Trip
+            </p>
+            <p className="font-condensed font-bold text-base text-white leading-tight">
+              Share your experience in {destination}
+            </p>
+          </div>
+        )}
         <div className="mt-8 hidden lg:block">
           <FlightPathDecoration />
         </div>
@@ -378,8 +388,8 @@ export default function RateMyService({ theme, gdxReference, destination, review
               {(isEditing && existingPhotos.length > 0 || newPhotoPreviews.length > 0) && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {isEditing && existingPhotos.map((url, i) => (
-                    <div key={`ex-${i}`} className="relative w-24 h-24 shrink-0">
-                      <img src={url} alt="" className="w-24 h-24 object-cover rounded-xl" />
+                    <div key={`ex-${i}`} className="relative w-16 h-16 shrink-0">
+  <img src={url} alt="" className="w-16 h-16 object-cover rounded-lg" />
                       <button onClick={() => removeExistingPhoto(i)}
                         className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
                         style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "#fff" }}
@@ -389,8 +399,8 @@ export default function RateMyService({ theme, gdxReference, destination, review
                     </div>
                   ))}
                   {newPhotoPreviews.map((url, i) => (
-                    <div key={`new-${i}`} className="relative w-24 h-24 shrink-0">
-                      <img src={url} alt="" className="w-24 h-24 object-cover rounded-xl" />
+                    <div key={`new-${i}`} className="relative w-16 h-16 shrink-0">
+  <img src={url} alt="" className="w-16 h-16 object-cover rounded-lg" />
                       <button onClick={() => removeNewPhoto(i)}
                         className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
                         style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "#fff" }}

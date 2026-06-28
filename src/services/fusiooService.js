@@ -94,11 +94,14 @@ export async function enrichBooking(booking) {
     resolveAirline(booking.name_of_airline),
   ]);
 
+  // Only use the raw field as fallback if it's a human-readable string, not a Fusioo record ID
+  const notRawId = (v) => (v && typeof v === "string" && !isFusiooId(v)) ? v : null;
+
   return {
     ...booking,
-    destinationName: destinationName ?? booking.destination  ?? null,
-    hotelName:       hotelName       ?? booking.hotel_name   ?? null,
-    airlineName:     airlineName     ?? booking.name_of_airline ?? null,
+    destinationName: destinationName ?? notRawId(booking.destination)      ?? null,
+    hotelName:       hotelName       ?? notRawId(booking.hotel_name)        ?? null,
+    airlineName:     airlineName     ?? notRawId(booking.name_of_airline)   ?? null,
   };
 }
 
@@ -204,8 +207,9 @@ export async function getFullBookingFromFusioo(supabaseRow) {
     ...fusiooRecord,
 
     // ── Resolved destination & hotel ─────────────────────────────────────────
-    destinationName:  destinationRec?.destination || null,
-    hotelName:        hotelRec?.hotel             || null,
+    // Prefer the resolved human-readable name; never fall back to a raw Fusioo ID
+    destinationName:  destinationRec?.destination  || null,
+    hotelName:        hotelRec?.hotel               || null,
 
     // ── Flight details (from airline_details_1 linked record) ────────────────
     airlineName:      airlineName,

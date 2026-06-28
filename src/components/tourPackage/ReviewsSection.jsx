@@ -1,68 +1,90 @@
-﻿import { useState } from "react";
+// @ts-nocheck
+import { useState, useEffect } from "react";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getPublicReviews } from "../../services/reviewsService";
 
 const ORANGE = "#FF9913";
 
-// Rich review data with profile images
-const defaultReviews = [
-  {
-    name: "Maria Santos",
-    photo: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&q=80",
-    rating: 5,
-    text: "Very helpful destination guide! Everything I needed to know before my trip was here. The arrival instructions were especially clear.",
-    date: "May 2025",
-  },
-  {
-    name: "Renz Dela Cruz",
-    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80",
-    rating: 5,
-    text: "Excellent travel briefing. The cultural tips helped me prepare properly and avoid any awkward situations abroad.",
-    date: "April 2025",
-  },
-  {
-    name: "Liza Mendoza",
-    photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=80",
-    rating: 5,
-    text: "Worth every detail! The packing list and weather guide saved me from overpacking. Will use Gladex again.",
-    date: "March 2025",
-  },
-  {
-    name: "Janine Reyes",
-    photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&q=80",
-    rating: 5,
-    text: "The destination guide was so detailed. Nami Island tips were spot on — knew exactly what to expect!",
-    date: "February 2025",
-  },
-  {
-    name: "Carlo Macias",
-    photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&q=80",
-    rating: 5,
-    text: "I loved how the guide covered emergency contacts and hotel check-in. Made everything stress-free.",
-    date: "January 2025",
-  },
-  {
-    name: "Grace Torres",
-    photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&q=80",
-    rating: 5,
-    text: "First international trip and the briefing made me feel so confident. Food recommendations were amazing!",
-    date: "December 2024",
-  },
-];
-
 const CARDS_PER_PAGE = 3;
 
-export default function ReviewsSection({ reviews = [] }) {
-  const [page, setPage] = useState(0);
+const AVATAR_COLORS = [
+  "#FF9913", "#E67E22", "#27AE60", "#2980B9", "#8E44AD", "#C0392B",
+];
 
-  const allReviews = reviews.length >= 3 ? reviews.map((r, i) => ({
-    ...r,
-    photo: defaultReviews[i % defaultReviews.length]?.photo,
-    text: r.text || r.comment,
-  })) : defaultReviews;
+function InitialsAvatar({ name, index }) {
+  const n = name?.trim();
+  let initials = "?";
+  if (n && n !== "Verified Traveler") {
+    const parts = n.replace(",", "").trim().split(/\s+/);
+    initials = parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0].slice(0, 2).toUpperCase();
+  }
+  const bg = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  return (
+    <span
+      className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-condensed font-black text-xs text-white"
+      style={{ backgroundColor: bg }}
+    >
+      {initials}
+    </span>
+  );
+}
 
-  const totalPages = Math.ceil(allReviews.length / CARDS_PER_PAGE);
-  const visible = allReviews.slice(page * CARDS_PER_PAGE, page * CARDS_PER_PAGE + CARDS_PER_PAGE);
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString("en-PH", { year: "numeric", month: "long" });
+}
+
+// "DELA CRUZ, MARIA" → "Maria D." for public display (privacy-friendly)
+function displayName(lead_name) {
+  if (!lead_name?.trim()) return "Verified Traveler";
+  const n = lead_name.trim();
+  if (n.includes(",")) {
+    const [last, first] = n.split(",").map(s => s.trim());
+    const firstName = first.split(" ")[0];
+    const cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    return `${cap(firstName)} ${last[0]}.`;
+  }
+  const parts = n.split(/\s+/);
+  if (parts.length === 1) return n.charAt(0) + n.slice(1).toLowerCase();
+  const cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  return `${cap(parts[0])} ${parts[parts.length - 1][0]}.`;
+}
+
+export default function ReviewsSection({ destinationName = null }) {
+  const [reviews, setReviews] = useState(null); // null = loading
+  const [page, setPage]       = useState(0);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        let data = await getPublicReviews(destinationName);
+        // If no destination-specific reviews yet, show all public ones as social proof
+        if (!data.length && destinationName) {
+          data = await getPublicReviews(null);
+        }
+        setReviews(data);
+      } catch {
+        setReviews([]);
+      }
+    }
+    load();
+  }, [destinationName]);
+
+  if (reviews === null) return null; // silent loading — no layout shift
+  if (reviews.length === 0) return null; // no reviews yet — hide section entirely
+
+  const allCards = reviews.map((r, i) => ({
+    name:   displayName(r.lead_name),
+    rating: r.rating ?? 5,
+    text:   r.review_text?.trim() || null,
+    date:   formatDate(r.created_at),
+    index:  i,
+  }));
+
+  const totalPages = Math.ceil(allCards.length / CARDS_PER_PAGE);
+  const visible    = allCards.slice(page * CARDS_PER_PAGE, page * CARDS_PER_PAGE + CARDS_PER_PAGE);
 
   return (
     <div>
@@ -106,24 +128,23 @@ export default function ReviewsSection({ reviews = [] }) {
           className="grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
           {visible.map((rev, i) => (
-            <div key={i} className="p-4 rounded-2xl border border-gray-100 bg-gray-50 flex flex-col gap-3">
-              {/* Stars */}
+            <div
+              key={i}
+              className="p-4 rounded-2xl flex flex-col gap-3"
+              style={{ backgroundColor: "#fff", border: "1px solid rgba(255,153,19,0.15)", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}
+            >
               <div className="flex items-center gap-0.5">
-                {Array.from({ length: rev.rating || 5 }).map((_, j) => (
+                {Array.from({ length: Math.max(0, rev.rating) }).map((_, j) => (
                   <Star key={j} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-
-              {/* Review text */}
-              <p className="text-sm text-gray-700 leading-relaxed flex-1 italic">"{rev.text}"</p>
-
-              {/* Reviewer */}
+              {rev.text ? (
+                <p className="text-sm text-gray-700 leading-relaxed flex-1 italic">"{rev.text}"</p>
+              ) : (
+                <p className="text-sm text-gray-400 leading-relaxed flex-1 italic">No review text provided.</p>
+              )}
               <div className="flex items-center gap-2.5 pt-2 border-t border-gray-100">
-                <img
-                  src={rev.photo || `https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&q=80`}
-                  alt={rev.name}
-                  className="w-8 h-8 rounded-full object-cover shrink-0"
-                />
+                <InitialsAvatar name={rev.name} index={rev.index} />
                 <div>
                   <p className="text-xs font-bold text-gray-800">{rev.name}</p>
                   <p className="text-[10px] text-gray-400">{rev.date}</p>
@@ -142,11 +163,7 @@ export default function ReviewsSection({ reviews = [] }) {
               key={i}
               onClick={() => setPage(i)}
               className="rounded-full transition-all"
-              style={{
-                width: i === page ? 20 : 6,
-                height: 6,
-                backgroundColor: i === page ? ORANGE : "#D0D0D0",
-              }}
+              style={{ width: i === page ? 20 : 6, height: 6, backgroundColor: i === page ? ORANGE : "#D0D0D0" }}
             />
           ))}
         </div>

@@ -254,7 +254,7 @@ export default function TourPackagePage() {
             </div>
 
             {/* ── REVIEWS CAROUSEL ── */}
-            <ReviewsSection reviews={content.reviews || []} />
+            <ReviewsSection destinationName={dest?.name} />
 
             {/* ── GOOD TO KNOW: WHAT TO BRING + SEASONS ── */}
             <WhatToBringSection items={content.whatToBring || []} seasons={content.seasons || []} />

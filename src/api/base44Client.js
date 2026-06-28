@@ -1,12 +1,12 @@
 import { createClient } from '@base44/sdk';
 import { appParams } from '@/lib/app-params';
 
-const { appId, token, functionsVersion, appBaseUrl } = appParams;
+const { appId, functionsVersion, appBaseUrl } = appParams;
 
-//Create a client with authentication required
+// Public app — no auth token, no auto-auth calls
 export const base44 = createClient({
   appId,
-  token,
+  token: null,
   functionsVersion,
   serverUrl: '',
   requiresAuth: false,
