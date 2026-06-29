@@ -1,6 +1,6 @@
 ﻿// @ts-nocheck
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CheckCircle, XCircle, Loader, MapPin,
@@ -363,8 +363,12 @@ function StatusMessage({ status, gdxInput, isDark }) {
 export default function GdxSearchSection() {
   const { isDark } = useTheme();
   const navigate   = useNavigate();
+  const location   = useLocation();
 
-  const [gdxInput,      setGdxInput]      = useState("");
+  const [gdxInput,      setGdxInput]      = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("gdx") ?? "";
+  });
   const [lastNameInput, setLastNameInput] = useState("");
   const [status,        setStatus]        = useState(STATUS.IDLE);
   const [booking,       setBooking]       = useState(null);

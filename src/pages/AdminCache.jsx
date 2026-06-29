@@ -58,18 +58,9 @@ function StatCard({ label, value, color, sub }) {
 
 function PackageSection({ pkg, rows, onOpenBooking }) {
   const [open, setOpen] = useState(false);
-  const [loadingGdx, setLoadingGdx] = useState(null);
 
-  async function handleOpen(e) {
-    setLoadingGdx(e.gdx);
-    try {
-      const cached = await getCachedGdx(e.gdx);
-      const booking = cached?.booking ?? null;
-      const slug = cached?.slug ?? e.slug ?? null;
-      onOpenBooking(slug, booking, e.gdx);
-    } finally {
-      setLoadingGdx(null);
-    }
+  function handleOpen(e) {
+    onOpenBooking(e.slug, null, e.gdx);
   }
 
   return (
@@ -111,15 +102,11 @@ function PackageSection({ pkg, rows, onOpenBooking }) {
                     <td className="px-2 py-1.5 text-right">
                       <button
                         onClick={() => handleOpen(e)}
-                        disabled={loadingGdx === e.gdx}
-                        title="Open briefing page (admin)"
-                        className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
+                        title="Open on main page"
+                        className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg transition-colors"
                         style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
                       >
-                        {loadingGdx === e.gdx
-                          ? <Loader size={11} className="animate-spin" />
-                          : <ExternalLink size={11} />}
-                        Open
+                        <ExternalLink size={11} /> Open
                       </button>
                     </td>
                   </tr>
@@ -260,8 +247,7 @@ export default function AdminCache() {
   }
 
   function handleOpenBooking(slug, booking, gdx) {
-    const route = slug ? `/preview/${slug}` : "/preview/unknown";
-    navigate(route, { state: { booking, gdx } });
+    window.open(`/?gdx=${gdx}`, "_blank");
   }
 
   // Derived display lists
@@ -413,7 +399,18 @@ export default function AdminCache() {
                         <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #bbf7d0" }}>
                           <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
                             <p className="font-body text-xs font-bold tracking-widest uppercase" style={{ color: "#16a34a" }}>🌏 International Bookings — Newest First</p>
-                            <span className="font-body text-xs text-gray-400">{recentIntl.length} total</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-body text-xs text-gray-400">{recentIntl.length} total</span>
+                              <button
+                                onClick={() => { setRecentLoading(true); getRecentInternationalBookings(50).then(setRecentIntl).catch(() => {}).finally(() => setRecentLoading(false)); }}
+                                disabled={recentLoading}
+                                className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg disabled:opacity-50"
+                                style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
+                              >
+                                {recentLoading ? <Loader size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                                Refresh
+                              </button>
+                            </div>
                           </div>
                           <table className="w-full text-xs font-body">
                             <thead>
