@@ -229,16 +229,27 @@ export default function AdminCache() {
   const newGroups      = groupByDestination(newThisRun);
 
   const q = searchQuery.trim().toLowerCase();
+  // Normalize: collapse dashes, en-dashes, em-dashes, and spaces into a single space
+  // so "Beijing-Shanghai", "Beijing Shanghai", "beijing–shanghai" all match each other
+  function norm(s) {
+    return (s ?? "").toLowerCase().replace(/[-–—]+/g, " ").replace(/\s+/g, " ").trim();
+  }
+  const qNorm = norm(q);
+  function textMatch(s) {
+    const lo = (s ?? "").toLowerCase();
+    const n  = norm(s);
+    return lo.includes(q) || n.includes(qNorm);
+  }
   function filterGroups(groups) {
     if (!q) return groups;
     return groups
       .map(g => {
-        const slugMatch = g.slug?.toLowerCase().includes(q);
-        const nameMatch = g.destinationName?.toLowerCase().includes(q);
+        const slugMatch = textMatch(g.slug);
+        const nameMatch = textMatch(g.destinationName);
         const matchedPkgs = g.packages.filter(
           ({ pkg, rows }) =>
-            pkg.toLowerCase().includes(q) ||
-            rows.some(r => r.lead_name?.toLowerCase().includes(q) || String(r.gdx).includes(q))
+            textMatch(pkg) ||
+            rows.some(r => textMatch(r.lead_name) || String(r.gdx).includes(q))
         );
         if (slugMatch || nameMatch) return g;
         if (matchedPkgs.length > 0) return { ...g, packages: matchedPkgs };
