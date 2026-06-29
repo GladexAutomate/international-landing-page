@@ -6,7 +6,7 @@ import {
   RefreshCw, Database, CheckCircle, XCircle,
   SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap, Search, X, ExternalLink,
 } from "lucide-react";
-import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries, getCachedGdx } from "../services/gdxCacheService";
+import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries, getCachedGdx, getRecentInternationalBookings } from "../services/gdxCacheService";
 import { READY_SLUGS } from "../config/readySlugs";
 
 const ORANGE = "#FF9913";
@@ -186,6 +186,8 @@ export default function AdminCache() {
   const [result,     setResult]     = useState(null);
   const [tab,        setTab]        = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [recentIntl, setRecentIntl] = useState([]);
+  const [recentLoading, setRecentLoading] = useState(false);
   const logsEndRef = useRef(null);
   const seenGdxRef = useRef(new Set());
 
@@ -218,8 +220,12 @@ export default function AdminCache() {
 
   async function load() {
     setLoading(true);
-    // Run independently — a stats failure must never block the table
-    await Promise.all([loadTable(), loadStats()]);
+    setRecentLoading(true);
+    await Promise.all([
+      loadTable(),
+      loadStats(),
+      getRecentInternationalBookings(50).then(setRecentIntl).catch(() => {}).finally(() => setRecentLoading(false)),
+    ]);
     setLoading(false);
   }
 
@@ -302,6 +308,7 @@ export default function AdminCache() {
 
   const tabs = [
     { id: "all",        label: `📋 All (${masterList.filter(e => e.slug).length})` },
+    { id: "recent",     label: `🌏 International (${recentIntl.length})` },
     { id: "live",       label: `🆕 New (${newThisRun.length})` },
     { id: "unresolved", label: `❌ Unresolved (${unresolvedRows.length})` },
   ];
@@ -394,6 +401,61 @@ export default function AdminCache() {
                         )}
                       </>
                     )
+                )}
+
+                {/* ── INTERNATIONAL RECENT ── */}
+                {tab === "recent" && (
+                  recentLoading
+                    ? <div className="flex items-center gap-2 text-gray-400 py-8"><Loader size={16} className="animate-spin" /><span className="font-body text-sm">Loading…</span></div>
+                    : recentIntl.length === 0
+                      ? <p className="font-body text-sm text-gray-400 py-4">No international bookings found in cache.</p>
+                      : (
+                        <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #bbf7d0" }}>
+                          <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
+                            <p className="font-body text-xs font-bold tracking-widest uppercase" style={{ color: "#16a34a" }}>🌏 International Bookings — Newest First</p>
+                            <span className="font-body text-xs text-gray-400">{recentIntl.length} total</span>
+                          </div>
+                          <table className="w-full text-xs font-body">
+                            <thead>
+                              <tr className="bg-gray-50 text-gray-400">
+                                <th className="text-left px-4 py-2 font-semibold">#</th>
+                                <th className="text-left px-4 py-2 font-semibold">GDX</th>
+                                <th className="text-left px-4 py-2 font-semibold">Last Name</th>
+                                <th className="text-left px-4 py-2 font-semibold hidden sm:table-cell">Full Name</th>
+                                <th className="text-left px-4 py-2 font-semibold hidden md:table-cell">Destination</th>
+                                <th className="px-2 py-2" />
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {recentIntl.map((e, i) => (
+                                <tr key={e.gdx} className="border-t border-gray-50 hover:bg-orange-50/40">
+                                  <td className="px-4 py-1.5 text-gray-400">{i + 1}</td>
+                                  <td className="px-4 py-1.5 font-bold text-gray-800">GDX-{e.gdx}</td>
+                                  <td className="px-4 py-1.5 font-bold" style={{ color: ORANGE }}>{lastName(e.lead_name)}</td>
+                                  <td className="px-4 py-1.5 text-gray-600 hidden sm:table-cell">{e.lead_name ?? "—"}</td>
+                                  <td className="px-4 py-1.5 hidden md:table-cell">
+                                    <span className="font-body text-xs px-2 py-0.5 rounded-full"
+                                      style={{ backgroundColor: READY_SLUGS.has(e.slug) ? "#dcfce7" : "#fef9c3",
+                                               color: READY_SLUGS.has(e.slug) ? "#15803d" : "#854d0e" }}>
+                                      {e.slug}
+                                    </span>
+                                  </td>
+                                  <td className="px-2 py-1.5 text-right">
+                                    <button
+                                      onClick={() => handleOpenBooking(e.slug, null, e.gdx)}
+                                      title="Open briefing page"
+                                      className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg"
+                                      style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
+                                    >
+                                      <ExternalLink size={11} /> Open
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )
                 )}
 
                 {/* ── NEW THIS RUN ── */}

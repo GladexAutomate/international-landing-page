@@ -209,6 +209,36 @@ export async function getAllCachedEntries() {
   return rows;
 }
 
+/**
+ * Returns the most recently BOOKED international clients (sorted by GDX desc).
+ * Extracts lead_name directly from the enriched_data JSONB — no migration needed.
+ */
+export async function getRecentInternationalBookings(limit = 50) {
+  const INTL_SLUGS = [
+    "danang-vietnam", "hongkong", "singapore", "taipei",
+    "beijing-shanghai-collective", "beijing-shanghai-pal", "beijing-shanghai-cebu-pacific",
+    "hongkong-shenzhen-zhuhai", "hanoi-sapa-airasia", "beijing-shanghai",
+    "hongkong-cebu-pacific", "danang-6d4n-vietjet", "danang-5d3n-vietjet",
+    "danang-4d2n-bamboo", "danang-4d3n-airasia", "danang-4d3n-cebu-pacific",
+    "danang-5d3n-bamboo", "danang-6d4n-vietjet-standard",
+  ];
+
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("gdx, slug, cached_at, enriched_data->>lead_name")
+    .in("slug", INTL_SLUGS)
+    .order("gdx", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data ?? []).map((e) => ({
+    gdx:       e.gdx,
+    slug:      e.slug,
+    lead_name: e.lead_name ?? null,
+    cached_at: e.cached_at,
+  }));
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MASTER LIST  —  permanent reference table
 // ─────────────────────────────────────────────────────────────────────────────
