@@ -1,11 +1,12 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RefreshCw, Database, CheckCircle, XCircle,
-  SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap, Search, X,
+  SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap, Search, X, ExternalLink,
 } from "lucide-react";
-import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries } from "../services/gdxCacheService";
+import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries, getCachedGdx } from "../services/gdxCacheService";
 import { READY_SLUGS } from "../config/readySlugs";
 
 const ORANGE = "#FF9913";
@@ -55,8 +56,22 @@ function StatCard({ label, value, color, sub }) {
   );
 }
 
-function PackageSection({ pkg, rows }) {
+function PackageSection({ pkg, rows, onOpenBooking }) {
   const [open, setOpen] = useState(false);
+  const [loadingGdx, setLoadingGdx] = useState(null);
+
+  async function handleOpen(e) {
+    setLoadingGdx(e.gdx);
+    try {
+      const cached = await getCachedGdx(e.gdx);
+      const booking = cached?.booking ?? null;
+      const slug = cached?.slug ?? e.slug ?? null;
+      onOpenBooking(slug, booking, e.gdx);
+    } finally {
+      setLoadingGdx(null);
+    }
+  }
+
   return (
     <div className="border border-gray-100 rounded-xl mb-2 overflow-hidden">
       <button
@@ -84,6 +99,7 @@ function PackageSection({ pkg, rows }) {
                   <th className="text-left px-4 py-2 font-semibold">GDX</th>
                   <th className="text-left px-4 py-2 font-semibold">Last Name</th>
                   <th className="text-left px-4 py-2 font-semibold hidden sm:table-cell">Full Name</th>
+                  <th className="px-2 py-2" />
                 </tr>
               </thead>
               <tbody>
@@ -92,6 +108,20 @@ function PackageSection({ pkg, rows }) {
                     <td className="px-4 py-1.5 font-bold text-gray-800">GDX-{e.gdx}</td>
                     <td className="px-4 py-1.5 font-bold" style={{ color: ORANGE }}>{lastName(e.lead_name)}</td>
                     <td className="px-4 py-1.5 text-gray-500 hidden sm:table-cell">{e.lead_name ?? "—"}</td>
+                    <td className="px-2 py-1.5 text-right">
+                      <button
+                        onClick={() => handleOpen(e)}
+                        disabled={loadingGdx === e.gdx}
+                        title="Open briefing page (admin)"
+                        className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
+                        style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
+                      >
+                        {loadingGdx === e.gdx
+                          ? <Loader size={11} className="animate-spin" />
+                          : <ExternalLink size={11} />}
+                        Open
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -103,7 +133,7 @@ function PackageSection({ pkg, rows }) {
   );
 }
 
-function DestinationBlock({ slug, destinationName, packages, total, defaultOpen }) {
+function DestinationBlock({ slug, destinationName, packages, total, defaultOpen, onOpenBooking }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const isReady = READY_SLUGS.has(slug);
   const title = destinationName || slug;
@@ -134,7 +164,9 @@ function DestinationBlock({ slug, destinationName, packages, total, defaultOpen 
             style={{ overflow: "hidden" }}
             className="px-4 pb-4 pt-1 border-t border-gray-100"
           >
-            {packages.map(({ pkg, rows }) => <PackageSection key={pkg} pkg={pkg} rows={rows} />)}
+            {packages.map(({ pkg, rows }) => (
+              <PackageSection key={pkg} pkg={pkg} rows={rows} onOpenBooking={onOpenBooking} />
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -145,6 +177,7 @@ function DestinationBlock({ slug, destinationName, packages, total, defaultOpen 
 // ── main ──────────────────────────────────────────────────────────────────────
 
 export default function AdminCache() {
+  const navigate = useNavigate();
   const [stats,      setStats]      = useState(null);
   const [masterList, setMasterList] = useState([]);
   const [loading,    setLoading]    = useState(true);
@@ -218,6 +251,11 @@ export default function AdminCache() {
     } finally {
       setRunning(false);
     }
+  }
+
+  function handleOpenBooking(slug, booking, gdx) {
+    const route = slug ? `/preview/${slug}` : "/preview/unknown";
+    navigate(route, { state: { booking, gdx } });
   }
 
   // Derived display lists
@@ -345,13 +383,13 @@ export default function AdminCache() {
                         {filteredReady.length > 0 && (
                           <div className="mb-4">
                             <p className="font-body text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#16a34a" }}>✅ Live — Briefing Page Ready</p>
-                            {filteredReady.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} />)}
+                            {filteredReady.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} onOpenBooking={handleOpenBooking} />)}
                           </div>
                         )}
                         {filteredPending.length > 0 && (
                           <div>
                             <p className="font-body text-xs font-bold tracking-widest uppercase mb-2 mt-4" style={{ color: "#d97706" }}>⏭️ Pending — Destination Known</p>
-                            {filteredPending.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={!!q} />)}
+                            {filteredPending.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={!!q} onOpenBooking={handleOpenBooking} />)}
                           </div>
                         )}
                       </>
@@ -373,7 +411,7 @@ export default function AdminCache() {
                         <p className="font-body text-sm text-gray-500 mb-3">
                           <strong>{newThisRun.length} bookings</strong> discovered this run that weren't in the list before.
                         </p>
-                        {filteredNew.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} />)}
+                        {filteredNew.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} onOpenBooking={handleOpenBooking} />)}
                       </>
                 )}
 
