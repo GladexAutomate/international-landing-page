@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RefreshCw, Database, CheckCircle, XCircle,
-  SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap,
+  SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap, Search, X,
 } from "lucide-react";
 import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries } from "../services/gdxCacheService";
 import { READY_SLUGS } from "../config/readySlugs";
@@ -152,6 +152,7 @@ export default function AdminCache() {
   const [logs,       setLogs]       = useState([]);
   const [result,     setResult]     = useState(null);
   const [tab,        setTab]        = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const logsEndRef = useRef(null);
   const seenGdxRef = useRef(new Set());
 
@@ -227,6 +228,29 @@ export default function AdminCache() {
   const newThisRun     = masterList.filter(e => e.isNew);
   const newGroups      = groupByDestination(newThisRun);
 
+  const q = searchQuery.trim().toLowerCase();
+  function filterGroups(groups) {
+    if (!q) return groups;
+    return groups
+      .map(g => {
+        const slugMatch = g.slug?.toLowerCase().includes(q);
+        const nameMatch = g.destinationName?.toLowerCase().includes(q);
+        const matchedPkgs = g.packages.filter(
+          ({ pkg, rows }) =>
+            pkg.toLowerCase().includes(q) ||
+            rows.some(r => r.lead_name?.toLowerCase().includes(q) || String(r.gdx).includes(q))
+        );
+        if (slugMatch || nameMatch) return g;
+        if (matchedPkgs.length > 0) return { ...g, packages: matchedPkgs };
+        return null;
+      })
+      .filter(Boolean);
+  }
+
+  const filteredReady   = filterGroups(readyGroups);
+  const filteredPending = filterGroups(pendingGroups);
+  const filteredNew     = filterGroups(newGroups);
+
   const tabs = [
     { id: "all",        label: `📋 All (${masterList.filter(e => e.slug).length})` },
     { id: "live",       label: `🆕 New (${newThisRun.length})` },
@@ -249,6 +273,24 @@ export default function AdminCache() {
 
           {/* ── LEFT: Table ──────────────────────────────────────────────────── */}
           <div className="flex-1 min-w-0">
+
+            {/* Search bar */}
+            <div className="relative mb-3">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search by destination, slug, package, name, or GDX…"
+                className="w-full font-body text-sm pl-8 pr-8 py-2.5 rounded-xl bg-white outline-none"
+                style={{ border: `1.5px solid ${searchQuery ? ORANGE : "#e5e7eb"}`, color: "#111" }}
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+                  <X size={13} />
+                </button>
+              )}
+            </div>
 
             {/* Tabs */}
             <div className="flex gap-2 mb-4 flex-wrap">
@@ -283,16 +325,22 @@ export default function AdminCache() {
                       </div>
                     ) : (
                       <>
-                        {readyGroups.length > 0 && (
-                          <div className="mb-4">
-                            <p className="font-body text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#16a34a" }}>✅ Live — Briefing Page Ready</p>
-                            {readyGroups.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} />)}
+                        {q && (filteredReady.length + filteredPending.length === 0) && (
+                          <div className="rounded-xl p-6 text-center bg-white" style={{ border: "1px solid #e5e7eb" }}>
+                            <Search size={24} className="mx-auto mb-2 text-gray-300" />
+                            <p className="font-body text-sm text-gray-400">No bookings found for <strong>"{searchQuery}"</strong></p>
                           </div>
                         )}
-                        {pendingGroups.length > 0 && (
+                        {filteredReady.length > 0 && (
+                          <div className="mb-4">
+                            <p className="font-body text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#16a34a" }}>✅ Live — Briefing Page Ready</p>
+                            {filteredReady.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} />)}
+                          </div>
+                        )}
+                        {filteredPending.length > 0 && (
                           <div>
                             <p className="font-body text-xs font-bold tracking-widest uppercase mb-2 mt-4" style={{ color: "#d97706" }}>⏭️ Pending — Destination Known</p>
-                            {pendingGroups.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={false} />)}
+                            {filteredPending.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={!!q} />)}
                           </div>
                         )}
                       </>
@@ -314,7 +362,7 @@ export default function AdminCache() {
                         <p className="font-body text-sm text-gray-500 mb-3">
                           <strong>{newThisRun.length} bookings</strong> discovered this run that weren't in the list before.
                         </p>
-                        {newGroups.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} />)}
+                        {filteredNew.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} />)}
                       </>
                 )}
 
