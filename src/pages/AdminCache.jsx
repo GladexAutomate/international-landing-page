@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries, getCachedGdx, getRecentInternationalBookings } from "../services/gdxCacheService";
 import { READY_SLUGS } from "../config/readySlugs";
+import { getBriefingBySlug } from "../data/briefings/index.js";
 
 const ORANGE = "#FF9913";
 
@@ -654,6 +655,45 @@ export default function AdminCache() {
                 ))}
               </motion.div>
             )}
+
+            {/* Live Briefing Pages module */}
+            <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #bbf7d0" }}>
+              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <p className="font-condensed font-black text-base text-gray-900 leading-tight">Live Briefing Pages</p>
+                  <p className="font-body text-xs text-gray-400">{READY_SLUGS.size} packages available</p>
+                </div>
+                <span className="font-body text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#15803d" }}>✅ LIVE</span>
+              </div>
+              <div className="divide-y divide-gray-50">
+                {[...READY_SLUGS].map(slug => {
+                  const b = getBriefingBySlug(slug);
+                  const wm = b?.welcomeMessage ?? {};
+                  const subtitle = wm.subtitle || wm.title || slug;
+                  const code = wm.packageCode || null;
+                  const duration = wm.duration || null;
+                  return (
+                    <div key={slug} className="px-4 py-3 flex items-start justify-between gap-2 hover:bg-orange-50/40 transition-colors">
+                      <div className="min-w-0">
+                        <p className="font-body text-sm font-semibold text-gray-800 leading-snug truncate">{subtitle}</p>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          {duration && <span className="font-body text-xs text-gray-400">{duration}</span>}
+                          {code && <span className="font-mono text-xs text-gray-400">{code}</span>}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => window.open(`/preview/${slug}`, "_blank")}
+                        title="Preview briefing page"
+                        className="shrink-0 inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg mt-0.5"
+                        style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
+                      >
+                        <ExternalLink size={11} /> View
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Live log */}
             <AnimatePresence>
