@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RefreshCw, Database, CheckCircle, XCircle,
-  SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap, Search, X, ExternalLink,
+  SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap, Search, X, ExternalLink, Calendar,
 } from "lucide-react";
 import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries, getCachedGdx, getRecentInternationalBookings } from "../services/gdxCacheService";
 import { READY_SLUGS } from "../config/readySlugs";
@@ -176,11 +176,21 @@ export default function AdminCache() {
   const [recentIntl, setRecentIntl] = useState([]);
   const [recentLoading, setRecentLoading] = useState(false);
   const [newRunGdxs, setNewRunGdxs] = useState(new Set());
+  const [dateFilter,    setDateFilter]    = useState(null); // "YYYY-MM-DD" or null = all
+  const [dateMenuOpen,  setDateMenuOpen]  = useState(false);
+  const dateMenuRef = useRef(null);
   const logsEndRef = useRef(null);
   const seenGdxRef = useRef(new Set());
 
   useEffect(() => { load(); }, []);
   useEffect(() => { logsEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [logs]);
+  useEffect(() => {
+    function handleClick(e) {
+      if (dateMenuRef.current && !dateMenuRef.current.contains(e.target)) setDateMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   async function loadTable() {
     try {
@@ -254,13 +264,36 @@ export default function AdminCache() {
     window.open(`/?gdx=${gdx}`, "_blank");
   }
 
-  // Derived display lists
-  const allGroups      = groupByDestination(masterList);
+  // Derived display lists — date filter applied first
+  const dateFiltered   = applyDateFilter(masterList);
+  const allGroups      = groupByDestination(dateFiltered);
   const readyGroups    = allGroups.filter(g => READY_SLUGS.has(g.slug));
   const pendingGroups  = allGroups.filter(g => !READY_SLUGS.has(g.slug) && g.slug !== "unresolved");
-  const unresolvedRows = masterList.filter(e => !e.slug);
+  const unresolvedRows = dateFiltered.filter(e => !e.slug);
   const newThisRun     = masterList.filter(e => newRunGdxs.has(String(e.gdx)));
-  const newGroups      = groupByDestination(newThisRun);
+  const newGroups      = groupByDestination(applyDateFilter(newThisRun));
+
+  // ── Date filter helpers ────────────────────────────────────────────────────
+  function toLocalDate(ts) {
+    if (!ts) return null;
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+  function fmtDate(isoDate) {
+    if (!isoDate) return "All dates";
+    const [y, m, d] = isoDate.split("-");
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return `${months[+m - 1]} ${+d}, ${y}`;
+  }
+  // Unique sorted dates (newest first) from the entire masterList
+  const availableDates = [...new Set(
+    masterList.map(e => toLocalDate(e.cached_at)).filter(Boolean)
+  )].sort((a, b) => b.localeCompare(a));
+
+  function applyDateFilter(list) {
+    if (!dateFilter) return list;
+    return list.filter(e => toLocalDate(e.cached_at) === dateFilter);
+  }
 
   const q = searchQuery.trim().toLowerCase();
   // Normalize: collapse dashes, en-dashes, em-dashes, and spaces into a single space
@@ -320,22 +353,77 @@ export default function AdminCache() {
           {/* ── LEFT: Table ──────────────────────────────────────────────────── */}
           <div className="flex-1 min-w-0">
 
-            {/* Search bar */}
-            <div className="relative mb-3">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search by destination, slug, package, name, or GDX…"
-                className="w-full font-body text-sm pl-8 pr-8 py-2.5 rounded-xl bg-white outline-none"
-                style={{ border: `1.5px solid ${searchQuery ? ORANGE : "#e5e7eb"}`, color: "#111" }}
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
-                  <X size={13} />
+            {/* Search + Date filter row */}
+            <div className="flex gap-2 mb-3 items-center">
+              <div className="relative flex-1">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search by destination, slug, package, name, or GDX…"
+                  className="w-full font-body text-sm pl-8 pr-8 py-2.5 rounded-xl bg-white outline-none"
+                  style={{ border: `1.5px solid ${searchQuery ? ORANGE : "#e5e7eb"}`, color: "#111" }}
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              {/* Date filter button */}
+              <div className="relative shrink-0" ref={dateMenuRef}>
+                <button
+                  onClick={() => setDateMenuOpen(o => !o)}
+                  className="inline-flex items-center gap-1.5 font-body text-sm font-semibold px-3 py-2.5 rounded-xl transition-all"
+                  style={{
+                    backgroundColor: dateFilter ? ORANGE : "#FFF",
+                    color: dateFilter ? "#000" : "#555",
+                    border: `1.5px solid ${dateFilter ? ORANGE : "#e5e7eb"}`,
+                  }}
+                >
+                  <Calendar size={13} />
+                  {dateFilter ? fmtDate(dateFilter) : "Date"}
+                  {dateFilter && (
+                    <span
+                      onClick={e => { e.stopPropagation(); setDateFilter(null); }}
+                      className="ml-0.5 hover:opacity-70"
+                    ><X size={11} /></span>
+                  )}
                 </button>
-              )}
+
+                <AnimatePresence>
+                  {dateMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 4, scale: 0.97 }}
+                      transition={{ duration: 0.13 }}
+                      className="absolute right-0 top-full mt-1 z-50 rounded-xl overflow-hidden bg-white"
+                      style={{ border: "1.5px solid #e5e7eb", minWidth: 170, boxShadow: "0 4px 20px rgba(0,0,0,0.10)" }}
+                    >
+                      <button
+                        onClick={() => { setDateFilter(null); setDateMenuOpen(false); }}
+                        className="w-full text-left px-4 py-2.5 font-body text-sm hover:bg-orange-50 transition-colors"
+                        style={{ color: !dateFilter ? ORANGE : "#333", fontWeight: !dateFilter ? 700 : 400 }}
+                      >
+                        All dates
+                      </button>
+                      {availableDates.map(d => (
+                        <button
+                          key={d}
+                          onClick={() => { setDateFilter(d); setDateMenuOpen(false); }}
+                          className="w-full text-left px-4 py-2.5 font-body text-sm hover:bg-orange-50 transition-colors border-t border-gray-50"
+                          style={{ color: dateFilter === d ? ORANGE : "#333", fontWeight: dateFilter === d ? 700 : 400 }}
+                        >
+                          {fmtDate(d)}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Tabs */}
