@@ -175,6 +175,7 @@ export default function AdminCache() {
   const [searchQuery, setSearchQuery] = useState("");
   const [recentIntl, setRecentIntl] = useState([]);
   const [recentLoading, setRecentLoading] = useState(false);
+  const [newRunGdxs, setNewRunGdxs] = useState(new Set());
   const logsEndRef = useRef(null);
   const seenGdxRef = useRef(new Set());
 
@@ -220,6 +221,7 @@ export default function AdminCache() {
     setRunning(true);
     setLogs([]);
     setResult(null);
+    setNewRunGdxs(new Set());
     seenGdxRef.current = new Set(masterList.map(r => String(r.gdx)));
     try {
       const res = await bulkCacheAllBookings(
@@ -236,8 +238,10 @@ export default function AdminCache() {
         },
       );
       setResult(res);
-      // Always reload table after run — handles "all already cached" case
-      // where onEntry never fired but data is in Supabase
+      // Track new GDXs from this run — stored separately so loadTable() can't wipe them
+      if (res.newToList?.length) {
+        setNewRunGdxs(new Set(res.newToList.map(e => String(e.gdx))));
+      }
       await Promise.all([loadTable(), loadStats()]);
     } catch (err) {
       setLogs((p) => [...p, `❌ Fatal error: ${err.message}`]);
@@ -255,7 +259,7 @@ export default function AdminCache() {
   const readyGroups    = allGroups.filter(g => READY_SLUGS.has(g.slug));
   const pendingGroups  = allGroups.filter(g => !READY_SLUGS.has(g.slug) && g.slug !== "unresolved");
   const unresolvedRows = masterList.filter(e => !e.slug);
-  const newThisRun     = masterList.filter(e => e.isNew);
+  const newThisRun     = masterList.filter(e => newRunGdxs.has(String(e.gdx)));
   const newGroups      = groupByDestination(newThisRun);
 
   const q = searchQuery.trim().toLowerCase();
