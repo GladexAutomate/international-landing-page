@@ -593,7 +593,7 @@ export default function GdxSearchSection() {
                   resetStatus();
                 }}
                 onKeyDown={(e) => e.key === "Enter" && canSearch && handleSearch()}
-                placeholder="e.g. GDX-12345678"
+                placeholder="e.g. 12345678"
                 maxLength={20}
                 disabled={isLoading}
                 aria-label="GDX booking number"
@@ -606,7 +606,7 @@ export default function GdxSearchSection() {
                 }}
               />
               <p className="font-body text-xs mt-1.5 pl-1" style={{ color: textSecondary }}>
-                Numbers only — the digits from your booking confirmation (e.g. 12345678)
+                Enter the number from your booking confirmation
               </p>
             </div>
 

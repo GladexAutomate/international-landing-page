@@ -154,55 +154,60 @@ export async function invalidateCachedGdx(gdx) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Returns all fresh entries from gdx_cache in display-ready format.
- * This is the primary data source for the admin page — it always has data
- * after any bulk fetch because gdx_cache is written first.
+ * Returns all cached entries from gdx_cache in display-ready format.
+ *
+ * @param {string[]|null} slugFilter  Optional: only return entries whose slug is
+ *                                    in this list (e.g. Array.from(READY_SLUGS)).
+ *                                    Pass null to return all entries with a slug.
  */
-export async function getAllCachedEntries() {
-  // Attempt 1: all display columns (requires SQL migration)
-  let { data, error } = await supabase
-    .from(TABLE)
-    .select("gdx, slug, lead_name, destination_name, package_name, cached_at");
+export async function getAllCachedEntries(slugFilter = null) {
+  const buildQuery = (cols) => {
+    let q = supabase.from(TABLE).select(cols).order("cached_at", { ascending: false });
+    if (slugFilter && slugFilter.length > 0) {
+      q = q.in("slug", slugFilter);
+    } else {
+      q = q.not("slug", "is", null);
+    }
+    return q;
+  };
 
-  // Attempt 2: without destination/package columns
-  if (error) {
-    ({ data, error } = await supabase
-      .from(TABLE)
-      .select("gdx, slug, lead_name, cached_at"));
-  }
+  // Primary query — lead_name column exists after SQL migration
+  let { data, error } = await buildQuery("gdx, slug, lead_name, cached_at");
 
-  // Attempt 3: absolute minimum — guaranteed original columns only
+  // Fallback — absolute minimum if lead_name column not yet added
   if (error) {
-    ({ data, error } = await supabase
-      .from(TABLE)
-      .select("gdx, slug, cached_at"));
+    ({ data, error } = await buildQuery("gdx, slug, cached_at"));
   }
 
   if (error) throw error;
 
-  const now = Date.now();
   let rows = (data ?? [])
-    .filter((e) => now - new Date(e.cached_at).getTime() < TTL_MS)
     .map((e) => ({
-      gdx:              e.gdx,
-      lead_name:        e.lead_name        ?? null,
-      destination_name: e.destination_name ?? null,
-      slug:             e.slug             ?? null,
-      package_name:     e.package_name     ?? null,
+      gdx:       e.gdx,
+      lead_name: e.lead_name ?? null,
+      slug:      e.slug      ?? null,
+      cached_at: e.cached_at ?? null,
     }));
 
-  // If lead_name is missing (SQL migration not run), pull from bookings_6fbdd6b2
-  // which always has the passenger name — no schema change needed.
-  if (rows.length > 0 && rows.every((r) => r.lead_name === null)) {
-    const { data: names } = await supabase
-      .from("bookings_6fbdd6b2")
-      .select("gdx, lead_name");
+  // Fill in lead_name from bookings_6fbdd6b2 for any entry that's missing it.
+  const missingGdxs = rows.filter((r) => r.lead_name === null).map((r) => String(r.gdx));
+  if (missingGdxs.length > 0) {
+    // If many are missing, fetch the whole table (faster than a huge IN clause).
+    const nameQuery = missingGdxs.length > 200
+      ? supabase.from("bookings_6fbdd6b2").select("gdx, lead_name")
+      : supabase.from("bookings_6fbdd6b2").select("gdx, lead_name").in("gdx", missingGdxs);
+    const { data: names } = await nameQuery;
     if (names?.length) {
-      const nameMap = new Map(names.map((n) => [String(n.gdx), n.lead_name]));
-      rows = rows.map((r) => ({
-        ...r,
-        lead_name: nameMap.get(String(r.gdx)) ?? null,
-      }));
+      const nameMap = new Map();
+      for (const n of names) {
+        const k = String(n.gdx);
+        if (!nameMap.has(k) && n.lead_name) nameMap.set(k, n.lead_name);
+      }
+      rows = rows.map((r) =>
+        r.lead_name === null
+          ? { ...r, lead_name: nameMap.get(String(r.gdx)) ?? null }
+          : r
+      );
     }
   }
 
@@ -221,6 +226,7 @@ export async function getRecentInternationalBookings(limit = 50) {
     "hongkong-cebu-pacific", "danang-6d4n-vietjet", "danang-5d3n-vietjet",
     "danang-4d2n-bamboo", "danang-4d3n-airasia", "danang-4d3n-cebu-pacific",
     "danang-5d3n-bamboo", "danang-6d4n-vietjet-standard",
+    "beijing-6d5n-pal", "beijing",
   ];
 
   const { data, error } = await supabase
@@ -237,6 +243,162 @@ export async function getRecentInternationalBookings(limit = 50) {
     lead_name: e.lead_name ?? null,
     cached_at: e.cached_at,
   }));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOOKING INTELLIGENCE  —  aggregated stats from enriched_data
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/**
+ * Computes per-slug booking intelligence from two sources:
+ *
+ *  Source A — enriched_data JSONB (travel dates from Fusioo):
+ *    Tries departureDate, departure_date, arrivalDate, arrival, tourDate
+ *    → tells us WHEN clients actually travel
+ *
+ *  Source B — bookings_6fbdd6b2.date_created (booking creation date):
+ *    Available for every booking in Supabase
+ *    → tells us WHEN clients make the purchase / WHEN demand peaks
+ *
+ * Returns a Map keyed by slug with:
+ *   count              — total bookings in cache
+ *   travelPeak         — top travel months from Fusioo dates (or null)
+ *   bookingPeak        — top booking-creation months from date_created
+ *   hasLiveTravelDates — true if ≥3 bookings had parseable travel dates
+ *   hasLiveBookingDates— always true if slug has ≥3 bookings (date_created is reliable)
+ */
+export async function getBlockingIntelStats() {
+  const CURRENT_YEAR = new Date().getFullYear();
+
+  function tryParseDate(dateStr) {
+    if (!dateStr) return null;
+    try {
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime()) && d.getFullYear() > 2020) return d;
+    } catch {}
+    return null;
+  }
+
+  function emptyEntry() {
+    return {
+      count: 0,
+      travelMonths:  new Array(12).fill(0),
+      bookingMonths: new Array(12).fill(0),
+      travelDateCount:  0,
+      bookingDateCount: 0,
+    };
+  }
+
+  // Title-case "danang-vietnam" → "Danang Vietnam" when destinationName unavailable
+  function slugToDisplay(slug) {
+    return slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  }
+
+  // ── Single query: gdx_cache has everything we need ────────────────────────────
+  // enriched_data = full Fusioo record merged with Supabase row (getFullBookingFromFusioo).
+  // Booking date sources (tried in order of reliability):
+  //   enriched_data->>created       — Fusioo system field (always present on Fusioo records)
+  //   enriched_data->>date_created  — Supabase sync field (may be null if not synced)
+  //   enriched_data->>last_modified — Fusioo last-modified (not ideal but always present)
+  const { data: cacheRows, error: cacheErr } = await supabase
+    .from(TABLE)
+    .select(
+      "gdx, slug, " +
+      "enriched_data->>destinationName, " +
+      "enriched_data->>created, " +
+      "enriched_data->>date_created, " +
+      "enriched_data->>last_modified, " +
+      "enriched_data->>departureDate, " +
+      "enriched_data->>departure_date, " +
+      "enriched_data->>arrivalDate, " +
+      "enriched_data->>arrival"
+    );
+
+  if (cacheErr) throw cacheErr;
+
+  const byDest   = new Map();
+  const bySlug   = new Map();
+  const monthBuckets     = Array.from({ length: 12 }, () => new Map()); // current-year only
+  const allYearBuckets   = Array.from({ length: 12 }, () => new Map()); // all-time (for matrix)
+
+  for (const row of cacheRows ?? []) {
+    // ── Resolve display name — skip if neither field is available ──────────────
+    const destName = row.destinationName || (row.slug ? slugToDisplay(row.slug) : null);
+    if (!destName) continue;
+
+    const destKey  = destName.toLowerCase().trim();
+    // Try Fusioo system 'created' first — it's always present on enriched records.
+    // Fall back to 'date_created' (Supabase sync) then 'last_modified' (Fusioo).
+    const bookDate  = tryParseDate(row.created || row.date_created || row.last_modified);
+    const bookMonth = bookDate ? bookDate.getMonth() : null;
+    const bookYear  = bookDate ? bookDate.getFullYear() : null;
+    const travelDate = tryParseDate(
+      row.departureDate || row.departure_date || row.arrivalDate || row.arrival
+    );
+    const travelMonth = travelDate ? travelDate.getMonth() : null;
+
+    // ── Per-destination stats (all-time, for matrix counts + book rush) ────────
+    if (!byDest.has(destKey)) byDest.set(destKey, emptyEntry());
+    const de = byDest.get(destKey);
+    de.count++;
+    if (bookMonth !== null) { de.bookingMonths[bookMonth]++; de.bookingDateCount++; }
+
+    // ── Per-slug stats (all-time, for travel peak) ─────────────────────────────
+    if (row.slug) {
+      if (!bySlug.has(row.slug)) bySlug.set(row.slug, emptyEntry());
+      const se = bySlug.get(row.slug);
+      se.count++;
+      if (travelMonth !== null) { se.travelMonths[travelMonth]++; se.travelDateCount++; }
+      if (bookMonth  !== null)  { se.bookingMonths[bookMonth]++;  se.bookingDateCount++;  }
+    }
+
+    // ── Monthly report buckets ─────────────────────────────────────────────────
+    // Current-year bucket (shown in monthly report)
+    if (bookMonth !== null && bookYear === CURRENT_YEAR) {
+      monthBuckets[bookMonth].set(destName, (monthBuckets[bookMonth].get(destName) || 0) + 1);
+    }
+    // All-time bucket (used for matrix book rush peak months)
+    if (bookMonth !== null) {
+      allYearBuckets[bookMonth].set(destName, (allYearBuckets[bookMonth].get(destName) || 0) + 1);
+    }
+  }
+
+  // ── Sort monthly buckets → arrays ─────────────────────────────────────────────
+  const byMonth = monthBuckets.map(bucket =>
+    Array.from(bucket.entries())
+      .map(([dest, count]) => ({ dest, count }))
+      .sort((a, b) => b.count - a.count)
+  );
+
+  // ── Convert month count arrays → readable strings ─────────────────────────────
+  const MIN_DATA = 3;
+
+  function topMonths(arr) {
+    return arr
+      .map((count, idx) => ({ idx, count }))
+      .filter(m => m.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3)
+      .sort((a, b) => a.idx - b.idx)
+      .map(m => MONTH_NAMES[m.idx])
+      .join(", ") || null;
+  }
+
+  for (const [, e] of bySlug) {
+    e.travelPeak          = e.travelDateCount  >= MIN_DATA ? topMonths(e.travelMonths)  : null;
+    e.bookingPeak         = e.bookingDateCount >= MIN_DATA ? topMonths(e.bookingMonths) : null;
+    e.hasLiveTravelDates  = e.travelPeak  !== null;
+    e.hasLiveBookingDates = e.bookingPeak !== null;
+  }
+
+  for (const [, e] of byDest) {
+    e.bookingPeak         = e.bookingDateCount >= MIN_DATA ? topMonths(e.bookingMonths) : null;
+    e.hasLiveBookingDates = e.bookingPeak !== null;
+  }
+
+  return { bySlug, byDest, byMonth };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -300,17 +462,9 @@ async function upsertMasterListEntry(gdx, booking, slug, isReady) {
  * Returns a summary of the current cache state.
  */
 export async function getCacheStats() {
-  // Never select enriched_data — too large for bulk reads (causes 400).
-  // Use the lightweight display columns instead.
   let { data: cacheRows, error: cacheErr } = await supabase
     .from(TABLE)
-    .select("gdx, slug, lead_name, destination_name, package_name, cached_at");
-
-  if (cacheErr) {
-    ({ data: cacheRows, error: cacheErr } = await supabase
-      .from(TABLE)
-      .select("gdx, slug, lead_name, cached_at"));
-  }
+    .select("gdx, slug, lead_name, cached_at");
 
   if (cacheErr) {
     ({ data: cacheRows, error: cacheErr } = await supabase
@@ -325,13 +479,9 @@ export async function getCacheStats() {
     .from("bookings_6fbdd6b2")
     .select("gdx");
 
-  const now = Date.now();
   const bySlug = {};
-  let freshCount = 0;
 
   (cacheRows ?? []).forEach((e) => {
-    const age = now - new Date(e.cached_at).getTime();
-    if (age < TTL_MS) freshCount++;
     const key = e.slug || "unresolved";
     bySlug[key] = (bySlug[key] ?? 0) + 1;
   });
@@ -339,8 +489,8 @@ export async function getCacheStats() {
   return {
     totalBookings: bookingRows?.length  ?? 0,
     totalCached:   cacheRows?.length    ?? 0,
-    freshCached:   freshCount,
-    staleCached:   (cacheRows?.length ?? 0) - freshCount,
+    freshCached:   cacheRows?.length    ?? 0,
+    staleCached:   0,
     uncached:      (bookingRows?.length ?? 0) - (cacheRows?.length ?? 0),
     bySlug,
     entries: (cacheRows ?? []).map((e) => ({
@@ -350,7 +500,7 @@ export async function getCacheStats() {
       packageName:     e.package_name     || e.slug || "—",
       destinationName: e.destination_name || e.slug || "—",
       cachedAt:        e.cached_at,
-      fresh:           now - new Date(e.cached_at).getTime() < TTL_MS,
+      fresh:           true,
     })),
   };
 }
@@ -375,8 +525,9 @@ export async function getCacheStats() {
  * @param {(msg: string) => void} onProgress   progress callback
  * @returns {Promise<{ success, skipped, failed }>}
  */
-export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), onEntry = null) {
+export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), onEntry = null, cutoffDate = null) {
   const log = (msg) => { console.log(msg); onProgress?.(msg); };
+  if (cutoffDate) log(`📅 Fetching bookings from ${cutoffDate.toLocaleDateString("en-PH")} onwards...`);
 
   log("🔍 Fetching international bookings from Supabase + master list...");
 
@@ -412,12 +563,16 @@ export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), o
   const now = Date.now();
 
   // Which bookings need (re)caching from Fusioo?
+  // Only process bookings within the selected date window (cutoffDate).
+  // Already-cached but updated in Fusioo are always re-fetched regardless of date.
   const toProcess = internationalBookings.filter((b) => {
-    const cachedAt = cacheMap.get(String(b.gdx));
-    if (!cachedAt) return true;
-    if (now - cachedAt.getTime() > TTL_MS) return true;
-    if (b.last_modified && new Date(b.last_modified) > cachedAt) return true;
-    return false;
+    const cachedAt    = cacheMap.get(String(b.gdx));
+    const bookingDate = b.date_created ? new Date(b.date_created) : null;
+    const inWindow    = !cutoffDate || !bookingDate || bookingDate >= cutoffDate;
+
+    if (b.last_modified && cachedAt && new Date(b.last_modified) > cachedAt) return true; // updated → always re-fetch
+    if (!cachedAt) return inWindow;  // never cached → only if within window
+    return false;                    // already cached and unchanged → skip
   });
 
   const alreadyCached = internationalBookings.length - toProcess.length;
@@ -504,7 +659,7 @@ export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), o
     }
 
     if (i < toProcess.length - 1) {
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 2000));
     }
   }
 

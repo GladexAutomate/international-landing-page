@@ -8,10 +8,12 @@ import { getDestinationBySlug } from "../data/destinations";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 import { DANANG_PACKAGES, getDanangPackageByBooking } from "../data/briefings/danang-packages.js";
 import { HONGKONG_PACKAGES, getHongkongPackageByBooking } from "../data/briefings/hongkong-packages.js";
+import { BEIJING_PACKAGES, getBeijingPackageByBooking } from "../data/briefings/beijing-packages.js";
 import { ThemeProvider, useTheme } from "../lib/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import ScrollControls from "../components/ScrollControls";
 import { resolveVoucher, resolveItinerary, resolveFirstId } from "../services/fusiooDocumentService";
+import { getVoucher } from "../services/voucherService";
 import { generateVoucherPDF } from "../utils/generateVoucherPDF";
 import {
   getInsurancePlans,
@@ -2628,6 +2630,14 @@ function PreviewContent() {
   const [bookingExpanded, setBookingExpanded] = useState(true);
 
   useEffect(() => {
+    if (!booking?.gdx) return;
+    // Check our own Supabase vouchers table first (admin-uploaded files take priority)
+    getVoucher(booking.gdx).then(v => {
+      if (v?.voucher_url) setVoucherDoc({ status: "url", url: v.voucher_url });
+    }).catch(() => {});
+  }, [booking?.gdx]);
+
+  useEffect(() => {
     if (!booking) return;
 
     const FUSIOO_ID_RE = /^i[0-9a-f]{32}$/i;
@@ -2772,10 +2782,11 @@ function PreviewContent() {
     console.log("[DOCUMENT AUDIT] Itinerary record IDs :", itineraryIds);
 
     if (!directVoucherUrl && voucherIds.length > 0) {
-      setVoucherDoc({ status: "loading", url: null });
+      // Don't overwrite a Supabase-uploaded voucher already set
+      setVoucherDoc(prev => prev.status === "url" ? prev : { status: "loading", url: null });
       resolveVoucher(voucherIds[0])
-        .then((url) => setVoucherDoc({ status: url ? "url" : "unavailable", url }))
-        .catch(() => setVoucherDoc({ status: "unavailable", url: null }));
+        .then((url) => setVoucherDoc(prev => prev.status === "url" ? prev : { status: url ? "url" : "unavailable", url }))
+        .catch(() => setVoucherDoc(prev => prev.status === "url" ? prev : { status: "unavailable", url: null }));
     } else if (!directVoucherUrl) {
       console.log("[DOCUMENT AUDIT] No voucher URL or record ID found — fallback PDF will be used.");
     }
@@ -2824,11 +2835,27 @@ function PreviewContent() {
         : autoDetectedHongkongPkg)
     : null;
 
+  // ── Beijing multi-package variant logic ───────────────────────────────────
+  // All Beijing packages share the "beijing" slug — package is auto-detected
+  // from GDX booking data or manually selected by the client.
+  const isBeijing = slug === "beijing";
+  const [selectedBeijingKey, setSelectedBeijingKey] = useState(
+    () => isBeijing && previewKey ? previewKey : null
+  );
+  const autoDetectedBeijingPkg = isBeijing ? getBeijingPackageByBooking(booking) : null;
+  const activeBeijingPkg = isBeijing
+    ? (selectedBeijingKey
+        ? BEIJING_PACKAGES.find((p) => p.key === selectedBeijingKey) ?? autoDetectedBeijingPkg
+        : autoDetectedBeijingPkg)
+    : null;
+
   const briefing = activeDanangPkg
     ? activeDanangPkg.briefing
     : activeHongkongPkg
       ? activeHongkongPkg.briefing
-      : baseBriefing;
+      : activeBeijingPkg
+        ? activeBeijingPkg.briefing
+        : baseBriefing;
 
   // Theme for white sections — neutral background with dark text
   const theme = {
@@ -2966,6 +2993,102 @@ function PreviewContent() {
   // Section spacing constant
   const sectionGap = "py-10 lg:py-12";
 
+  // Ordered section definitions — filter to visible, then alternate DARK/ORANGE by index
+  const briefingSectionDefs = briefing ? [
+    { key: "welcome", show: true, bgVariant: "city",
+      render: (t) => <WelcomeSection briefing={briefing} pkg={pkg} theme={t} heroImage={dest?.heroImage} /> },
+    { key: "inclusions", show: true, bgVariant: null,
+      render: (t) => <InclusionsSection pkg={pkg} briefing={briefing} theme={t} /> },
+    { key: "tours", show: !!(dest?.enableAddOns && globaltixTours.length > 0), bgVariant: "city",
+      render: (t) => (
+        <OptionalToursSection
+          tours={globaltixTours}
+          cartTourIds={cart.tours.map((item) => item.tour?.id)}
+          onAdd={(tour) => setBookingModalTour(tour)}
+          theme={t}
+        />
+      ),
+    },
+    { key: "travel-info", show: true, bgVariant: null,
+      render: (t) => <TravelInfoCenter briefing={briefing} theme={t} /> },
+    { key: "arrival", show: true, bgVariant: "luggage",
+      render: (t) => <ArrivalSection briefing={briefing} theme={t} /> },
+    { key: "transfer", show: true, bgVariant: null,
+      render: (t) => <TransferSection briefing={briefing} theme={t} /> },
+    { key: "hotel", show: true, bgVariant: "luggage",
+      render: (t) => <HotelSection briefing={briefing} theme={t} /> },
+    { key: "reminders", show: true, bgVariant: null,
+      render: (t) => <RemindersSection briefing={briefing} theme={t} /> },
+    { key: "dos-donts", show: !!briefing.dosAndDonts, bgVariant: "city",
+      render: (t) => (
+        <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={t}>
+          <DosAndDonts dos={briefing.dosAndDonts.dos} donts={briefing.dosAndDonts.donts} theme={t} />
+        </BriefingSection>
+      ),
+    },
+    { key: "immigration", show: !!(briefing.immigrationAdvisory?.length > 0), bgVariant: null,
+      render: (t) => (
+        <BriefingSection label="Philippine Immigration" title="Immigration Advisory" theme={t}>
+          <div className="mb-4">
+            <p className="font-body text-base leading-relaxed" style={{ color: t.textSecondary }}>
+              Tap your traveler type below to see the documents required at Philippine immigration upon departure. Bring originals and photocopies of all documents.
+            </p>
+          </div>
+          <ImmigrationAdvisory advisory={briefing.immigrationAdvisory} theme={t} />
+        </BriefingSection>
+      ),
+    },
+    { key: "connecting-flight", show: true, bgVariant: "city",
+      render: (t) => <ConnectingFlightSection briefing={briefing} theme={t} /> },
+    { key: "shopping", show: true, bgVariant: null,
+      render: (t) => <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={t} /> },
+    { key: "requirements", show: true, bgVariant: "city",
+      render: (t) => <RequirementsSection pkg={pkg} theme={t} /> },
+    { key: "important-notices", show: !!(pkg?.importantNotices?.length > 0), bgVariant: "city",
+      render: (t) => <ImportantNoticesSection pkg={pkg} theme={t} /> },
+    { key: "checklist", show: !!(briefing.checklist?.length > 0), bgVariant: null,
+      render: (t) => (
+        <BriefingSection label="Pre-Departure" title="Travel Readiness Checklist" theme={t}>
+          <TravelChecklist items={briefing.checklist} storageKey={`gladex-checklist-${slug}`} theme={t} />
+        </BriefingSection>
+      ),
+    },
+    { key: "what-to-bring", show: true, bgVariant: "luggage",
+      render: (t) => <WhatToBringCarousel items={briefing.whatToBring || []} theme={t} /> },
+    { key: "outfit", show: true, bgVariant: null,
+      render: (t) => <OutfitGuide theme={t} /> },
+    { key: "destination-guide", show: true, bgVariant: "city",
+      render: (t) => <DestinationGuideSection briefing={briefing} slug={slug} theme={t} /> },
+    { key: "connectivity", show: true, bgVariant: null,
+      render: (t) => <ConnectivitySection briefing={briefing} theme={t} /> },
+    { key: "faq", show: !!(briefing.faqs?.length > 0), bgVariant: "city",
+      render: (t) => (
+        <BriefingSection label="Common Questions" title="Frequently Asked Questions" theme={t}>
+          <BriefingFAQ faqs={briefing.faqs} theme={t} />
+        </BriefingSection>
+      ),
+    },
+    { key: "assistance", show: !!briefing.assistanceContacts, bgVariant: null,
+      render: (t) => (
+        <BriefingSection label="Contact Us" title="Need Assistance?" theme={t}>
+          <NeedAssistance contacts={briefing.assistanceContacts} theme={t} />
+        </BriefingSection>
+      ),
+    },
+    { key: "testimonials", show: true, bgVariant: "luggage",
+      render: (t) => (
+        <BriefingTestimonials theme={t} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} reviewRefreshKey={reviewRefreshKey} />
+      ),
+    },
+    { key: "rate", show: !!(booking?.gdx), bgVariant: null,
+      render: (t) => (
+        <RateMyService theme={t} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={handleReviewSaved} />
+      ),
+    },
+    { key: "referral", show: true, bgVariant: "city",
+      render: (t) => <ReferralSection theme={t} /> },
+  ] : [];
+  const visibleBriefingSections = briefingSectionDefs.filter((s) => s.show);
 
   return (
     <div className="briefing-page min-h-screen transition-colors duration-300" style={{ backgroundColor: bg }}>
@@ -3760,13 +3883,56 @@ function PreviewContent() {
         </div>
       )}
 
+      {/* ── Beijing Package Selector ── */}
+      {isBeijing && (
+        <div style={{ backgroundColor: "#FFFFFF" }} className="py-10 px-4 border-b border-gray-100">
+          <div className="w-full px-6 lg:px-12 xl:px-20">
+            <p className="text-xs font-bold tracking-[0.3em] uppercase text-center mb-1" style={{ color: "#FF9913" }}>
+              Your Package
+            </p>
+            <h3 className="font-condensed font-black text-[#111] text-2xl text-center mb-1">
+              Select Your Package
+            </h3>
+            <p className="text-xs text-center mb-6" style={{ color: "#888" }}>
+              {autoDetectedBeijingPkg && !selectedBeijingKey
+                ? "Auto-selected based on your booking — tap to switch"
+                : "Tap your package to view the correct briefing"}
+            </p>
+            <div className="flex gap-3 justify-center flex-wrap">
+              {BEIJING_PACKAGES.map((bpkg) => {
+                const isActive = activeBeijingPkg?.key === bpkg.key;
+                return (
+                  <button
+                    key={bpkg.key}
+                    onClick={() => setSelectedBeijingKey(bpkg.key)}
+                    className="px-7 py-4 rounded-2xl transition-all active:scale-95 text-center min-w-[120px]"
+                    style={
+                      isActive
+                        ? { backgroundColor: "#FF9913", color: "#fff", border: "2px solid #FF9913", boxShadow: "0 4px 16px rgba(255,153,19,0.3)" }
+                        : { backgroundColor: "#F9F7F5", color: "#333", border: "2px solid #E5E7EB" }
+                    }
+                  >
+                    <span className="font-condensed font-black text-2xl block">{bpkg.shortLabel}</span>
+                    <span className="block text-xs font-medium mt-0.5" style={{ opacity: isActive ? 0.85 : 0.6 }}>
+                      {bpkg.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══════════════════════════════════════════════════════════════════════
-          BRIEFING SECTIONS — light orange (#FFF4E0) / dark alternating backgrounds
+          BRIEFING SECTIONS — true alternating DARK / ORANGE backgrounds
+          Index 0 = DARK, 1 = ORANGE, 2 = DARK … regardless of which
+          conditional sections are visible.
           ══════════════════════════════════════════════════════════════════════ */}
       {briefing && (
         <div className="transition-colors duration-300">
 
-          {/* Contact Panel + Emergency Numbers — ORANGE */}
+          {/* Contact Panel + Emergency Numbers — fixed ORANGE (outside alternation) */}
           <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
             <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12">
               <div className="space-y-8">
@@ -3780,278 +3946,28 @@ function PreviewContent() {
             </div>
           </div>
 
-          {/* 1. Welcome — DARK */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="city" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <WelcomeSection briefing={briefing} pkg={pkg} theme={theme} heroImage={dest?.heroImage} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* 2 & 3. Inclusions + Exclusions — ORANGE */}
-          <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <InclusionsSection pkg={pkg} briefing={briefing} theme={orangeTheme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Optional Tours & Activities — DARK (only on destinations with enableAddOns: true) */}
-          {dest?.enableAddOns && globaltixTours.length > 0 && (
-            <SectionErrorBoundary>
-              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-                <TravelCardBg variant="city" />
-                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                  <OptionalToursSection
-                    tours={globaltixTours}
-                    cartTourIds={cart.tours.map((t) => t.tour?.id)}
-                    onAdd={(tour) => setBookingModalTour(tour)}
-                    theme={theme}
-                  />
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* 5. Travel Information Center — ORANGE */}
-          <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <TravelInfoCenter briefing={briefing} theme={orangeTheme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* 6. Arrival Instructions — DARK */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <ArrivalSection briefing={briefing} theme={theme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* 7. Transfer Instructions — ORANGE */}
-          <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <TransferSection briefing={briefing} theme={orangeTheme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* 8. Hotel Check-In — DARK */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <HotelSection briefing={briefing} theme={theme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* 9. Tour Reminders — ORANGE */}
-          <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <RemindersSection briefing={briefing} theme={orangeTheme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Do's and Don'ts — DARK */}
-          {briefing.dosAndDonts && (
-            <SectionErrorBoundary>
-              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-                <TravelCardBg variant="city" />
-                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                  <BriefingSection label="Behavior Guidelines" title="Important Do's & Don'ts" theme={theme}>
-                    <DosAndDonts
-                      dos={briefing.dosAndDonts.dos}
-                      donts={briefing.dosAndDonts.donts}
-                      theme={theme}
-                    />
-                  </BriefingSection>
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* Immigration Advisory — ORANGE */}
-          {briefing.immigrationAdvisory?.length > 0 && (
-            <SectionErrorBoundary>
-              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                  <BriefingSection label="Philippine Immigration" title="Immigration Advisory" theme={orangeTheme}>
-                    <div className="mb-4">
-                      <p className="font-body text-base leading-relaxed" style={{ color: orangeTheme.textSecondary }}>
-                        Tap your traveler type below to see the documents required at Philippine immigration upon departure. Bring originals and photocopies of all documents.
-                      </p>
+          {visibleBriefingSections.map((section, i) => {
+            const isOrange = i % 2 === 1;
+            const t = isOrange ? orangeTheme : theme;
+            return (
+              <SectionErrorBoundary key={section.key}>
+                {isOrange ? (
+                  <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
+                    <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
+                      {section.render(t)}
                     </div>
-                    <ImmigrationAdvisory advisory={briefing.immigrationAdvisory} theme={orangeTheme} />
-                  </BriefingSection>
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* Connecting Flight Info — CREAM */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="city" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <ConnectingFlightSection briefing={briefing} theme={theme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Shopping Advisory — ORANGE */}
-          <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <ShoppingAdvisorySection briefing={briefing} pkg={pkg} theme={orangeTheme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Requirements — CREAM */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="city" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <RequirementsSection pkg={pkg} theme={theme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Important Notices — DARK */}
-          {pkg?.importantNotices?.length > 0 && (
-            <SectionErrorBoundary>
-              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-                <TravelCardBg variant="city" />
-                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                  <ImportantNoticesSection pkg={pkg} theme={theme} />
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* Travel Checklist — ORANGE */}
-          {briefing.checklist?.length > 0 && (
-            <SectionErrorBoundary>
-              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                  <BriefingSection label="Pre-Departure" title="Travel Readiness Checklist" theme={orangeTheme}>
-                    <TravelChecklist
-                      items={briefing.checklist}
-                      storageKey={`gladex-checklist-${slug}`}
-                      theme={orangeTheme}
-                    />
-                  </BriefingSection>
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* What to Bring — DARK */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <WhatToBringCarousel items={briefing.whatToBring || []} theme={theme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Outfit Guide — ORANGE */}
-          <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <OutfitGuide theme={orangeTheme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Destination Guide — DARK */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="city" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <DestinationGuideSection briefing={briefing} slug={slug} theme={theme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Connectivity Guide — ORANGE */}
-          <SectionErrorBoundary>
-            <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-              <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                <ConnectivitySection briefing={briefing} theme={orangeTheme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* FAQ — DARK */}
-          {briefing.faqs?.length > 0 && (
-            <SectionErrorBoundary>
-              <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-                <TravelCardBg variant="city" />
-                <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                  <BriefingSection label="Common Questions" title="Frequently Asked Questions" theme={theme}>
-                    <BriefingFAQ faqs={briefing.faqs} theme={theme} />
-                  </BriefingSection>
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* Need Assistance — ORANGE */}
-          {briefing.assistanceContacts && (
-            <SectionErrorBoundary>
-              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                  <BriefingSection label="Contact Us" title="Need Assistance?" theme={orangeTheme}>
-                    <NeedAssistance contacts={briefing.assistanceContacts} theme={orangeTheme} />
-                  </BriefingSection>
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* Testimonials — DARK */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="luggage" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <BriefingTestimonials theme={theme} clientReview={clientReview} slug={slug} gdxReference={booking?.gdx} reviewRefreshKey={reviewRefreshKey} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
-
-          {/* Rate My Service — ORANGE */}
-          {booking?.gdx && (
-            <SectionErrorBoundary>
-              <div data-theme="orange" style={{ backgroundColor: "#FF9913" }}>
-                <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16">
-                  <RateMyService theme={orangeTheme} gdxReference={booking.gdx} destination={slug} reviewerName={booking.lead_name} onReviewSaved={handleReviewSaved} />
-                </div>
-              </div>
-            </SectionErrorBoundary>
-          )}
-
-          {/* Referral — DARK */}
-          <SectionErrorBoundary>
-            <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
-              <TravelCardBg variant="city" />
-              <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
-                <ReferralSection theme={theme} />
-              </div>
-            </div>
-          </SectionErrorBoundary>
+                  </div>
+                ) : (
+                  <div className="relative overflow-hidden" style={{ backgroundColor: CARD_BG }}>
+                    <TravelCardBg variant={section.bgVariant || "city"} />
+                    <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20 py-8 sm:py-12 lg:py-16" style={{ zIndex: 1 }}>
+                      {section.render(t)}
+                    </div>
+                  </div>
+                )}
+              </SectionErrorBoundary>
+            );
+          })}
 
         </div>
       )}

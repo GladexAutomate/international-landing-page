@@ -14,7 +14,7 @@ import Admin from './pages/Admin';
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/destination/:slug" element={<DestinationPreview />} />

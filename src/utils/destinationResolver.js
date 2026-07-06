@@ -17,9 +17,35 @@
 // Key   = value stored in bookings_6fbdd6b2.destination (the Fusioo record ID)
 // Value = destination slug used in /destination/:slug route
 const FUSIOO_ID_MAP = {
-  // Examples — fill in after running the schema audit:
-  // "i563dc5a6d467470496d28a0d9f062a52": "danang-vietnam",
-  // "iXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX": "hongkong",
+  // ── International (resolve to READY_SLUGS) ──────────────────────────────────
+  "i563dc5a6d467470496d28a0d9f062a52": "hongkong",           // Hong Kong
+  "i2275fb23823144ca8eeaa95a50741968": "beijing",            // Shanghai, China
+  "i7d544023422e4f4baf30d2dbe7bfac56": "beijing",            // Beijing, China
+  "i8a5a12c6eb95442584686b5888a362eb": "beijing",            // China (generic)
+  "icfaa00526aa8488db46974508645aada": "beijing",            // Beijing + Shanghai
+  "ice6368bb3dad4b0591f8a1d50085d9d6": "danang-vietnam",     // Da Nang, Vietnam
+  "ide1eb009d1d54d79a2353c9cf4f12841": "singapore",          // Singapore
+  "if4f72d7ffde3489c9174e3f64c16c694": "taipei",             // Taipei, Taiwan
+  "i7fcd28d6b1a64033bd5fbc90f55b2fe8": "vietnam-hanoi",      // Hanoi, Vietnam
+  // ── International (not yet in READY_SLUGS) ──────────────────────────────────
+  "ie9eb5d4727a44c3c939cd7077d7991f6": "bangkok",            // Bangkok, Thailand
+  "ie9f73a9029334eaaab329d8b1c2e3ceb": null,                 // Ho Chi Minh (no slug yet)
+  "ic82be40b623a44d8bd7c8a32b4fd7902": "new-zealand",        // New Zealand
+  "i873d5ac486154db7a22dfb57775f7878": "japan",              // Japan
+  "i1645e108d52045d98fb84032c8be59d2": null,                 // Kazakhstan (no slug)
+  "i01415d1730824e6fa3f01e116549b2b7": null,                 // Pakistan (no slug)
+  // ── Domestic Philippines ─────────────────────────────────────────────────────
+  "i06973524aa974848a37007b3a1ceb0db": null,                 // Manila
+  "i389b88123aa34be1937d64d4df6eca42": null,                 // Ilocos
+  "i4e87aba541a94b98b8fead98d0c809a8": null,                 // Boracay via CATICLAN
+  "i63798db52a7f44f187ef6f9828c3a57a": null,                 // Bohol
+  "i67f5adf04bfc41d78c3102ed8226d317": null,                 // Boracay via KALIBO
+  "i900e3e3215704c05b629832e1b624a2c": null,                 // El Nido
+  "ia234508bd6d24726adb9e82a1337c85e": null,                 // Cebu
+  "ib027fb1de5de4c39b5ecc4e1905e65c2": null,                 // Tacloban
+  "ib515f233f6d8407796c3e21c2557d5ae": null,                 // Puerto Princesa
+  "ie2040a0a36634bd88e89df6d5fb63f90": null,                 // Coron
+  "ifd846ca66a964189ae2a32bc4c17bba7": null,                 // Cauayan
 };
 
 // ─── 2. KEYWORD → SLUG MAP ───────────────────────────────────────────────────
@@ -42,10 +68,19 @@ const KEYWORD_MAP = [
   { slug: "hongkong-shenzhen-zhuhai", keywords: ["hk shenzhen zhuhai", "hongkong shenzhen zhuhai", "hong kong shenzhen zhuhai", "shenzhen zhuhai", "4d3n shenzhen", "cebu pacific shenzhen", "hk szx zhuhai"] },
   { slug: "hongkong",               keywords: ["hongkong private", "hong kong private", "private hongkong", "hong kong", "hongkong", "hk ", "h.k.", "hong-kong"] },
   { slug: "macau",                  keywords: ["macau", "macao"] },
-  { slug: "beijing-shanghai-pal",          keywords: ["shanghai pal", "philippine airlines shanghai", "pal shanghai", "shanghai philippine airlines"] },
-  { slug: "beijing-shanghai-collective",   keywords: ["shanghai mini kyoto", "mini kyoto", "shenzhen airlines shanghai", "shanghai shenzhen", "5d4n shanghai", "shanghai private", "beijing shanghai private", "beijing private", "shanghai collective"] },
-  { slug: "beijing-shanghai-cebu-pacific", keywords: ["shanghai cebu pacific", "cebu pacific shanghai", "6d4n shanghai", "shanghai 6d4n", "shanghai ceb"] },
-  { slug: "beijing-shanghai",              keywords: ["beijing", "shanghai", "china tour", "beijing shanghai"] },
+  // All Beijing / Shanghai packages resolve to "beijing" — the landing page
+  // auto-detects the specific variant (6D5N BJ PAL, B+SH PAL, Cebu Pacific, Private)
+  // from the booking's GDX/package/airline fields via getBeijingPackageByBooking().
+  { slug: "beijing", keywords: [
+    "6d5n beijing", "beijing 6d5n", "beijing pal", "pal beijing",
+    "beijing philippine airlines", "philippine airlines beijing",
+    "shanghai pal", "pal shanghai", "philippine airlines shanghai", "shanghai philippine airlines",
+    "shanghai cebu pacific", "cebu pacific shanghai", "6d4n shanghai", "shanghai 6d4n", "shanghai ceb",
+    "shanghai mini kyoto", "mini kyoto", "shenzhen airlines shanghai", "shanghai shenzhen",
+    "5d4n shanghai", "shanghai private", "beijing shanghai private", "beijing private", "shanghai collective",
+    "beijing", "shanghai", "china tour", "beijing shanghai",
+    " china",
+  ]},
 
   // ── Korea ──────────────────────────────────────────────────────────────────
   { slug: "jeju-korea",             keywords: ["jeju"] },            // specific first
@@ -121,9 +156,10 @@ export function resolveDestinationSlug(booking) {
   const destId = Array.isArray(booking.destination)
     ? booking.destination[0]
     : booking.destination;
-  if (destId && FUSIOO_ID_MAP[destId]) {
-    console.log("[GDX Resolver] Matched via FUSIOO_ID_MAP:", FUSIOO_ID_MAP[destId]);
-    return FUSIOO_ID_MAP[destId];
+  if (destId && destId in FUSIOO_ID_MAP) {
+    const mapped = FUSIOO_ID_MAP[destId];
+    if (mapped) console.log("[GDX Resolver] Matched via FUSIOO_ID_MAP:", mapped);
+    return mapped; // null for known domestic/unslug'd destinations
   }
 
   // ── Strategy 2: domestic_voucher_ destination text field ─────────────────

@@ -17,4 +17,6 @@ export const READY_SLUGS = new Set([
   "beijing-shanghai-cebu-pacific",
   "hongkong-shenzhen-zhuhai",
   "hanoi-sapa-airasia",
+  "beijing-6d5n-pal",
+  "beijing",
 ]);

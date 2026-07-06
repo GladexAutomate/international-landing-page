@@ -1,51 +1,35 @@
 // @ts-nocheck
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RefreshCw, Database, CheckCircle, XCircle,
-  SkipForward, Loader, BarChart2, ChevronDown, ChevronRight, Zap, Search, X, ExternalLink, Calendar,
+  SkipForward, Loader, BarChart2, Zap, ExternalLink,
+  Search, X, BookOpen, FileText,
 } from "lucide-react";
-import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries, getCachedGdx, getRecentInternationalBookings } from "../services/gdxCacheService";
+import { getCacheStats, bulkCacheAllBookings, getAllCachedEntries } from "../services/gdxCacheService";
 import { READY_SLUGS } from "../config/readySlugs";
 import { getBriefingBySlug } from "../data/briefings/index.js";
 
 const ORANGE = "#FF9913";
 
-// ── helpers ───────────────────────────────────────────────────────────────────
+const SLUG_LABELS = {
+  "danang-vietnam":                "Da Nang, Vietnam",
+  "hongkong":                      "Hong Kong",
+  "singapore":                     "Singapore",
+  "taipei":                        "Taipei",
+  "beijing":                       "Beijing",
+  "beijing-6d5n-pal":              "Beijing 6D5N PAL",
+  "beijing-shanghai-pal":          "Beijing + Shanghai PAL",
+  "beijing-shanghai-cebu-pacific": "Beijing + Shanghai CEB",
+  "beijing-shanghai-collective":   "Beijing + Shanghai Private",
+  "hongkong-shenzhen-zhuhai":      "HK · Shenzhen · Zhuhai",
+  "hanoi-sapa-airasia":            "Hanoi · Sapa",
+};
 
-function lastName(fullName) {
-  if (!fullName) return "—";
-  const n = String(fullName).trim();
-  return n.includes(",") ? n.split(",")[0].trim() : (n.split(/\s+/).pop() ?? n);
+function slugLabel(slug) {
+  return SLUG_LABELS[slug] || slug;
 }
-
-function groupByDestination(entries) {
-  const map = {};
-  entries.forEach((e) => {
-    const key = e.slug || "unresolved";
-    if (!map[key]) map[key] = { slug: key, destinationName: null, packages: {} };
-    if (!map[key].destinationName && e.destination_name) map[key].destinationName = e.destination_name;
-    const pkg = e.package_name || "—";
-    if (!map[key].packages[pkg]) map[key].packages[pkg] = [];
-    map[key].packages[pkg].push(e);
-  });
-  return Object.values(map)
-    .sort((a, b) => (a.destinationName || a.slug).localeCompare(b.destinationName || b.slug))
-    .map(({ slug, destinationName, packages }) => ({
-      slug,
-      destinationName,
-      packages: Object.entries(packages)
-        .sort((a, b) => b[1].length - a[1].length)
-        .map(([pkg, rows]) => ({
-          pkg,
-          rows: rows.sort((a, b) => lastName(a.lead_name).localeCompare(lastName(b.lead_name))),
-        })),
-      total: Object.values(packages).reduce((s, r) => s + r.length, 0),
-    }));
-}
-
-// ── sub-components ────────────────────────────────────────────────────────────
 
 function StatCard({ label, value, color, sub }) {
   return (
@@ -57,112 +41,28 @@ function StatCard({ label, value, color, sub }) {
   );
 }
 
-function PackageSection({ pkg, rows, onOpenBooking }) {
-  const [open, setOpen] = useState(false);
+const RANGE_OPTIONS = [
+  { label: "7 days",   days: 7   },
+  { label: "2 weeks",  days: 14  },
+  { label: "1 month",  days: 30  },
+  { label: "3 months", days: 90  },
+  { label: "6 months", days: 180 },
+  { label: "All new",  days: null },
+];
 
-  function handleOpen(e) {
-    onOpenBooking(e.slug, null, e.gdx);
-  }
-
-  return (
-    <div className="border border-gray-100 rounded-xl mb-2 overflow-hidden">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
-      >
-        <div className="flex items-center gap-2">
-          {open ? <ChevronDown size={13} className="text-gray-400 shrink-0" /> : <ChevronRight size={13} className="text-gray-400 shrink-0" />}
-          <span className="font-body text-sm font-semibold text-gray-700">{pkg}</span>
-        </div>
-        <span className="font-body text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ backgroundColor: `${ORANGE}22`, color: ORANGE }}>
-          {rows.length} GDX
-        </span>
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.18 }}
-            style={{ overflow: "hidden" }}
-          >
-            <table className="w-full text-xs font-body border-t border-gray-100">
-              <thead>
-                <tr className="bg-gray-50 text-gray-400">
-                  <th className="text-left px-4 py-2 font-semibold">GDX</th>
-                  <th className="text-left px-4 py-2 font-semibold">Last Name</th>
-                  <th className="text-left px-4 py-2 font-semibold hidden sm:table-cell">Full Name</th>
-                  <th className="px-2 py-2" />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((e) => (
-                  <tr key={e.gdx} className="border-t border-gray-50 hover:bg-orange-50/40">
-                    <td className="px-4 py-1.5 font-bold text-gray-800">GDX-{e.gdx}</td>
-                    <td className="px-4 py-1.5 font-bold" style={{ color: ORANGE }}>{lastName(e.lead_name)}</td>
-                    <td className="px-4 py-1.5 text-gray-500 hidden sm:table-cell">{e.lead_name ?? "—"}</td>
-                    <td className="px-2 py-1.5 text-right">
-                      <button
-                        onClick={() => handleOpen(e)}
-                        title="Open on main page"
-                        className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg transition-colors"
-                        style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
-                      >
-                        <ExternalLink size={11} /> Open
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+function getCutoff(days) {
+  if (!days) return null;
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
 }
 
-function DestinationBlock({ slug, destinationName, packages, total, defaultOpen, onOpenBooking }) {
-  const [open, setOpen] = useState(defaultOpen ?? false);
-  const isReady = READY_SLUGS.has(slug);
-  const title = destinationName || slug;
-  return (
-    <div className="rounded-xl mb-2 overflow-hidden bg-white" style={{ border: `1.5px solid ${isReady ? "#bbf7d0" : "#fef08a"}` }}>
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors text-left">
-        <div className="flex items-center gap-2 min-w-0">
-          {open ? <ChevronDown size={15} className="text-gray-400 shrink-0" /> : <ChevronRight size={15} className="text-gray-400 shrink-0" />}
-          <div className="min-w-0">
-            <span className="font-condensed font-black text-lg text-gray-900">{title}</span>
-            {isReady && (
-              <span className="ml-2 font-body text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#15803d" }}>
-                ✅ LIVE
-              </span>
-            )}
-          </div>
-        </div>
-        <span className="font-body text-xs font-bold px-2 py-1 rounded-full shrink-0 ml-2"
-          style={{ backgroundColor: isReady ? "#dcfce7" : "#fef9c3", color: isReady ? "#15803d" : "#854d0e" }}>
-          {total} GDX
-        </span>
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
-            style={{ overflow: "hidden" }}
-            className="px-4 pb-4 pt-1 border-t border-gray-100"
-          >
-            {packages.map(({ pkg, rows }) => (
-              <PackageSection key={pkg} pkg={pkg} rows={rows} onOpenBooking={onOpenBooking} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+function fmtDate(ts) {
+  if (!ts) return "—";
+  const d = new Date(ts);
+  const mo = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()];
+  return `${mo} ${d.getDate()}, ${d.getFullYear()}`;
 }
-
-// ── main ──────────────────────────────────────────────────────────────────────
 
 export default function AdminCache() {
   const navigate = useNavigate();
@@ -172,30 +72,17 @@ export default function AdminCache() {
   const [running,    setRunning]    = useState(false);
   const [logs,       setLogs]       = useState([]);
   const [result,     setResult]     = useState(null);
-  const [tab,        setTab]        = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [recentIntl, setRecentIntl] = useState([]);
-  const [recentLoading, setRecentLoading] = useState(false);
-  const [newRunGdxs, setNewRunGdxs] = useState(new Set());
-  const [dateFilter,    setDateFilter]    = useState(null); // "YYYY-MM-DD" or null = all
-  const [dateMenuOpen,  setDateMenuOpen]  = useState(false);
-  const dateMenuRef = useRef(null);
+  const [rangeDays,  setRangeDays]  = useState(30);
+  const [search,     setSearch]     = useState("");
   const logsEndRef = useRef(null);
   const seenGdxRef = useRef(new Set());
 
   useEffect(() => { load(); }, []);
   useEffect(() => { logsEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [logs]);
-  useEffect(() => {
-    function handleClick(e) {
-      if (dateMenuRef.current && !dateMenuRef.current.contains(e.target)) setDateMenuOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   async function loadTable() {
     try {
-      const cached = await getAllCachedEntries();
+      const cached = await getAllCachedEntries(Array.from(READY_SLUGS));
       const rows = cached.map(e => ({
         ...e,
         is_ready: READY_SLUGS.has(e.slug),
@@ -219,12 +106,7 @@ export default function AdminCache() {
 
   async function load() {
     setLoading(true);
-    setRecentLoading(true);
-    await Promise.all([
-      loadTable(),
-      loadStats(),
-      getRecentInternationalBookings(50).then(setRecentIntl).catch(() => {}).finally(() => setRecentLoading(false)),
-    ]);
+    await Promise.all([loadTable(), loadStats()]);
     setLoading(false);
   }
 
@@ -232,7 +114,6 @@ export default function AdminCache() {
     setRunning(true);
     setLogs([]);
     setResult(null);
-    setNewRunGdxs(new Set());
     seenGdxRef.current = new Set(masterList.map(r => String(r.gdx)));
     try {
       const res = await bulkCacheAllBookings(
@@ -247,12 +128,9 @@ export default function AdminCache() {
             is_ready: READY_SLUGS.has(entry.slug),
           }]);
         },
+        getCutoff(rangeDays),
       );
       setResult(res);
-      // Track new GDXs from this run — stored separately so loadTable() can't wipe them
-      if (res.newToList?.length) {
-        setNewRunGdxs(new Set(res.newToList.map(e => String(e.gdx))));
-      }
       await Promise.all([loadTable(), loadStats()]);
     } catch (err) {
       setLogs((p) => [...p, `❌ Fatal error: ${err.message}`]);
@@ -261,386 +139,119 @@ export default function AdminCache() {
     }
   }
 
-  function handleOpenBooking(slug, booking, gdx) {
-    window.open(`/?gdx=${gdx}`, "_blank");
-  }
+  // International (READY_SLUGS only), filtered by search
+  const q = search.trim().toLowerCase();
+  const intlRows = useMemo(() => {
+    const rows = masterList
+      .filter(e => e.slug && READY_SLUGS.has(e.slug))
+      .sort((a, b) => Number(b.gdx) - Number(a.gdx));
+    if (!q) return rows;
+    return rows.filter(e =>
+      String(e.gdx).includes(q) ||
+      (e.lead_name ?? "").toLowerCase().includes(q) ||
+      (slugLabel(e.slug)).toLowerCase().includes(q)
+    );
+  }, [masterList, q]);
 
-  // Derived display lists — date filter applied first
-  const dateFiltered   = applyDateFilter(masterList);
-  const allGroups      = groupByDestination(dateFiltered);
-  const readyGroups    = allGroups.filter(g => READY_SLUGS.has(g.slug));
-  const pendingGroups  = allGroups.filter(g => !READY_SLUGS.has(g.slug) && g.slug !== "unresolved");
-  const unresolvedRows = dateFiltered.filter(e => !e.slug);
-  const newThisRun     = masterList.filter(e => newRunGdxs.has(String(e.gdx)));
-  const newGroups      = groupByDestination(applyDateFilter(newThisRun));
-
-  // ── Date filter helpers ────────────────────────────────────────────────────
-  function toLocalDate(ts) {
-    if (!ts) return null;
-    const d = new Date(ts);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  }
-  function fmtDate(isoDate) {
-    if (!isoDate) return "All dates";
-    const [y, m, d] = isoDate.split("-");
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return `${months[+m - 1]} ${+d}, ${y}`;
-  }
-  // Unique sorted dates (newest first) from the entire masterList
-  const availableDates = [...new Set(
-    masterList.map(e => toLocalDate(e.cached_at)).filter(Boolean)
-  )].sort((a, b) => b.localeCompare(a));
-
-  function applyDateFilter(list) {
-    if (!dateFilter) return list;
-    return list.filter(e => toLocalDate(e.cached_at) === dateFilter);
-  }
-
-  const q = searchQuery.trim().toLowerCase();
-  // Normalize: collapse dashes, en-dashes, em-dashes, and spaces into a single space
-  // so "Beijing-Shanghai", "Beijing Shanghai", "beijing–shanghai" all match each other
-  function norm(s) {
-    return (s ?? "").toLowerCase().replace(/[-–—]+/g, " ").replace(/\s+/g, " ").trim();
-  }
-  const qNorm = norm(q);
-  function textMatch(s) {
-    const lo = (s ?? "").toLowerCase();
-    const n  = norm(s);
-    return lo.includes(q) || n.includes(qNorm);
-  }
-  function filterGroups(groups) {
-    if (!q) return groups;
-    return groups
-      .map(g => {
-        const slugMatch = textMatch(g.slug);
-        const nameMatch = textMatch(g.destinationName);
-        const matchedPkgs = g.packages.filter(
-          ({ pkg, rows }) =>
-            textMatch(pkg) ||
-            rows.some(r => textMatch(r.lead_name) || String(r.gdx).includes(q))
-        );
-        if (slugMatch || nameMatch) return g;
-        if (matchedPkgs.length > 0) return { ...g, packages: matchedPkgs };
-        return null;
-      })
-      .filter(Boolean);
-  }
-
-  const filteredReady   = filterGroups(readyGroups);
-  const filteredPending = filterGroups(pendingGroups);
-  const filteredNew     = filterGroups(newGroups);
-
-  const tabs = [
-    { id: "all",        label: `📋 All (${masterList.filter(e => e.slug).length})` },
-    { id: "recent",     label: `🌏 International (${recentIntl.length})` },
-    { id: "live",       label: `🆕 New (${newThisRun.length})` },
-    { id: "unresolved", label: `❌ Unresolved (${unresolvedRows.length})` },
-  ];
+  const unresolvedRows = masterList.filter(e => !e.slug);
 
   return (
     <div className="flex-1 min-w-0">
 
-        {/* Header */}
-        <div className="mb-6 flex items-start gap-3">
-          <Database size={20} style={{ color: ORANGE }} className="mt-1 shrink-0" />
-          <div>
-            <h2 className="font-condensed font-black text-3xl text-gray-900 leading-tight">GDX Cache Manager</h2>
-          </div>
+      {/* Header */}
+      <div className="mb-6 flex items-start gap-3">
+        <Database size={20} style={{ color: ORANGE }} className="mt-1 shrink-0" />
+        <div>
+          <h2 className="font-condensed font-black text-3xl text-gray-900 leading-tight">Admin</h2>
         </div>
+      </div>
 
-        {/* Two-column layout */}
-        <div className="flex flex-col lg:flex-row gap-5">
+      {/* Two-column layout on large screens */}
+      <div className="flex flex-col xl:flex-row gap-6 items-start">
 
-          {/* ── LEFT: Table ──────────────────────────────────────────────────── */}
-          <div className="flex-1 min-w-0">
+        {/* ── LEFT COLUMN: Controls + Stats + Live Pages ── */}
+        <div className="flex flex-col gap-4 w-full xl:w-80 shrink-0">
 
-            {/* Search + Date filter row */}
-            <div className="flex gap-2 mb-3 items-center">
-              <div className="relative flex-1">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search by destination, slug, package, name, or GDX…"
-                  className="w-full font-body text-sm pl-8 pr-8 py-2.5 rounded-xl bg-white outline-none"
-                  style={{ border: `1.5px solid ${searchQuery ? ORANGE : "#e5e7eb"}`, color: "#111" }}
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
-                    <X size={13} />
-                  </button>
-                )}
-              </div>
-
-              {/* Date filter button */}
-              <div className="relative shrink-0" ref={dateMenuRef}>
-                <button
-                  onClick={() => setDateMenuOpen(o => !o)}
-                  className="inline-flex items-center gap-1.5 font-body text-sm font-semibold px-3 py-2.5 rounded-xl transition-all"
-                  style={{
-                    backgroundColor: dateFilter ? ORANGE : "#FFF",
-                    color: dateFilter ? "#000" : "#555",
-                    border: `1.5px solid ${dateFilter ? ORANGE : "#e5e7eb"}`,
-                  }}
-                >
-                  <Calendar size={13} />
-                  {dateFilter ? fmtDate(dateFilter) : "Date"}
-                  {dateFilter && (
-                    <span
-                      onClick={e => { e.stopPropagation(); setDateFilter(null); }}
-                      className="ml-0.5 hover:opacity-70"
-                    ><X size={11} /></span>
-                  )}
-                </button>
-
-                <AnimatePresence>
-                  {dateMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 4, scale: 0.97 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                      transition={{ duration: 0.13 }}
-                      className="absolute right-0 top-full mt-1 z-50 rounded-xl overflow-hidden bg-white"
-                      style={{ border: "1.5px solid #e5e7eb", minWidth: 170, boxShadow: "0 4px 20px rgba(0,0,0,0.10)" }}
-                    >
-                      <button
-                        onClick={() => { setDateFilter(null); setDateMenuOpen(false); }}
-                        className="w-full text-left px-4 py-2.5 font-body text-sm hover:bg-orange-50 transition-colors"
-                        style={{ color: !dateFilter ? ORANGE : "#333", fontWeight: !dateFilter ? 700 : 400 }}
-                      >
-                        All dates
-                      </button>
-                      {availableDates.map(d => (
-                        <button
-                          key={d}
-                          onClick={() => { setDateFilter(d); setDateMenuOpen(false); }}
-                          className="w-full text-left px-4 py-2.5 font-body text-sm hover:bg-orange-50 transition-colors border-t border-gray-50"
-                          style={{ color: dateFilter === d ? ORANGE : "#333", fontWeight: dateFilter === d ? 700 : 400 }}
-                        >
-                          {fmtDate(d)}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex gap-2 mb-4 flex-wrap">
-              {tabs.map(t => (
-                <button key={t.id} onClick={() => setTab(t.id)}
-                  className="font-body text-sm font-semibold px-4 py-2 rounded-xl transition-all"
-                  style={{
-                    backgroundColor: tab === t.id ? ORANGE : "#FFF",
-                    color: tab === t.id ? "#000" : "#555",
-                    border: `1px solid ${tab === t.id ? ORANGE : "#ddd"}`,
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            {loading ? (
-              <div className="flex items-center gap-2 text-gray-400 py-8">
-                <Loader size={16} className="animate-spin" />
-                <span className="font-body text-sm">Loading cached bookings…</span>
-              </div>
-            ) : (
-              <>
-                {/* ── ALL BOOKINGS ── */}
-                {tab === "all" && (
-                  masterList.filter(e => e.slug).length === 0
-                    ? (
-                      <div className="rounded-2xl p-8 text-center bg-white" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
-                        <Database size={32} className="mx-auto mb-3 text-gray-300" />
-                        <p className="font-body text-sm text-gray-500">No bookings yet. Click <strong>Fetch All from Fusioo</strong> to populate.</p>
-                      </div>
-                    ) : (
-                      <>
-                        {q && (filteredReady.length + filteredPending.length === 0) && (
-                          <div className="rounded-xl p-6 text-center bg-white" style={{ border: "1px solid #e5e7eb" }}>
-                            <Search size={24} className="mx-auto mb-2 text-gray-300" />
-                            <p className="font-body text-sm text-gray-400">No bookings found for <strong>"{searchQuery}"</strong></p>
-                          </div>
-                        )}
-                        {filteredReady.length > 0 && (
-                          <div className="mb-4">
-                            <p className="font-body text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#16a34a" }}>✅ Live — Briefing Page Ready</p>
-                            {filteredReady.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} onOpenBooking={handleOpenBooking} />)}
-                          </div>
-                        )}
-                        {filteredPending.length > 0 && (
-                          <div>
-                            <p className="font-body text-xs font-bold tracking-widest uppercase mb-2 mt-4" style={{ color: "#d97706" }}>⏭️ Pending — Destination Known</p>
-                            {filteredPending.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={!!q} onOpenBooking={handleOpenBooking} />)}
-                          </div>
-                        )}
-                      </>
-                    )
-                )}
-
-                {/* ── INTERNATIONAL RECENT ── */}
-                {tab === "recent" && (
-                  recentLoading
-                    ? <div className="flex items-center gap-2 text-gray-400 py-8"><Loader size={16} className="animate-spin" /><span className="font-body text-sm">Loading…</span></div>
-                    : recentIntl.length === 0
-                      ? <p className="font-body text-sm text-gray-400 py-4">No international bookings found in cache.</p>
-                      : (
-                        <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #bbf7d0" }}>
-                          <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-                            <p className="font-body text-xs font-bold tracking-widest uppercase" style={{ color: "#16a34a" }}>🌏 International Bookings — Newest First</p>
-                            <div className="flex items-center gap-2">
-                              <span className="font-body text-xs text-gray-400">{recentIntl.length} total</span>
-                              <button
-                                onClick={() => { setRecentLoading(true); getRecentInternationalBookings(50).then(setRecentIntl).catch(() => {}).finally(() => setRecentLoading(false)); }}
-                                disabled={recentLoading}
-                                className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg disabled:opacity-50"
-                                style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
-                              >
-                                {recentLoading ? <Loader size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-                                Refresh
-                              </button>
-                            </div>
-                          </div>
-                          <table className="w-full text-xs font-body">
-                            <thead>
-                              <tr className="bg-gray-50 text-gray-400">
-                                <th className="text-left px-4 py-2 font-semibold">#</th>
-                                <th className="text-left px-4 py-2 font-semibold">GDX</th>
-                                <th className="text-left px-4 py-2 font-semibold">Last Name</th>
-                                <th className="text-left px-4 py-2 font-semibold hidden sm:table-cell">Full Name</th>
-                                <th className="text-left px-4 py-2 font-semibold hidden md:table-cell">Destination</th>
-                                <th className="px-2 py-2" />
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {recentIntl.map((e, i) => (
-                                <tr key={e.gdx} className="border-t border-gray-50 hover:bg-orange-50/40">
-                                  <td className="px-4 py-1.5 text-gray-400">{i + 1}</td>
-                                  <td className="px-4 py-1.5 font-bold text-gray-800">GDX-{e.gdx}</td>
-                                  <td className="px-4 py-1.5 font-bold" style={{ color: ORANGE }}>{lastName(e.lead_name)}</td>
-                                  <td className="px-4 py-1.5 text-gray-600 hidden sm:table-cell">{e.lead_name ?? "—"}</td>
-                                  <td className="px-4 py-1.5 hidden md:table-cell">
-                                    <span className="font-body text-xs px-2 py-0.5 rounded-full"
-                                      style={{ backgroundColor: READY_SLUGS.has(e.slug) ? "#dcfce7" : "#fef9c3",
-                                               color: READY_SLUGS.has(e.slug) ? "#15803d" : "#854d0e" }}>
-                                      {e.slug}
-                                    </span>
-                                  </td>
-                                  <td className="px-2 py-1.5 text-right">
-                                    <button
-                                      onClick={() => handleOpenBooking(e.slug, null, e.gdx)}
-                                      title="Open briefing page"
-                                      className="inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg"
-                                      style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
-                                    >
-                                      <ExternalLink size={11} /> Open
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )
-                )}
-
-                {/* ── NEW THIS RUN ── */}
-                {tab === "live" && (
-                  newThisRun.length === 0
-                    ? (
-                      <div className="rounded-2xl p-8 text-center bg-white" style={{ border: "1px solid rgba(0,0,0,0.07)" }}>
-                        <Zap size={32} className="mx-auto mb-3 text-gray-300" />
-                        <p className="font-body text-sm text-gray-500">
-                          {result ? "No new bookings this run — all were already listed." : "Run a fetch to see newly discovered bookings here."}
-                        </p>
-                      </div>
-                    )
-                    : <>
-                        <p className="font-body text-sm text-gray-500 mb-3">
-                          <strong>{newThisRun.length} bookings</strong> discovered this run that weren't in the list before.
-                        </p>
-                        {filteredNew.map(g => <DestinationBlock key={g.slug} {...g} defaultOpen={true} onOpenBooking={handleOpenBooking} />)}
-                      </>
-                )}
-
-                {/* ── UNRESOLVED ── */}
-                {tab === "unresolved" && (
-                  unresolvedRows.length === 0
-                    ? <p className="font-body text-sm text-gray-400">No unresolved bookings.</p>
-                    : (
-                      <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #fca5a5" }}>
-                        <table className="w-full text-sm font-body">
-                          <thead>
-                            <tr className="bg-gray-50 text-gray-400 text-xs">
-                              <th className="text-left px-4 py-2 font-semibold">GDX</th>
-                              <th className="text-left px-4 py-2 font-semibold">Last Name</th>
-                              <th className="text-left px-4 py-2 font-semibold hidden sm:table-cell">Full Name</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {unresolvedRows
-                              .sort((a, b) => lastName(a.lead_name).localeCompare(lastName(b.lead_name)))
-                              .map(e => (
-                                <tr key={e.gdx} className="border-t border-gray-50">
-                                  <td className="px-4 py-1.5 font-bold text-gray-800">GDX-{e.gdx}</td>
-                                  <td className="px-4 py-1.5 font-bold" style={{ color: ORANGE }}>{lastName(e.lead_name)}</td>
-                                  <td className="px-4 py-1.5 text-gray-500 hidden sm:table-cell">{e.lead_name ?? "—"}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )
-                )}
-              </>
-            )}
+          {/* Always-visible nav buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate("/admin/briefings")}
+              className="flex-1 flex items-center justify-center gap-1.5 font-body text-xs font-bold py-2.5 rounded-xl border transition-colors hover:bg-orange-50"
+              style={{ borderColor: `${ORANGE}55`, color: ORANGE }}
+            >
+              <BookOpen size={13} /> Client Briefings
+            </button>
+            <button
+              onClick={() => navigate("/admin/vouchers")}
+              className="flex-1 flex items-center justify-center gap-1.5 font-body text-xs font-bold py-2.5 rounded-xl border transition-colors hover:bg-orange-50"
+              style={{ borderColor: `${ORANGE}55`, color: ORANGE }}
+            >
+              <FileText size={13} /> Vouchers
+            </button>
           </div>
 
-          {/* ── RIGHT: Controls + Log ─────────────────────────────────────────── */}
-          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col gap-4">
-
-            {/* Buttons */}
-            <div className="flex flex-col gap-2">
-              <motion.button
-                onClick={handleBulkCache} disabled={running}
-                className="w-full inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl disabled:opacity-50"
-                style={{ backgroundColor: ORANGE, color: "#000" }}
-                whileHover={{ scale: running ? 1 : 1.02 }} whileTap={{ scale: 0.97 }}
-              >
-                {running ? <Loader size={15} className="animate-spin" /> : <RefreshCw size={15} />}
-                {running ? "Fetching from Fusioo…" : "Fetch All from Fusioo"}
-              </motion.button>
-              <motion.button
-                onClick={load} disabled={running || loading}
-                className="w-full inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border disabled:opacity-50"
-                style={{ backgroundColor: "#FFF", borderColor: "#ddd", color: "#444" }}
-                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}
-              >
-                <BarChart2 size={15} /> Refresh Stats
-              </motion.button>
+          {/* Date range + Fetch */}
+          <div className="flex flex-col gap-2">
+            <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #e5e7eb" }}>
+              <p className="font-body text-xs font-bold tracking-widest uppercase text-gray-400 px-3 pt-2.5 pb-1">Fetch bookings from</p>
+              <div className="flex flex-wrap gap-1 px-3 pb-3">
+                {RANGE_OPTIONS.map(opt => {
+                  const active = rangeDays === opt.days;
+                  return (
+                    <button
+                      key={String(opt.days)}
+                      onClick={() => setRangeDays(opt.days)}
+                      disabled={running}
+                      className="font-body text-xs font-bold px-3 py-1.5 rounded-lg transition-all disabled:opacity-40"
+                      style={{
+                        backgroundColor: active ? ORANGE : "#f3f4f6",
+                        color:           active ? "#000" : "#555",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Stats */}
-            {stats && (
-              <div className="grid grid-cols-2 gap-2">
-                <StatCard label="International" value={stats.totalBookings} />
-                <StatCard label="In Cache"      value={stats.freshCached}  color="#2563eb" />
-                <StatCard label="Displayed"     value={masterList.filter(e => e.slug).length} color="#16a34a" />
-                <StatCard label="Unresolved"    value={unresolvedRows.length}  color="#d97706" />
-              </div>
-            )}
+            <motion.button
+              onClick={handleBulkCache} disabled={running}
+              className="w-full inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl disabled:opacity-50"
+              style={{ backgroundColor: ORANGE, color: "#000" }}
+              whileHover={{ scale: running ? 1 : 1.02 }} whileTap={{ scale: 0.97 }}
+            >
+              {running ? <Loader size={15} className="animate-spin" /> : <RefreshCw size={15} />}
+              {running ? "Fetching from Fusioo…" : `Fetch — last ${RANGE_OPTIONS.find(o => o.days === rangeDays)?.label}`}
+            </motion.button>
+            <motion.button
+              onClick={load} disabled={running || loading}
+              className="w-full inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-5 py-3 rounded-xl border disabled:opacity-50"
+              style={{ backgroundColor: "#FFF", borderColor: "#ddd", color: "#444" }}
+              whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}
+            >
+              <BarChart2 size={15} /> Refresh Stats
+            </motion.button>
+          </div>
 
-            {/* Result summary */}
-            {result && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl p-4 grid grid-cols-2 gap-3"
-                style={{ backgroundColor: "#FFF5EC", border: `1px solid ${ORANGE}33` }}
-              >
+          {/* Stats */}
+          {stats && (
+            <div className="grid grid-cols-2 gap-2">
+              <StatCard label="International" value={stats.totalBookings} />
+              <StatCard label="In Cache"      value={stats.freshCached}  color="#2563eb" />
+              <StatCard label="Displayed"     value={masterList.filter(e => e.slug && READY_SLUGS.has(e.slug)).length} color="#16a34a" />
+              <StatCard label="Unresolved"    value={unresolvedRows.length}  color="#d97706" />
+            </div>
+          )}
+
+          {/* Result summary */}
+          {result && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl overflow-hidden"
+              style={{ border: `1px solid ${ORANGE}33` }}
+            >
+              <div className="p-4 grid grid-cols-2 gap-3" style={{ backgroundColor: "#FFF5EC" }}>
                 {[
                   { icon: <CheckCircle size={16} style={{ color: "#16a34a" }} />, val: result.success.length,   label: "Resolved" },
                   { icon: <Zap size={16} style={{ color: "#7c3aed" }} />,         val: result.newToList.length, label: "New" },
@@ -653,84 +264,186 @@ export default function AdminCache() {
                     <p className="font-body text-xs text-gray-500">{label}</p>
                   </div>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Live Briefing Pages */}
+          <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #bbf7d0" }}>
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <p className="font-condensed font-black text-base text-gray-900 leading-tight">Live Briefing Pages</p>
+                <p className="font-body text-xs text-gray-400">{READY_SLUGS.size} packages available</p>
+              </div>
+              <span className="font-body text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#15803d" }}>✅ LIVE</span>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {[...READY_SLUGS].map(slug => {
+                const b = getBriefingBySlug(slug);
+                const wm = b?.welcomeMessage ?? {};
+                const subtitle = wm.subtitle || wm.title || slug;
+                const code = wm.packageCode || null;
+                const duration = wm.duration || null;
+                return (
+                  <div key={slug} className="px-4 py-3 flex items-start justify-between gap-2 hover:bg-orange-50/40 transition-colors">
+                    <div className="min-w-0">
+                      <p className="font-body text-sm font-semibold text-gray-800 leading-snug">
+                        {subtitle}
+                        {code && <span className="font-mono text-xs font-normal text-gray-400 ml-1.5">{code}</span>}
+                      </p>
+                      {duration && <p className="font-body text-xs text-gray-400 mt-0.5">{duration}</p>}
+                    </div>
+                    <button
+                      onClick={() => window.open(`/preview/${slug}`, "_blank")}
+                      title="Preview briefing page"
+                      className="shrink-0 inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg mt-0.5"
+                      style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
+                    >
+                      <ExternalLink size={11} /> View
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Live log */}
+          <AnimatePresence>
+            {logs.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl overflow-hidden"
+                style={{ border: "1px solid rgba(0,0,0,0.1)" }}
+              >
+                <div className="px-3 py-2 flex items-center gap-2" style={{ backgroundColor: "#1A1A1A" }}>
+                  <div className={`w-2 h-2 rounded-full ${running ? "bg-green-400 animate-pulse" : "bg-gray-500"}`} />
+                  <span className="font-body text-xs text-gray-400">{running ? "Live" : "Done"}</span>
+                  <span className="font-body text-xs text-gray-600 ml-auto">{logs.length} lines</span>
+                </div>
+                <div
+                  className="p-3 overflow-y-auto font-mono text-xs space-y-0.5"
+                  style={{ backgroundColor: "#111", maxHeight: 280, color: "#d4d4d4" }}
+                >
+                  {logs.map((line, i) => (
+                    <p key={i} style={{
+                      color: line.includes("✅") ? "#86efac"
+                        : line.includes("❌") ? "#fca5a5"
+                        : line.includes("⏭️") ? "#fde68a"
+                        : line.includes("🆕") ? "#c4b5fd"
+                        : line.startsWith("🏁") || line.startsWith("🌏") ? "#93c5fd"
+                        : "#d4d4d4",
+                    }}>{line}</p>
+                  ))}
+                  <div ref={logsEndRef} />
+                </div>
               </motion.div>
             )}
+          </AnimatePresence>
 
-            {/* Live Briefing Pages module */}
-            <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #bbf7d0" }}>
-              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                <div>
-                  <p className="font-condensed font-black text-base text-gray-900 leading-tight">Live Briefing Pages</p>
-                  <p className="font-body text-xs text-gray-400">{READY_SLUGS.size} packages available</p>
-                </div>
-                <span className="font-body text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#15803d" }}>✅ LIVE</span>
+        </div>
+
+        {/* ── RIGHT COLUMN: International Bookings Table ── */}
+        <div className="flex-1 min-w-0">
+          <div className="rounded-xl overflow-hidden bg-white" style={{ border: "1.5px solid #e5e7eb" }}>
+
+            {/* Table header */}
+            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="font-condensed font-black text-base text-gray-900 leading-tight">International Bookings</p>
+                <p className="font-body text-xs text-gray-400">
+                  {loading ? "Loading…" : `${intlRows.length} client${intlRows.length !== 1 ? "s" : ""}${q ? ` matching "${search}"` : ""}`}
+                </p>
               </div>
-              <div className="divide-y divide-gray-50">
-                {[...READY_SLUGS].map(slug => {
-                  const b = getBriefingBySlug(slug);
-                  const wm = b?.welcomeMessage ?? {};
-                  const subtitle = wm.subtitle || wm.title || slug;
-                  const code = wm.packageCode || null;
-                  const duration = wm.duration || null;
-                  return (
-                    <div key={slug} className="px-4 py-3 flex items-start justify-between gap-2 hover:bg-orange-50/40 transition-colors">
-                      <div className="min-w-0">
-                        <p className="font-body text-sm font-semibold text-gray-800 leading-snug truncate">{subtitle}</p>
-                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                          {duration && <span className="font-body text-xs text-gray-400">{duration}</span>}
-                          {code && <span className="font-mono text-xs text-gray-400">{code}</span>}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => window.open(`/preview/${slug}`, "_blank")}
-                        title="Preview briefing page"
-                        className="shrink-0 inline-flex items-center gap-1 font-body text-xs font-semibold px-2 py-1 rounded-lg mt-0.5"
-                        style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
-                      >
-                        <ExternalLink size={11} /> View
-                      </button>
-                    </div>
-                  );
-                })}
+              {/* Search */}
+              <div className="relative w-full sm:w-64">
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search GDX or name…"
+                  className="w-full font-body text-sm pl-8 pr-8 py-2 rounded-lg bg-gray-50 outline-none"
+                  style={{ border: `1.5px solid ${search ? ORANGE : "#e5e7eb"}`, color: "#111" }}
+                />
+                {search && (
+                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+                    <X size={12} />
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Live log */}
-            <AnimatePresence>
-              {logs.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-xl overflow-hidden flex-1"
-                  style={{ border: "1px solid rgba(0,0,0,0.1)" }}
-                >
-                  <div className="px-3 py-2 flex items-center gap-2" style={{ backgroundColor: "#1A1A1A" }}>
-                    <div className={`w-2 h-2 rounded-full ${running ? "bg-green-400 animate-pulse" : "bg-gray-500"}`} />
-                    <span className="font-body text-xs text-gray-400">{running ? "Live" : "Done"}</span>
-                    <span className="font-body text-xs text-gray-600 ml-auto">{logs.length} lines</span>
-                  </div>
-                  <div
-                    className="p-3 overflow-y-auto font-mono text-xs space-y-0.5"
-                    style={{ backgroundColor: "#111", maxHeight: 380, color: "#d4d4d4" }}
-                  >
-                    {logs.map((line, i) => (
-                      <p key={i} style={{
-                        color: line.includes("✅") ? "#86efac"
-                          : line.includes("❌") ? "#fca5a5"
-                          : line.includes("⏭️") ? "#fde68a"
-                          : line.includes("🆕") ? "#c4b5fd"
-                          : line.startsWith("🏁") || line.startsWith("🌏") ? "#93c5fd"
-                          : "#d4d4d4",
-                      }}>{line}</p>
+            {/* Table body */}
+            {loading ? (
+              <div className="flex items-center gap-2 text-gray-400 px-4 py-10">
+                <Loader size={15} className="animate-spin" />
+                <span className="font-body text-sm">Loading bookings…</span>
+              </div>
+            ) : intlRows.length === 0 ? (
+              <div className="px-4 py-10 text-center">
+                <p className="font-body text-sm text-gray-400">
+                  {q ? `No results for "${search}"` : "No international bookings cached yet. Run a Fetch All."}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm font-body">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      <th className="text-left px-4 py-2.5 text-xs font-bold tracking-widest uppercase text-gray-400">GDX</th>
+                      <th className="text-left px-4 py-2.5 text-xs font-bold tracking-widest uppercase text-gray-400">Client Name</th>
+                      <th className="text-left px-4 py-2.5 text-xs font-bold tracking-widest uppercase text-gray-400 hidden md:table-cell">Destination</th>
+                      <th className="text-left px-4 py-2.5 text-xs font-bold tracking-widest uppercase text-gray-400 hidden lg:table-cell">Cached</th>
+                      <th className="px-4 py-2.5" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {intlRows.map((entry, i) => (
+                      <tr
+                        key={entry.gdx}
+                        className="border-t border-gray-50 hover:bg-orange-50/30 transition-colors"
+                        style={{ backgroundColor: i % 2 === 0 ? undefined : "#FAFAFA" }}
+                      >
+                        <td className="px-4 py-2.5">
+                          <span className="font-mono text-sm font-bold" style={{ color: ORANGE }}>{entry.gdx}</span>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className="font-semibold text-gray-800 text-sm">{entry.lead_name ?? "—"}</span>
+                        </td>
+                        <td className="px-4 py-2.5 hidden md:table-cell">
+                          <span
+                            className="inline-block text-xs font-bold px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: "#dcfce7", color: "#15803d" }}
+                          >
+                            {slugLabel(entry.slug)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 hidden lg:table-cell">
+                          <span className="font-body text-xs text-gray-400">{fmtDate(entry.cached_at)}</span>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <button
+                            onClick={() => window.open(`/destination/${entry.slug}?gdx=${entry.gdx}`, "_blank")}
+                            className="inline-flex items-center gap-1 font-body text-xs font-bold px-2.5 py-1.5 rounded-lg"
+                            style={{ backgroundColor: `${ORANGE}18`, color: ORANGE }}
+                          >
+                            <ExternalLink size={10} /> Open
+                          </button>
+                        </td>
+                      </tr>
                     ))}
-                    <div ref={logsEndRef} />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  </tbody>
+                </table>
+                <div className="px-4 py-2 border-t border-gray-50 bg-gray-50">
+                  <p className="font-body text-xs text-gray-400">{intlRows.length} international booking{intlRows.length !== 1 ? "s" : ""}</p>
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
 
+      </div>
     </div>
   );
 }

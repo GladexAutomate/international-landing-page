@@ -2,7 +2,109 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Plus, Trash2, ChevronDown, ChevronRight, Loader, User } from "lucide-react";
+
+// ── Group Blocking Reference ───────────────────────────────────────────────────
+// blockBy + srp   = management policy from Product Development proposal
+// slugs           = used to find travel dates in enriched_data (gdx_cache)
+// destKeywords    = matched against actual Fusioo destination text in bookings_6fbdd6b2
+//                   for accurate counts + Book Rush (covers ALL bookings, not just cached ones)
+const INTL_BLOCKING = [
+  {
+    dest: "🇻🇳 Da Nang, Vietnam",
+    slugs: ["danang-vietnam","danang-6d4n-vietjet","danang-5d3n-vietjet","danang-4d2n-bamboo",
+            "danang-4d3n-airasia","danang-4d3n-cebu-pacific","danang-5d3n-bamboo","danang-6d4n-vietjet-standard"],
+    destKeywords: ["da nang","danang","vietnam"],
+    refPeak: "Feb – May", blockBy: "June",        srp: "₱33,800",
+  },
+  {
+    dest: "🇻🇳 Hanoi – Sapa",
+    slugs: ["hanoi-sapa-airasia"],
+    destKeywords: ["hanoi","sapa"],
+    refPeak: "Sep–Oct, Apr",    blockBy: "Feb / Oct",   srp: "₱34,600",
+  },
+  {
+    dest: "🇭🇰 Hong Kong",
+    slugs: ["hongkong","hongkong-cebu-pacific","hongkong-shenzhen-zhuhai"],
+    destKeywords: ["hong kong","hongkong"],
+    refPeak: "Oct – Dec",        blockBy: "April",       srp: "₱26,500",
+  },
+  {
+    dest: "🇨🇳 Beijing – Shanghai",
+    slugs: ["beijing-shanghai-collective","beijing-shanghai-pal","beijing-shanghai-cebu-pacific","beijing-shanghai"],
+    destKeywords: ["beijing","shanghai"],
+    refPeak: "Mar–May, Sep–Nov", blockBy: "Oct / March", srp: "—",
+  },
+  {
+    dest: "🇹🇼 Taipei, Taiwan",
+    slugs: ["taipei"],
+    destKeywords: ["taipei","taiwan"],
+    refPeak: "Oct – Apr",        blockBy: "February",    srp: "₱31,800",
+  },
+  {
+    dest: "🇸🇬 Singapore",
+    slugs: ["singapore"],
+    destKeywords: ["singapore"],
+    refPeak: "Dec – Feb",        blockBy: "June",        srp: "—",
+  },
+  {
+    dest: "🇹🇭 Thailand / Pattaya",
+    slugs: [],
+    destKeywords: ["thailand","pattaya","bangkok"],
+    refPeak: "Nov – May",        blockBy: "March",       srp: "₱29,500",
+  },
+  {
+    dest: "🇯🇵 Japan Tokyo / Osaka",
+    slugs: [],
+    destKeywords: ["japan","tokyo","osaka"],
+    refPeak: "Mar–Apr, Oct–Dec", blockBy: "Jul / April", srp: "₱64,000",
+  },
+  {
+    dest: "🇰🇷 South Korea",
+    slugs: [],
+    destKeywords: ["korea","seoul","busan"],
+    refPeak: "Mar–May, Oct–Dec", blockBy: "Jul / April", srp: "₱33,500",
+  },
+];
+const DMSTC_BLOCKING = [
+  {
+    dest: "🏖️ Siargao",
+    slugs: ["siargao"],
+    destKeywords: ["siargao"],
+    refPeak: "Mar – Oct",        blockBy: "Jul / April", srp: "₱28,980",
+  },
+  {
+    dest: "🌄 Batanes",
+    slugs: ["batanes"],
+    destKeywords: ["batanes"],
+    refPeak: "Mar – Jun",        blockBy: "Jul / April", srp: "₱29,600",
+  },
+  {
+    dest: "🏝️ Boracay",
+    slugs: ["boracay"],
+    destKeywords: ["boracay"],
+    refPeak: "Mar – Jun",        blockBy: "July",        srp: "₱16,200",
+  },
+  {
+    dest: "🌊 El Nido / Palawan",
+    slugs: ["el-nido","palawan","el nido"],
+    destKeywords: ["el nido","elnido","palawan"],
+    refPeak: "Oct – May",        blockBy: "March",       srp: "₱16,600",
+  },
+  {
+    dest: "✈️ Cebu",
+    slugs: ["cebu"],
+    destKeywords: ["cebu"],
+    refPeak: "Dec – May",        blockBy: "June",        srp: "—",
+  },
+  {
+    dest: "🌴 Coron",
+    slugs: ["coron"],
+    destKeywords: ["coron"],
+    refPeak: "Nov – May",        blockBy: "March",       srp: "—",
+  },
+];
 import { getReviewStats, addReview, deleteReview, lookupLeadNameByGdx } from "../services/reviewsService";
+import { getBlockingIntelStats } from "../services/gdxCacheService";
 import { destinations } from "../data/destinations";
 
 const ORANGE = "#FF9913";
@@ -418,6 +520,310 @@ export default function AdminReviews() {
           </form>
         </div>
       )}
+
+      {/* ── Group Blocking Reference ── */}
+      <BlockingMatrix />
+    </div>
+  );
+}
+
+// ── Blocking Matrix (live Fusioo cache + policy reference) ────────────────────
+
+function mergeStats(rows, stats) {
+  // stats = { bySlug: Map, byDest: Map } from getBlockingIntelStats()
+  const { bySlug, byDest } = stats || {};
+
+  return rows.map(r => {
+    let count = 0;
+    let travelPeak = null;
+    let bookingPeak = null;
+    let hasLiveTravelDates = false;
+    let hasLiveBookingDates = false;
+
+    // ── Count + Book Rush from actual Fusioo destination text ──────────────
+    // byDest is keyed by the lowercase destination string stored in bookings_6fbdd6b2.
+    // We iterate all entries in byDest and sum those whose key INCLUDES any of our keywords.
+    // This is accurate for ALL bookings regardless of cache/slug status.
+    if (byDest) {
+      const keywords = r.destKeywords || [];
+      for (const [destKey, s] of byDest) {
+        if (keywords.some(kw => destKey.includes(kw))) {
+          count += s.count;
+          if (s.hasLiveBookingDates && s.bookingPeak) {
+            bookingPeak = s.bookingPeak;
+            hasLiveBookingDates = true;
+          }
+        }
+      }
+    }
+
+    // ── Travel Peak from enriched_data departure dates (slug-based) ────────
+    // Only enriched/cached bookings have departure dates, so this stays slug-based.
+    if (bySlug) {
+      for (const slug of (r.slugs || [])) {
+        const s = bySlug.get(slug);
+        if (s?.hasLiveTravelDates && s.travelPeak) {
+          travelPeak = s.travelPeak;
+          hasLiveTravelDates = true;
+        }
+      }
+    }
+
+    return { ...r, count, travelPeak, bookingPeak, hasLiveTravelDates, hasLiveBookingDates };
+  });
+}
+
+function BlockingTable({ rows, slugStats }) {
+  const merged = mergeStats(rows, slugStats);
+  const maxCount = Math.max(...merged.map(r => r.count), 1);
+
+  return (
+    <div className="overflow-x-auto rounded-xl" style={{ border: "1px solid #e5e7eb" }}>
+      <table className="w-full text-xs font-body">
+        <thead>
+          <tr className="bg-gray-50 text-gray-400">
+            <th className="text-left px-4 py-2.5 font-semibold">Destination</th>
+            <th className="text-left px-4 py-2.5 font-semibold whitespace-nowrap">Bookings</th>
+            <th className="text-left px-4 py-2.5 font-semibold whitespace-nowrap">Travel Peak</th>
+            <th className="text-left px-4 py-2.5 font-semibold whitespace-nowrap">Book Rush</th>
+            <th className="text-left px-4 py-2.5 font-semibold whitespace-nowrap">Block By</th>
+            <th className="text-left px-4 py-2.5 font-semibold whitespace-nowrap">SRP Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          {merged.map((r, i) => {
+            const pct = r.count / maxCount;
+            const barColor = pct >= 0.55 ? "#ef4444" : pct >= 0.2 ? "#f59e0b" : "#d1d5db";
+
+            // Travel Peak: live travel dates → ref from PDF
+            const travelDisplay = r.hasLiveTravelDates ? r.travelPeak : r.refPeak;
+            const travelBadge   = r.hasLiveTravelDates ? (
+              <span className="ml-1 font-body text-xs px-1 py-0.5 rounded font-bold" style={{ backgroundColor: "#dcfce7", color: "#15803d" }}>live</span>
+            ) : r.count > 0 ? (
+              <span className="ml-1 font-body text-xs text-gray-300">ref</span>
+            ) : null;
+
+            // Book Rush: when clients tend to actually purchase this destination
+            const bookDisplay = r.hasLiveBookingDates ? r.bookingPeak : null;
+
+            return (
+              <tr key={i} className="border-t border-gray-50 hover:bg-orange-50/30 transition-colors">
+                <td className="px-4 py-2.5 font-semibold text-gray-800 whitespace-nowrap">{r.dest}</td>
+                <td className="px-4 py-2.5">
+                  {r.count > 0 ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 h-1.5 rounded-full bg-gray-100 shrink-0">
+                        <div className="h-1.5 rounded-full" style={{ width: `${Math.max(pct * 100, 4)}%`, backgroundColor: barColor }} />
+                      </div>
+                      <span className="font-bold text-gray-800">{r.count}</span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5 whitespace-nowrap">
+                  <span className="text-gray-700">{travelDisplay || <span className="text-gray-300">—</span>}</span>
+                  {travelBadge}
+                </td>
+                <td className="px-4 py-2.5 whitespace-nowrap">
+                  {bookDisplay ? (
+                    <>
+                      <span className="text-gray-700">{bookDisplay}</span>
+                      <span className="ml-1 font-body text-xs px-1 py-0.5 rounded font-bold" style={{ backgroundColor: "#dbeafe", color: "#1d4ed8" }}>live</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-300">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5 font-bold whitespace-nowrap" style={{ color: "#d97706" }}>{r.blockBy}</td>
+                <td className="px-4 py-2.5 font-bold text-gray-800 whitespace-nowrap">{r.srp}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+const MONTH_LABELS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTH_SHORT  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function MonthlyReport({ byMonth }) {
+  if (!byMonth) return null;
+
+  // Compute the global max count across all months for bar scaling
+  const globalMax = Math.max(
+    1,
+    ...byMonth.flatMap(rows => rows.slice(0, 5).map(r => r.count))
+  );
+
+  // Only show months that have any bookings
+  const activeMonths = byMonth
+    .map((rows, idx) => ({ idx, rows }))
+    .filter(m => m.rows.length > 0);
+
+  if (activeMonths.length === 0) return null;
+
+  // Total bookings across all months
+  const grandTotal = byMonth.reduce((sum, rows) => sum + rows.reduce((s, r) => s + r.count, 0), 0);
+
+  return (
+    <div className="mt-4 pt-4 border-t border-gray-100">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="font-condensed font-black text-base text-gray-900">📅 Monthly Booking Report</p>
+          <p className="font-body text-xs text-gray-400">Current year only · from Fusioo enriched cache</p>
+        </div>
+        <span className="font-body text-xs font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: "#f3f4f6", color: "#6b7280" }}>{grandTotal.toLocaleString()} bookings</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {activeMonths.map(({ idx, rows }) => {
+          const monthTotal = rows.reduce((s, r) => s + r.count, 0);
+          const top5 = rows.slice(0, 5);
+          return (
+            <div key={idx} className="rounded-xl p-3" style={{ border: "1px solid #e5e7eb", backgroundColor: "#fafafa" }}>
+              {/* Month header */}
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-condensed font-black text-sm text-gray-800">{MONTH_LABELS[idx]}</p>
+                <span className="font-body text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#fff7ed", color: "#c2410c" }}>
+                  {monthTotal} bookings
+                </span>
+              </div>
+              {/* Top destinations */}
+              <div className="space-y-1.5">
+                {top5.map((r, i) => {
+                  const pct = r.count / globalMax;
+                  const barColor = i === 0 ? "#FF9913" : i === 1 ? "#f59e0b" : "#d1d5db";
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="font-body text-xs font-bold text-gray-400 w-3 shrink-0">{i + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1 mb-0.5">
+                          <span className="font-body text-xs font-semibold text-gray-700 truncate">{r.dest}</span>
+                          <span className="font-body text-xs font-bold text-gray-800 shrink-0">{r.count}</span>
+                        </div>
+                        <div className="h-1 rounded-full bg-gray-100">
+                          <div className="h-1 rounded-full" style={{ width: `${Math.max(pct * 100, 3)}%`, backgroundColor: barColor }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {rows.length > 5 && (
+                  <p className="font-body text-xs text-gray-400 pt-0.5">+{rows.length - 5} more destinations</p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function BlockingMatrix() {
+  const [open, setOpen]         = useState(false);
+  const [slugStats, setSlugStats] = useState(null);
+  const [loading, setLoading]   = useState(false);
+  const [loaded, setLoaded]     = useState(false);
+
+  async function loadStats() {
+    if (loaded) return;
+    setLoading(true);
+    try {
+      const stats = await getBlockingIntelStats();
+      setSlugStats(stats);
+      setLoaded(true);
+    } catch (err) {
+      console.error("[BlockingMatrix] Failed to load stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleOpen() {
+    setOpen(o => !o);
+    if (!loaded) loadStats();
+  }
+
+  return (
+    <div className="mt-8 rounded-2xl overflow-hidden bg-white" style={{ border: "1.5px solid #e0e7ff" }}>
+      <button
+        onClick={handleOpen}
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        style={{ borderBottom: open ? "1px solid #f3f4f6" : "none" }}
+      >
+        <div className="text-left">
+          <p className="font-condensed font-black text-xl text-gray-900 leading-tight">📊 Group Blocking Reference</p>
+          <p className="font-body text-xs text-gray-400 mt-0.5">
+            Booking counts, travel peak, and booking rush month — all from live Fusioo data · block-by from Product Development proposal
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {loading && <Loader size={13} className="animate-spin text-gray-400" />}
+          {open ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
+        </div>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="px-6 py-5 space-y-5">
+
+              {/* Rule banner */}
+              <div className="rounded-xl px-4 py-3 flex items-start gap-3" style={{ backgroundColor: "#fff7ed", border: "1px solid #fed7aa" }}>
+                <span className="text-lg leading-none mt-0.5">⏰</span>
+                <div>
+                  <p className="font-body text-sm font-bold text-orange-800">Mandatory 6–8 Month Planning Rule</p>
+                  <p className="font-body text-xs text-orange-700 mt-0.5">
+                    All blockings must be planned at least <strong>6 months before travel date.</strong> Requests below this window require management approval + urgency justification.
+                  </p>
+                </div>
+              </div>
+
+              {/* International */}
+              <div>
+                <p className="font-body text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#2563eb" }}>🌏 International</p>
+                <BlockingTable rows={INTL_BLOCKING} slugStats={slugStats} />
+              </div>
+
+              {/* Domestic */}
+              <div>
+                <p className="font-body text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#16a34a" }}>🇵🇭 Domestic</p>
+                <BlockingTable rows={DMSTC_BLOCKING} slugStats={slugStats} />
+              </div>
+
+              {/* Legend + footer */}
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-1 border-t border-gray-100">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-body text-xs px-1 py-0.5 rounded font-bold" style={{ backgroundColor: "#dcfce7", color: "#15803d" }}>live</span>
+                  <span className="font-body text-xs text-gray-400">Travel Peak = from actual Fusioo departure dates</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-body text-xs px-1 py-0.5 rounded font-bold" style={{ backgroundColor: "#dbeafe", color: "#1d4ed8" }}>live</span>
+                  <span className="font-body text-xs text-gray-400">Book Rush = months clients actually purchase this package</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-body text-xs text-gray-300 font-bold">ref</span>
+                  <span className="font-body text-xs text-gray-400">= reference from Product Development proposal</span>
+                </div>
+              </div>
+              <p className="font-body text-xs text-gray-400">
+                💡 Pricing average is the <strong>maximum range</strong> per blocking. Check 3 airline rates + 3 operator rates. Internal payment must be completed <strong>3 weeks before</strong> ticketing deadline.
+              </p>
+
+              {/* Monthly report — all destinations ranked by booking count per month */}
+              <MonthlyReport byMonth={slugStats?.byMonth} />
+
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

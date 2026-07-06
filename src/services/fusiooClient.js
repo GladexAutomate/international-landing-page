@@ -256,7 +256,7 @@ export async function getRecord(recordId) {
   // Return from cache if already fetched in this browser session
   if (_cache.has(recordId)) return _cache.get(recordId);
 
-  const MAX_ATTEMPTS = 3;
+  const MAX_ATTEMPTS = 5;
   let lastErr;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -267,12 +267,13 @@ export async function getRecord(recordId) {
       return record;
     } catch (err) {
       if (err instanceof FusiooError && err.code === "NOT_FOUND") {
-        _cache.set(recordId, null); // cache the miss so we don't retry
+        _cache.set(recordId, null);
         return null;
       }
       if (err instanceof FusiooError && err.code === "RATE_LIMITED" && attempt < MAX_ATTEMPTS) {
-        // Stagger retries with jitter so concurrent fetches don't all retry together
-        const delay = 1200 * attempt + Math.floor(Math.random() * 600);
+        // Exponential backoff: 3s, 6s, 12s, 24s
+        const delay = 3000 * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 1000);
+        console.warn(`[FusiooClient] 429 — waiting ${Math.round(delay/1000)}s before retry ${attempt}/${MAX_ATTEMPTS - 1}...`);
         await new Promise((r) => setTimeout(r, delay));
         continue;
       }

@@ -101,6 +101,22 @@ export const mediaConfig = {
     gallery: [],
   },
 
+  // ── BEIJING (all packages) ───────────────────────────────────────────────
+  "beijing": {
+    heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
+    video: null,
+    gallery: [],
+  },
+
+  // ── BEIJING 6D5N PAL ─────────────────────────────────────────────────────
+  "beijing-6d5n-pal": {
+    heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
+    video: null,
+    gallery: [],
+  },
+
   // ── BEIJING + SHANGHAI ───────────────────────────────────────────────────
   "beijing-shanghai": {
     heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",

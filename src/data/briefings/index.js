@@ -23,6 +23,7 @@ import { beijingShanghaiPalBriefing }          from "./beijing-shanghai-pal.js";
 import { beijingShanghaiCebuPacificBriefing } from "./beijing-shanghai-cebu-pacific.js";
 import { hongkongShenzhenZhuhaieBriefing }    from "./hongkong-shenzhen-zhuhai.js";
 import { hanoiSapaAirAsiaBriefing }    from "./hanoi-sapa-airasia.js";
+import { beijing6d5nPalBriefing }       from "./beijing-6d5n-pal.js";
 
 const BRIEFINGS = {
   "danang-vietnam":          danangBriefing,
@@ -42,6 +43,7 @@ const BRIEFINGS = {
   "beijing-shanghai-cebu-pacific":    beijingShanghaiCebuPacificBriefing,
   "hongkong-shenzhen-zhuhai":         hongkongShenzhenZhuhaieBriefing,
   "hanoi-sapa-airasia":      hanoiSapaAirAsiaBriefing,
+  "beijing-6d5n-pal":        beijing6d5nPalBriefing,
 };
 
 /**

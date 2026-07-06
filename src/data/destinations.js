@@ -574,6 +574,24 @@ export const destinations = [
   },
 
   // ============================================================
+  // BEIJING — all packages (single slug, package auto-detected)
+  // ============================================================
+  {
+    id: "beijing",
+    slug: "beijing",
+    name: "Beijing, China",
+    country: "China",
+    tagline: "Ancient imperial capital — from the Great Wall to the Forbidden City",
+    promoLabel: "AIRLINE",
+    packageType: "GROUP TOUR",
+    startingPrice: null,
+    heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
+    videoUrl: null,
+    packages: [],
+  },
+
+  // ============================================================
   // SHANGHAI MINI KYOTO — PAL (Philippine Airlines)
   // ============================================================
   {
@@ -625,6 +643,83 @@ export const destinations = [
     cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
     videoUrl: null,
     packages: [],
+  },
+
+  // ============================================================
+  // BEIJING 6D5N — PHILIPPINE AIRLINES
+  // ============================================================
+  {
+    id: "beijing-6d5n-pal",
+    slug: "beijing-6d5n-pal",
+    name: "Beijing",
+    country: "China",
+    tagline: "Ancient imperial capital — from the Great Wall to the Forbidden City",
+    promoLabel: "AIRLINE",
+    packageType: "GROUP TOUR",
+    startingPrice: null,
+    heroImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1600&q=80",
+    cardImage: "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&q=80",
+    videoUrl: null,
+    packages: [
+      {
+        code: "GDX-BJ-6D5N-PAL",
+        name: "6D5N Beijing via Philippine Airlines",
+        duration: "6 Days / 5 Nights",
+        inclusions: [
+          "Economy Airfare and tax via Philippine Airlines (Round Trip)",
+          "Baggage Allowance: 25kg Check-in and 7kg Carry-on",
+          "4 nights room accommodation with daily hotel breakfast",
+          "Sightseeing tours as specified — including all entrance fees",
+          "Private coach with English-speaking tour guide",
+          "Meals as listed in the itinerary",
+          "Tipping fee for driver and guide",
+          "China Group Visa",
+        ],
+        exclusions: [
+          "Extra Baggage Allowance",
+          "Travel Insurance (EXCEPT FOR THOSE WHO ALREADY PAID)",
+          "PH Travel Tax (EXCEPT FOR THOSE WHO ALREADY PAID)",
+          "Single Supplement (EXCEPT FOR THOSE WHO ALREADY PAID)",
+          "Expenses of a personal nature (telephone calls, mini bar, etc.)",
+          "Others not mentioned above",
+        ],
+        requirements: [
+          "Passport valid for at least six (6) months from travel date",
+          "Roundtrip Flight Ticket",
+          "China Group Visa",
+          "Travel Voucher",
+          "Immigration Supporting Documents (see Immigration Advisory section)",
+        ],
+        links: [
+          { label: "eTravel Registration", url: "https://etravel.gov.ph/" },
+        ],
+        visaInfo: "China Group Visa is included in the package. The first person listed on the group visa will serve as the designated visa leader. All passengers must proceed through immigration in the exact order of the name list on the group visa. Please bring the same passport submitted for the visa application.",
+        importantNotices: [
+          "Passport must be valid for at least 6 months from your travel date.",
+          "Bring the same passport submitted for your China Group Visa application.",
+          "NO online check-in — this is a group flight booking. All passengers must check in at the airport counter on departure day.",
+          "Passengers are NOT allowed to leave the group while on mainland China — it will affect the group visa.",
+          "Shopping stops at designated stores (Tea Shop, Jade Shop, Jewelry Shop) are mandatory to attend but purchasing is optional.",
+          "Same-day tour cancellations are automatically forfeited and non-refundable.",
+          "⚠️ PERSONAL TRANSACTIONS STRICTLY PROHIBITED — do not carry or purchase items on behalf of other passengers.",
+        ],
+        itinerary: [
+          { day: 1, title: "Manila → Beijing | Arrival", meals: "D", activities: ["Arrive at Beijing Capital International Airport", "Locate your assigned tour guide holding your WELCOME BOARD", "Visit the Water Cube (outside view)", "Visit the Bird's Nest Olympic Stadium (outside view)", "Explore Wangfujing Pedestrian Street", "Transfer to hotel for check-in"] },
+          { day: 2, title: "Beijing City Tour", meals: "B/L", activities: ["Breakfast at the hotel", "Visit Tiananmen Square", "Explore the Forbidden City", "Visit a Tea Shop", "Optional: Panda House at Beijing Zoo", "Optional: Peking Duck Dinner", "Transfer back to hotel"] },
+          { day: 3, title: "Great Wall & Summer Palace", meals: "B/L", activities: ["Breakfast at the hotel", "Visit a Jade Shop", "Visit the Juyongguan Great Wall", "Experience wearing traditional Hanfu attire", "Enjoy a foot massage", "Visit the Summer Palace (cruise not included — Optional Tour available)", "Transfer back to hotel"] },
+          { day: 4, title: "Temple of Heaven & Qianmen", meals: "B/L", activities: ["Breakfast at the hotel", "Visit a Jewelry Shop", "Visit the Temple of Heaven", "Explore Qianmen Old Street", "Optional: Chinese Acrobatic Show", "Transfer back to hotel"] },
+          { day: 5, title: "Free Day / Leisure", meals: "B", activities: ["Breakfast at the hotel", "Free day at your own leisure — no tour guide or transportation unless joining optional tour", "Optional: Universal Studios Beijing"] },
+          { day: 6, title: "Beijing → Manila | Departure", meals: "B", activities: ["Breakfast at the hotel", "Check out of the hotel", "Transfer to Beijing Capital International Airport", "Departure flight back to Manila"] },
+        ],
+        optionalTours: [
+          "Panda House at Beijing Zoo",
+          "Peking Duck Dinner",
+          "Summer Palace Cruise",
+          "Chinese Acrobatic Show",
+          "Universal Studios Beijing",
+        ],
+      },
+    ],
   },
 
   // ============================================================

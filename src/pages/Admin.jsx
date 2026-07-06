@@ -4,7 +4,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogOut, Loader, Eye, EyeOff, Lock } from "lucide-react";
 import AdminCache from "./AdminCache";
+import AdminBriefings from "./AdminBriefings";
 import AdminReviews from "./AdminReviews";
+import AdminVouchers from "./AdminVouchers";
 
 const ORANGE = "#FF9913";
 const SESSION_KEY = "gdx_admin_auth";
@@ -22,8 +24,10 @@ function parseAdminUsers() {
 const ADMIN_USERS = parseAdminUsers();
 
 const MODULES = [
-  { id: "cache",   path: "/admin/cache",   icon: "🗄️",  label: "GDX Cache"      },
-  { id: "reviews", path: "/admin/reviews", icon: "⭐",  label: "Client Reviews" },
+  { id: "cache",      path: "/admin/cache",      icon: "🗄️",  label: "Admin"           },
+  { id: "briefings",  path: "/admin/briefings",  icon: "📋",  label: "Client Briefings"},
+  { id: "vouchers",   path: "/admin/vouchers",   icon: "📄",  label: "Travel Vouchers" },
+  { id: "reviews",    path: "/admin/reviews",    icon: "⭐",  label: "Client Reviews"  },
 ];
 
 // ── Login Screen ──────────────────────────────────────────────────────────────
@@ -203,8 +207,10 @@ export default function Admin() {
 
         {/* ── Content ── */}
         <main className="flex-1 min-w-0 p-6 lg:p-8">
-          {active === "cache"   && <AdminCache />}
-          {active === "reviews" && <AdminReviews />}
+          {active === "cache"      && <AdminCache />}
+          {active === "briefings"  && <AdminBriefings />}
+          {active === "vouchers"   && <AdminVouchers />}
+          {active === "reviews"    && <AdminReviews />}
         </main>
       </div>
     </div>
