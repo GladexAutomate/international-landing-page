@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogOut, Loader, Eye, EyeOff, Lock } from "lucide-react";
+import bcrypt from "bcryptjs";
+import { createClient } from "@supabase/supabase-js";
 import AdminCache from "./AdminCache";
 import AdminBriefings from "./AdminBriefings";
 import AdminReviews from "./AdminReviews";
@@ -11,17 +13,10 @@ import AdminVouchers from "./AdminVouchers";
 const ORANGE = "#FF9913";
 const SESSION_KEY = "gdx_admin_auth";
 
-// Parse "User1:pass1,User2:pass2" → Map { "user1" → { display: "User1", pass: "pass1" } }
-function parseAdminUsers() {
-  const raw = import.meta.env.VITE_ADMIN_USERS || "";
-  const map = new Map();
-  raw.split(",").forEach(pair => {
-    const [user, ...rest] = pair.trim().split(":");
-    if (user && rest.length) map.set(user.toLowerCase(), { display: user, pass: rest.join(":") });
-  });
-  return map;
-}
-const ADMIN_USERS = parseAdminUsers();
+const supabaseMain = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 const MODULES = [
   { id: "cache",      path: "/admin/cache",      icon: "🗄️",  label: "Admin"           },
@@ -39,23 +34,40 @@ function LoginScreen({ onLogin }) {
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setTimeout(() => {
-      const record = ADMIN_USERS.get(username.trim().toLowerCase());
-      if (record && record.pass === password) {
-        sessionStorage.setItem(SESSION_KEY, record.display);
-        onLogin(record.display);
-      } else if (!ADMIN_USERS.has(username.trim().toLowerCase())) {
+    try {
+      const { data: rows, error: dbErr } = await supabaseMain
+        .from("admin_accounts")
+        .select("full_name, password_hash, role, is_active")
+        .ilike("email", username.trim())
+        .limit(1);
+
+      if (dbErr) throw dbErr;
+
+      const record = rows?.[0];
+      if (!record) {
         setError("Username not found.");
+      } else if (!record.is_active) {
+        setError("Account is inactive.");
       } else {
-        setError("Incorrect password.");
-        setPassword("");
+        const match = await bcrypt.compare(password, record.password_hash);
+        if (match) {
+          sessionStorage.setItem(SESSION_KEY, record.full_name);
+          onLogin(record.full_name);
+        } else {
+          setError("Incorrect password.");
+          setPassword("");
+        }
       }
+    } catch (err) {
+      console.error("[Admin login]", err);
+      setError("Login failed. Try again.");
+    } finally {
       setLoading(false);
-    }, 400);
+    }
   }
 
   const clearError = () => setError("");
