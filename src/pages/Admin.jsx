@@ -39,10 +39,11 @@ function LoginScreen({ onLogin }) {
     setLoading(true);
     setError("");
     try {
+      const trimmed = username.trim();
       const { data: rows, error: dbErr } = await supabaseMain
         .from("admin_accounts")
         .select("full_name, password_hash, role, is_active")
-        .ilike("email", username.trim())
+        .or(`employee_code.ilike.${trimmed},email.ilike.${trimmed}`)
         .limit(1);
 
       if (dbErr) throw dbErr;
@@ -95,7 +96,7 @@ function LoginScreen({ onLogin }) {
             type="text"
             value={username}
             onChange={e => { setUsername(e.target.value); clearError(); }}
-            placeholder="Username"
+            placeholder="Employee ID (e.g. 367)"
             required
             autoFocus
             autoComplete="username"
