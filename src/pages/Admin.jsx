@@ -2,27 +2,30 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, Loader, Eye, EyeOff, Lock } from "lucide-react";
+import { LogOut, Loader, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 import bcrypt from "bcryptjs";
 import { createClient } from "@supabase/supabase-js";
 import AdminCache from "./AdminCache";
 import AdminBriefings from "./AdminBriefings";
 import AdminReviews from "./AdminReviews";
 import AdminVouchers from "./AdminVouchers";
+import AdminUsers from "./AdminUsers";
 
 const ORANGE = "#FF9913";
-const SESSION_KEY = "gdx_admin_auth";
+const SESSION_KEY  = "gdx_admin_auth";
+const SESSION_ROLE = "gdx_admin_role";
 
 const supabaseMain = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-const MODULES = [
+const ALL_MODULES = [
   { id: "cache",      path: "/admin/cache",      icon: "🗄️",  label: "Admin"           },
   { id: "briefings",  path: "/admin/briefings",  icon: "📋",  label: "Client Briefings"},
   { id: "vouchers",   path: "/admin/vouchers",   icon: "📄",  label: "Travel Vouchers" },
   { id: "reviews",    path: "/admin/reviews",    icon: "⭐",  label: "Client Reviews"  },
+  { id: "users",      path: "/admin/users",      icon: "👥",  label: "User Management", superAdminOnly: true },
 ];
 
 // ── Login Screen ──────────────────────────────────────────────────────────────
@@ -57,7 +60,8 @@ function LoginScreen({ onLogin }) {
         const match = await bcrypt.compare(password, record.password_hash);
         if (match) {
           sessionStorage.setItem(SESSION_KEY, record.full_name);
-          onLogin(record.full_name);
+          sessionStorage.setItem(SESSION_ROLE, record.role ?? "agent");
+          onLogin(record.full_name, record.role ?? "agent");
         } else {
           setError("Incorrect password.");
           setPassword("");
@@ -162,16 +166,28 @@ export default function Admin() {
   const [adminUser, setAdminUser] = useState(
     () => sessionStorage.getItem(SESSION_KEY) || null
   );
+  const [adminRole, setAdminRole] = useState(
+    () => sessionStorage.getItem(SESSION_ROLE) || "agent"
+  );
 
   function handleSignOut() {
     sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_ROLE);
     setAdminUser(null);
+    setAdminRole("agent");
   }
 
   if (!adminUser) {
-    return <LoginScreen onLogin={(name) => setAdminUser(name)} />;
+    return (
+      <LoginScreen onLogin={(name, role) => {
+        setAdminUser(name);
+        setAdminRole(role);
+      }} />
+    );
   }
 
+  const isSuperAdmin = adminRole === "super_admin";
+  const MODULES = ALL_MODULES.filter(m => !m.superAdminOnly || isSuperAdmin);
   const active = MODULES.find(m => location.pathname.startsWith(m.path))?.id ?? "cache";
 
   return (
@@ -184,6 +200,13 @@ export default function Admin() {
             <span className="font-condensed font-black text-xl" style={{ color: ORANGE }}>GLADEX</span>
             <span className="font-condensed font-black text-xl text-gray-800"> Admin</span>
             <p className="font-body text-xs text-gray-400 mt-1">👤 {adminUser}</p>
+            {isSuperAdmin && (
+              <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+                style={{ backgroundColor: `${ORANGE}22`, color: ORANGE }}>
+                <ShieldCheck size={10} />
+                Super Admin
+              </div>
+            )}
           </div>
 
           <nav className="flex-1 space-y-1">
@@ -224,6 +247,7 @@ export default function Admin() {
           {active === "briefings"  && <AdminBriefings />}
           {active === "vouchers"   && <AdminVouchers />}
           {active === "reviews"    && <AdminReviews />}
+          {active === "users"      && isSuperAdmin && <AdminUsers />}
         </main>
       </div>
     </div>
