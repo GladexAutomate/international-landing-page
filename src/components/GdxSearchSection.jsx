@@ -436,16 +436,29 @@ export default function GdxSearchSection() {
       // ── 2. Supabase lookup ────────────────────────────────────────────────
       console.log("[GDX] Cache miss — querying Supabase:", query);
       const { data, error: supaError } = await supabase
-        .from("bookings_6fbdd6b2")
+        .from("fusioo_booking_transactions")
         .select("*")
-        .eq("gdx", query);
+        .eq("data->>gdx", query);
 
       if (supaError || !data || data.length === 0) {
         setStatus(STATUS.NOT_FOUND);
         return;
       }
 
-      const rawBooking = data[0];
+      // Fusioo "select" fields (type_of_package, transaction_type, etc.) sync as
+      // arrays — flatten them to strings so keyword-matching (isDomesticBooking,
+      // resolveDestinationSlug) keeps working unchanged.
+      const arrToStr = (v) =>
+        Array.isArray(v) ? v.filter((x) => typeof x === "string").join(" ") : v;
+
+      const row = data[0].data;
+      const rawBooking = {
+        ...row,
+        record_id: row.id,
+        type_of_package: arrToStr(row.type_of_package),
+        transaction_type: arrToStr(row.transaction_type),
+        collective_package_name: arrToStr(row.collective_package_name),
+      };
 
       // ── 3. Last name validation (against raw Supabase row) ────────────────
       if (!isLastNameMatch(rawBooking, lastName)) {

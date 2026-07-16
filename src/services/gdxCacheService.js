@@ -63,9 +63,9 @@ export async function getCachedGdx(gdx) {
     // the cache entry, re-fetch to pick up booking updates.
     try {
       const { data: rawRow } = await supabase
-        .from("bookings_6fbdd6b2")
-        .select("last_modified")
-        .eq("gdx", String(gdx))
+        .from("fusioo_booking_transactions")
+        .select("last_modified:data->>last_modified")
+        .eq("data->>gdx", String(gdx))
         .maybeSingle();
 
       if (rawRow?.last_modified && new Date(rawRow.last_modified) > cachedAt) {
