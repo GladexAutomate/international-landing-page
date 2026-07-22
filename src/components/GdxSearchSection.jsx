@@ -720,9 +720,9 @@ export default function GdxSearchSection() {
                 <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
                   🎬{" "}
                   <span style={{ color: textPrimary, fontWeight: 600 }}>
-                    Inihahanda pa namin ang inyong travel briefing!
+                    Your travel briefing is being prepared!
                   </span>{" "}
-                  Kung kakabook mo lang, maaaring hindi pa ito available ngayon. Subukan ulit mamaya o makipag-ugnayan sa inyong travel coordinator para sa tulong.
+                  If you recently completed your booking, your details may still be loading. Please try again shortly or reach out to your travel coordinator for assistance.
                 </p>
               </motion.div>
             )}
