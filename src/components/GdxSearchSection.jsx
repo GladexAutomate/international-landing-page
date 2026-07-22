@@ -454,11 +454,6 @@ export default function GdxSearchSection() {
         .order("synced_at", { ascending: false })
         .limit(1);
 
-      if (supaError || !data || data.length === 0) {
-        setStatus(STATUS.NOT_FOUND);
-        return;
-      }
-
       // Fusioo "select" fields (type_of_package, transaction_type, etc.) sync as
       // arrays — flatten them to strings so keyword-matching (isDomesticBooking,
       // resolveDestinationSlug) keeps working unchanged.
@@ -470,14 +465,46 @@ export default function GdxSearchSection() {
           .join(" ");
       };
 
-      const row = data[0].data;
-      const rawBooking = {
-        ...row,
-        record_id: row.id,
-        type_of_package: arrToStr(row.type_of_package),
-        transaction_type: arrToStr(row.transaction_type),
-        collective_package_name: arrToStr(row.collective_package_name),
-      };
+      let rawBooking;
+
+      if (supaError || !data || data.length === 0) {
+        // ── 3. Legacy table fallback — historical bookings ────────────────────
+        // bookings_6fbdd6b2 is the Base44-synced table with ALL historical bookings,
+        // including those created before the fusioo-webhook was configured.
+        console.log("[GDX] Not in fusioo_booking_transactions — checking legacy table:", query);
+        const { data: legacyRows, error: legacyError } = await supabase
+          .from("bookings_6fbdd6b2")
+          .select("*")
+          .eq("gdx", query)
+          .limit(1);
+
+        if (legacyError || !legacyRows || legacyRows.length === 0) {
+          setStatus(STATUS.NOT_FOUND);
+          return;
+        }
+
+        const legRow    = legacyRows[0];
+        const dataJson  = (legRow.data && typeof legRow.data === "object") ? legRow.data : {};
+        rawBooking = {
+          ...dataJson,
+          ...legRow,
+          record_id:               dataJson.id || null,
+          gdx:                     query,
+          lead_name:               legRow.lead_name     || dataJson.lead_name,
+          type_of_package:         arrToStr(legRow.type_of_package         || dataJson.type_of_package),
+          transaction_type:        arrToStr(legRow.transaction_type        || dataJson.transaction_type),
+          collective_package_name: arrToStr(legRow.collective_package_name || dataJson.collective_package_name),
+        };
+      } else {
+        const row = data[0].data;
+        rawBooking = {
+          ...row,
+          record_id:               row.id,
+          type_of_package:         arrToStr(row.type_of_package),
+          transaction_type:        arrToStr(row.transaction_type),
+          collective_package_name: arrToStr(row.collective_package_name),
+        };
+      }
 
       // ── 3. Last name validation (against raw Supabase row) ────────────────
       if (!isLastNameMatch(rawBooking, lastName)) {
