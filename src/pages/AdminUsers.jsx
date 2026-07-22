@@ -1,12 +1,32 @@
 // @ts-nocheck
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Loader, ChevronDown, ToggleLeft, ToggleRight, Shield } from "lucide-react";
-
-const ORANGE = "#FF9913";
+import { Search, RefreshCw, ChevronUp, ChevronDown, UserCheck, UserX, Eye, EyeOff, Copy, Check } from "lucide-react";
 
 const ACCOUNTS_URL = import.meta.env.VITE_ACCOUNTS_URL;
 const ACCOUNTS_KEY = import.meta.env.VITE_ACCOUNTS_SVC_KEY;
+const SESSION_KEY  = "gdx_admin_auth";
+const ORANGE = "#FF9913";
+const ASHLEY = "POTB2026-0364";
+
+const RANK = { agent: 0, team_leader: 1, admin: 2, super_admin: 3, developer: 3 };
+
+function canManageTarget(session, emp) {
+  if (!session) return false;
+  if (session.code === ASHLEY) return true;
+  if (!["super_admin", "developer", "admin"].includes(session.role)) return false;
+  if (emp.employee_code === ASHLEY) return false;
+  const targetRank = RANK[emp.role] ?? 0;
+  if (session.role === "admin") return targetRank <= 2;
+  return targetRank < 3;
+}
+
+function getAssignableRoles(session) {
+  if (!session) return [];
+  if (session.code === ASHLEY) return ["super_admin", "developer", "admin", "team_leader", "agent"];
+  if (["super_admin", "developer", "admin"].includes(session.role)) return ["admin", "team_leader", "agent"];
+  return [];
+}
 
 function resolveRole(account) {
   const t = (account.job_title || "").toUpperCase();
@@ -17,289 +37,432 @@ function resolveRole(account) {
   return "agent";
 }
 
-const ROLE_LABELS = {
-  super_admin: { label: "Super Admin",  bg: "#FF9913", color: "#000" },
-  admin:       { label: "Admin",        bg: "#7c3aed", color: "#fff" },
-  team_leader: { label: "Team Leader",  bg: "#1d4ed8", color: "#fff" },
-  agent:       { label: "Agent",        bg: "#e5e7eb", color: "#374151" },
+function toTitleCase(str) {
+  if (!str) return "—";
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).trim();
+}
+
+const ROLE_STYLE = {
+  super_admin: { bg: "#FFF3E0", color: "#E65100", label: "Super Admin" },
+  developer:   { bg: "#EDE7F6", color: "#4527A0", label: "Developer"   },
+  admin:       { bg: "#E3F2FD", color: "#0D47A1", label: "Admin"       },
+  team_leader: { bg: "#F1F8E9", color: "#33691E", label: "Team Leader" },
+  agent:       { bg: "#F5F5F5", color: "#616161", label: "Agent"       },
 };
 
-const ROLE_FILTER_OPTIONS = ["super_admin", "admin", "team_leader", "agent"];
+const STATUS_STYLE = {
+  active:   { bg: "#E8F5E9", color: "#2E7D32" },
+  inactive: { bg: "#FAFAFA", color: "#9E9E9E" },
+};
+
+async function fetchAllEmployees() {
+  const PAGE = 100;
+  let all = [];
+  let from = 0;
+  while (true) {
+    const r = await fetch(
+      `${ACCOUNTS_URL}/rest/v1/employeeaccount?select=id,data&limit=${PAGE}&offset=${from}`,
+      {
+        headers: {
+          "apikey": ACCOUNTS_KEY,
+          "Authorization": `Bearer ${ACCOUNTS_KEY}`,
+          "Accept-Profile": "public",
+        },
+        signal: AbortSignal.timeout(20000),
+      }
+    );
+    if (!r.ok) throw new Error(`Fetch error ${r.status}`);
+    const rows = await r.json();
+    all = all.concat(rows.map(r => ({ ...r.data, _id: r.id, role: resolveRole(r.data) })));
+    if (rows.length < PAGE) break;
+    from += PAGE;
+  }
+  return all;
+}
+
+async function patchData(rowId, fullData, patch) {
+  const { _id, role, ...cleanData } = fullData;
+  const r = await fetch(
+    `${ACCOUNTS_URL}/rest/v1/employeeaccount?id=eq.${rowId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "apikey": ACCOUNTS_KEY,
+        "Authorization": `Bearer ${ACCOUNTS_KEY}`,
+        "Content-Profile": "public",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+      },
+      body: JSON.stringify({ data: { ...cleanData, ...patch } }),
+      signal: AbortSignal.timeout(15000),
+    }
+  );
+  if (!r.ok) throw new Error(`Update failed (${r.status})`);
+  return patch;
+}
+
+function Initials({ name }) {
+  const parts = (name || "?").trim().split(/\s+/);
+  const letters = parts.length >= 2
+    ? parts[0][0] + parts[parts.length - 1][0]
+    : (parts[0] || "?")[0];
+  return (
+    <div style={{
+      width: 32, height: 32, borderRadius: "50%",
+      background: `${ORANGE}22`, color: ORANGE,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: "11px", fontWeight: 800, flexShrink: 0, letterSpacing: "0.04em",
+    }}>
+      {letters.toUpperCase()}
+    </div>
+  );
+}
 
 export default function AdminUsers() {
-  const [accounts, setAccounts]     = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [search, setSearch]         = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
-  const [toggling, setToggling]     = useState(null);
-  const [toast, setToast]           = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+  const [search, setSearch]       = useState("");
+  const [statusFilter, setStatus] = useState("all");
+  const [roleFilter, setRole]     = useState("all");
+  const [sortKey, setSortKey]     = useState("full_name");
+  const [sortDir, setSortDir]     = useState("asc");
+  const [updating, setUpdating]     = useState(new Set());
+  const [revealed, setRevealed]     = useState(new Set());
+  const [copied,   setCopied]       = useState(null);
 
+  const session          = (() => { try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); } catch { return null; } })();
+  const canSeeCredentials = ["super_admin", "developer"].includes(session?.role);
+  const canManageAnyone   = session?.code === ASHLEY || ["super_admin", "developer", "admin"].includes(session?.role);
+  const assignableRoles   = getAssignableRoles(session);
+
+  const toggleReveal = (id) => setRevealed(prev => {
+    const s = new Set(prev);
+    s.has(id) ? s.delete(id) : s.add(id);
+    return s;
+  });
+
+  const copyCredentials = (emp) => {
+    const text = `Login Code: ${emp.employee_code}\nPassword: ${emp.generated_password}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(emp._id);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  };
+
+  const load = async () => {
+    setLoading(true); setError(null);
+    try { setEmployees(await fetchAllEmployees()); }
+    catch (e) { setError(e.message); }
+    setLoading(false);
+  };
   useEffect(() => { load(); }, []);
 
-  async function load() {
-    if (!ACCOUNTS_URL || !ACCOUNTS_KEY) return;
-    setLoading(true);
-    const PAGE = 100;
-    let all = [];
-    let from = 0;
+  const handleToggle = async (emp) => {
+    const newStatus = emp.status === "active" ? "inactive" : "active";
+    setUpdating(prev => new Set(prev).add(emp._id));
     try {
-      while (true) {
-        const r = await fetch(
-          `${ACCOUNTS_URL}/rest/v1/employeeaccount?select=id,data&limit=${PAGE}&offset=${from}`,
-          {
-            headers: {
-              "apikey": ACCOUNTS_KEY,
-              "Authorization": `Bearer ${ACCOUNTS_KEY}`,
-              "Accept-Profile": "public",
-            },
-          }
-        );
-        if (!r.ok) break;
-        const rows = await r.json();
-        all = all.concat(rows.map(row => ({ ...row.data, _id: row.id, role: resolveRole(row.data) })));
-        if (rows.length < PAGE) break;
-        from += PAGE;
-      }
-      all.sort((a, b) => (a.full_name || "").localeCompare(b.full_name || ""));
-      setAccounts(all);
-    } catch (err) {
-      console.error("[AdminUsers] load error", err);
+      await patchData(emp._id, emp, { status: newStatus });
+      setEmployees(prev => prev.map(e =>
+        e._id === emp._id ? { ...e, status: newStatus } : e
+      ));
+    } catch (e) {
+      alert(`Failed to update: ${e.message}`);
     }
-    setLoading(false);
-  }
+    setUpdating(prev => { const s = new Set(prev); s.delete(emp._id); return s; });
+  };
 
-  async function toggleActive(account) {
-    setToggling(account._id);
-    const newStatus = account.status === "active" ? "inactive" : "active";
-    const { _id, role, ...cleanData } = account;
+  const handleRoleChange = async (emp, newRole) => {
+    setUpdating(prev => new Set(prev).add(emp._id));
     try {
-      const r = await fetch(
-        `${ACCOUNTS_URL}/rest/v1/employeeaccount?id=eq.${account._id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "apikey": ACCOUNTS_KEY,
-            "Authorization": `Bearer ${ACCOUNTS_KEY}`,
-            "Content-Profile": "public",
-            "Content-Type": "application/json",
-            "Prefer": "return=representation",
-          },
-          body: JSON.stringify({ data: { ...cleanData, status: newStatus } }),
-        }
+      await patchData(emp._id, emp, { role_override: newRole });
+      setEmployees(prev => prev.map(e =>
+        e._id === emp._id ? { ...e, role_override: newRole, role: newRole } : e
+      ));
+    } catch (e) {
+      alert(`Failed to update role: ${e.message}`);
+    }
+    setUpdating(prev => { const s = new Set(prev); s.delete(emp._id); return s; });
+  };
+
+  const filtered = useMemo(() => {
+    let rows = employees;
+    if (statusFilter !== "all") rows = rows.filter(e => (e.status || "inactive") === statusFilter);
+    if (roleFilter   !== "all") rows = rows.filter(e => e.role === roleFilter);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      rows = rows.filter(e =>
+        (e.full_name     || "").toLowerCase().includes(q) ||
+        (e.employee_code || "").toLowerCase().includes(q) ||
+        (e.job_title     || "").toLowerCase().includes(q) ||
+        (e.email         || "").toLowerCase().includes(q)
       );
-      if (!r.ok) {
-        showToast(`Failed to update ${account.full_name}`, "error");
-      } else {
-        setAccounts(prev =>
-          prev.map(a => a._id === account._id ? { ...a, status: newStatus } : a)
-        );
-        showToast(
-          `${account.full_name} ${newStatus === "active" ? "activated" : "deactivated"}`,
-          newStatus === "active" ? "success" : "warning"
-        );
-      }
-    } catch (err) {
-      showToast(`Failed to update ${account.full_name}`, "error");
     }
-    setToggling(null);
+    return [...rows].sort((a, b) => {
+      const va = (a[sortKey] || "").toLowerCase();
+      const vb = (b[sortKey] || "").toLowerCase();
+      return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
+  }, [employees, search, statusFilter, roleFilter, sortKey, sortDir]);
+
+  const total  = employees.length;
+  const active = employees.filter(e => e.status === "active").length;
+  const byRole = employees.reduce((acc, e) => { acc[e.role] = (acc[e.role] || 0) + 1; return acc; }, {});
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortKey(key); setSortDir("asc"); }
   }
 
-  function showToast(msg, type = "success") {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  }
+  const SortIcon = ({ k }) => sortKey === k
+    ? (sortDir === "asc" ? <ChevronUp size={11} /> : <ChevronDown size={11} />)
+    : null;
 
-  const q = search.trim().toLowerCase();
-  const filtered = useMemo(() => accounts.filter(a => {
-    const roleOk = roleFilter === "ALL" || a.role === roleFilter;
-    if (!roleOk) return false;
-    if (!q) return true;
-    return (
-      (a.full_name || "").toLowerCase().includes(q) ||
-      (a.employee_code || "").toLowerCase().includes(q) ||
-      (a.job_title || "").toLowerCase().includes(q)
-    );
-  }), [accounts, q, roleFilter]);
+  const FilterChip = ({ label, value, current, onClick }) => (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.94 }}
+      style={{
+        padding: "4px 11px", borderRadius: "999px", fontSize: "11.5px", fontWeight: 700,
+        border: `1.5px solid ${current === value ? ORANGE : "#e5e5e5"}`,
+        background: current === value ? `${ORANGE}15` : "#fff",
+        color: current === value ? ORANGE : "#666",
+        cursor: "pointer", transition: "border-color 0.12s, background 0.12s, color 0.12s",
+      }}
+    >
+      {label}
+    </motion.button>
+  );
 
-  const activeCount   = accounts.filter(a => a.status === "active").length;
-  const inactiveCount = accounts.length - activeCount;
+  const COLS = [
+    { key: "full_name",     label: "Name"        },
+    { key: "employee_code", label: "Code"        },
+    { key: "job_title",     label: "Job Title"   },
+    { key: "role",          label: "Role"        },
+    { key: "status",        label: "Status"      },
+    ...(canSeeCredentials ? [{ key: null, label: "Credentials" }] : []),
+    ...(canManageAnyone   ? [{ key: null, label: "Action"      }] : []),
+  ];
 
   return (
-    <div className="flex-1 min-w-0">
-
-      {/* Header */}
-      <div className="mb-6 flex items-start gap-3">
-        <Shield size={20} style={{ color: ORANGE }} className="mt-1 shrink-0" />
+    <motion.div
+      style={{ padding: "24px 28px" }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
-          <h2 className="font-condensed font-black text-3xl text-gray-900 leading-tight">User Management</h2>
-          <p className="font-body text-sm text-gray-400 mt-0.5">
-            View all employee accounts — activate or deactivate access.
+          <h2 style={{ fontSize: "1.15rem", fontWeight: 900, color: "#111", margin: "0 0 2px" }}>User Management</h2>
+          <p style={{ fontSize: "12px", color: "#aaa", margin: 0, fontWeight: 500 }}>
+            {loading ? "Loading…" : `${total} accounts · ${active} active`}
           </p>
         </div>
+        <motion.button
+          onClick={load} disabled={loading}
+          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: "1.5px solid #e5e5e5", background: "#fff", fontSize: "12.5px", fontWeight: 700, color: "#666", cursor: "pointer" }}
+        >
+          <RefreshCw size={13} style={{ animation: loading ? "spin 0.8s linear infinite" : "none" }} />
+          Refresh
+        </motion.button>
       </div>
 
-      {/* Stats */}
-      <div className="flex gap-3 mb-5 flex-wrap">
-        {[
-          { label: "Total Accounts", value: accounts.length, color: "#6366f1" },
-          { label: "Active",         value: activeCount,     color: "#16a34a" },
-          { label: "Inactive",       value: inactiveCount,   color: "#dc2626" },
-        ].map(s => (
-          <div key={s.label}
-            className="bg-white rounded-xl px-4 py-3 flex items-center gap-3"
-            style={{ border: "1.5px solid #e5e7eb" }}>
-            <span className="font-black text-2xl font-condensed" style={{ color: s.color }}>{s.value}</span>
-            <span className="font-body text-xs text-gray-500">{s.label}</span>
-          </div>
-        ))}
-      </div>
+      {!loading && !error && (
+        <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
+          {Object.entries(ROLE_STYLE).map(([role, style], i) => (
+            <motion.div
+              key={role}
+              initial={{ opacity: 0, y: 16, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: i * 0.06, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              style={{ padding: "8px 14px", borderRadius: 10, background: style.bg, display: "flex", flexDirection: "column", gap: 1, minWidth: 90 }}
+            >
+              <span style={{ fontSize: "18px", fontWeight: 900, color: style.color }}>{byRole[role] || 0}</span>
+              <span style={{ fontSize: "10px", fontWeight: 800, color: style.color, textTransform: "uppercase", letterSpacing: "0.06em" }}>{style.label}</span>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
-      {/* Controls */}
-      <div className="flex gap-3 mb-4 flex-wrap items-center">
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ position: "relative", flex: "1 1 220px", minWidth: 180 }}>
+          <Search size={13} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#ccc", pointerEvents: "none" }} />
           <input
-            type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search name, ID, or job title…"
-            className="w-full font-body text-sm pl-8 pr-8 py-2.5 rounded-xl bg-white outline-none"
-            style={{ border: `1.5px solid ${search ? ORANGE : "#e5e7eb"}`, color: "#111" }}
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search name, code, job title…"
+            style={{ width: "100%", padding: "8px 12px 8px 32px", borderRadius: 10, border: "1.5px solid #e5e5e5", fontSize: "12.5px", color: "#111", outline: "none", boxSizing: "border-box", background: "#fff" }}
           />
-          {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
-              <X size={13} />
-            </button>
-          )}
         </div>
-
-        <div className="relative">
-          <select
-            value={roleFilter}
-            onChange={e => setRoleFilter(e.target.value)}
-            className="font-body text-sm py-2.5 pl-3 pr-8 rounded-xl bg-white outline-none appearance-none cursor-pointer"
-            style={{ border: `1.5px solid ${roleFilter !== "ALL" ? ORANGE : "#e5e7eb"}`, color: "#111" }}
-          >
-            <option value="ALL">All Roles</option>
-            {ROLE_FILTER_OPTIONS.map(r => (
-              <option key={r} value={r}>{ROLE_LABELS[r]?.label ?? r}</option>
-            ))}
-          </select>
-          <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <FilterChip label="All"      value="all"      current={statusFilter} onClick={() => setStatus("all")} />
+          <FilterChip label="Active"   value="active"   current={statusFilter} onClick={() => setStatus("active")} />
+          <FilterChip label="Inactive" value="inactive" current={statusFilter} onClick={() => setStatus("inactive")} />
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <FilterChip label="All Roles"   value="all"         current={roleFilter} onClick={() => setRole("all")} />
+          <FilterChip label="Super Admin" value="super_admin" current={roleFilter} onClick={() => setRole("super_admin")} />
+          <FilterChip label="Developer"   value="developer"   current={roleFilter} onClick={() => setRole("developer")} />
+          <FilterChip label="Admin"       value="admin"       current={roleFilter} onClick={() => setRole("admin")} />
+          <FilterChip label="Team Leader" value="team_leader" current={roleFilter} onClick={() => setRole("team_leader")} />
+          <FilterChip label="Agent"       value="agent"       current={roleFilter} onClick={() => setRole("agent")} />
         </div>
       </div>
 
-      <p className="font-body text-xs text-gray-400 mb-3">
-        {filtered.length} account{filtered.length !== 1 ? "s" : ""}
-        {q || roleFilter !== "ALL" ? " matching filter" : ""}
-      </p>
-
-      {/* Table */}
-      {loading ? (
-        <div className="flex items-center gap-2 text-gray-400 py-10">
-          <Loader size={16} className="animate-spin" />
-          <span className="font-body text-sm">Loading accounts…</span>
+      {error ? (
+        <div style={{ padding: 16, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.18)", borderRadius: 10, fontSize: 13, color: "#dc2626", fontWeight: 600 }}>
+          ✕ {error}
+        </div>
+      ) : loading ? (
+        <div style={{ textAlign: "center", padding: "48px 0", color: "#bbb", fontSize: 13 }}>
+          <div style={{ width: 20, height: 20, border: "2px solid #f0f0f0", borderTopColor: ORANGE, borderRadius: "50%", animation: "spin 0.7s linear infinite", margin: "0 auto 10px" }} />
+          Loading accounts…
         </div>
       ) : (
-        <div className="bg-white rounded-2xl overflow-hidden" style={{ border: "1.5px solid #e5e7eb" }}>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm font-body" style={{ minWidth: 640 }}>
+        <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px" }}>
               <thead>
-                <tr style={{ borderBottom: "2px solid #f0f0f0", backgroundColor: "#fafafa" }}>
-                  {["Name", "Employee ID", "Job Title", "Role", "Status", "Action"].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                      {h}
+                <tr style={{ borderBottom: "1.5px solid #f0f0f0" }}>
+                  {COLS.map(col => (
+                    <th
+                      key={col.label}
+                      onClick={() => col.key && toggleSort(col.key)}
+                      style={{ padding: "10px 14px", textAlign: "left", fontWeight: 800, color: "#888", fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", cursor: col.key ? "pointer" : "default", userSelect: "none", whiteSpace: "nowrap" }}
+                    >
+                      {col.label} {col.key && <SortIcon k={col.key} />}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center py-12 text-gray-400 text-sm">No accounts found.</td></tr>
-                ) : filtered.map((account, i) => {
-                  const roleStyle  = ROLE_LABELS[account.role] ?? ROLE_LABELS.agent;
-                  const isActive   = account.status === "active";
-                  const isToggling = toggling === account._id;
+                  <tr>
+                    <td colSpan={COLS.length} style={{ padding: 40, textAlign: "center", color: "#bbb", fontWeight: 600 }}>
+                      No employees match your filters.
+                    </td>
+                  </tr>
+                ) : filtered.map((emp, i) => {
+                  const roleStyle   = ROLE_STYLE[emp.role]    || ROLE_STYLE.team_leader;
+                  const statusStyle = STATUS_STYLE[emp.status] || STATUS_STYLE.inactive;
+                  const isActive    = emp.status === "active";
+                  const isBusy      = updating.has(emp._id);
+
                   return (
-                    <tr key={account._id}
-                      className="border-t border-gray-50 hover:bg-orange-50/20 transition-colors"
-                      style={{ backgroundColor: i % 2 === 0 ? undefined : "#FAFAFA" }}>
-
-                      <td className="px-4 py-3">
-                        <span className="font-semibold text-gray-800">{account.full_name}</span>
+                    <motion.tr
+                      key={emp._id || i}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: isBusy ? 0.6 : 1, y: 0 }}
+                      transition={{ delay: Math.min(i * 0.018, 0.28), duration: 0.25, ease: "easeOut" }}
+                      style={{ borderBottom: "1px solid #f8f8f8", transition: "background 0.12s" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "#fafafa"}
+                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                    >
+                      <td style={{ padding: "10px 14px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                          <Initials name={emp.full_name} />
+                          <div>
+                            <div style={{ fontWeight: 700, color: "#111" }}>{toTitleCase(emp.full_name)}</div>
+                            <div style={{ fontSize: 11, color: "#bbb", marginTop: 1 }}>{emp.email || "—"}</div>
+                          </div>
+                        </div>
                       </td>
-
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-xs font-bold" style={{ color: ORANGE }}>
-                          {account.employee_code}
-                        </span>
+                      <td style={{ padding: "10px 14px", fontFamily: "monospace", color: "#555", fontWeight: 600 }}>
+                        {emp.employee_code || "—"}
                       </td>
-
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-gray-600">{account.job_title || "—"}</span>
+                      <td style={{ padding: "10px 14px", color: "#666" }}>
+                        {toTitleCase(emp.job_title) || "—"}
                       </td>
-
-                      <td className="px-4 py-3">
-                        <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full"
-                          style={{ backgroundColor: roleStyle.bg, color: roleStyle.color }}>
+                      <td style={{ padding: "10px 14px" }}>
+                        <span style={{ padding: "3px 9px", borderRadius: 999, background: roleStyle.bg, color: roleStyle.color, fontWeight: 800, fontSize: "10.5px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                           {roleStyle.label}
                         </span>
                       </td>
-
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${
-                          isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-green-500" : "bg-red-400"}`} />
-                          {isActive ? "Active" : "Inactive"}
+                      <td style={{ padding: "10px 14px" }}>
+                        <span style={{ padding: "3px 9px", borderRadius: 999, background: statusStyle.bg, color: statusStyle.color, fontWeight: 700, fontSize: "10.5px", textTransform: "capitalize" }}>
+                          {emp.status || "inactive"}
                         </span>
                       </td>
-
-                      <td className="px-4 py-3">
-                        {account.role === "super_admin" ? (
-                          <span className="text-xs text-gray-300">Protected</span>
-                        ) : (
-                          <motion.button
-                            onClick={() => toggleActive(account)}
-                            disabled={isToggling}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                            style={{
-                              backgroundColor: isActive ? "#fee2e2" : "#dcfce7",
-                              color: isActive ? "#dc2626" : "#16a34a",
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            {isToggling
-                              ? <Loader size={11} className="animate-spin" />
-                              : isActive
-                                ? <><ToggleRight size={12} /> Deactivate</>
-                                : <><ToggleLeft size={12} /> Activate</>
-                            }
-                          </motion.button>
-                        )}
-                      </td>
-                    </tr>
+                      {canSeeCredentials && (
+                        <td style={{ padding: "10px 14px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ fontSize: "11.5px", fontFamily: "monospace", color: "#333", fontWeight: 600, letterSpacing: revealed.has(emp._id) ? 0 : "0.12em", minWidth: 80 }}>
+                              {revealed.has(emp._id) ? (emp.generated_password || "—") : "••••••••"}
+                            </span>
+                            <button
+                              onClick={() => toggleReveal(emp._id)}
+                              title={revealed.has(emp._id) ? "Hide" : "Show"}
+                              style={{ background: "none", border: "none", cursor: "pointer", color: revealed.has(emp._id) ? ORANGE : "#ccc", padding: 2, display: "flex", flexShrink: 0 }}
+                            >
+                              {revealed.has(emp._id) ? <EyeOff size={13} /> : <Eye size={13} />}
+                            </button>
+                            <button
+                              onClick={() => copyCredentials(emp)}
+                              title="Copy code + password"
+                              style={{ background: "none", border: "none", cursor: "pointer", color: copied === emp._id ? "#2E7D32" : "#ccc", padding: 2, display: "flex", flexShrink: 0, transition: "color 0.2s" }}
+                            >
+                              {copied === emp._id ? <Check size={13} /> : <Copy size={13} />}
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                      {canManageAnyone && (
+                        <td style={{ padding: "10px 14px" }}>
+                          {canManageTarget(session, emp) ? (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 5, minWidth: 110 }}>
+                              <select
+                                disabled={isBusy}
+                                value={emp.role}
+                                onChange={e => handleRoleChange(emp, e.target.value)}
+                                style={{
+                                  padding: "4px 6px", borderRadius: 7, fontSize: "11px", fontWeight: 700,
+                                  border: "1.5px solid #e5e5e5", background: "#fafafa", color: "#555",
+                                  cursor: isBusy ? "not-allowed" : "pointer", outline: "none", width: "100%",
+                                }}
+                              >
+                                {assignableRoles.map(r => (
+                                  <option key={r} value={r}>{ROLE_STYLE[r]?.label || r}</option>
+                                ))}
+                              </select>
+                              <button
+                                disabled={isBusy}
+                                onClick={() => handleToggle(emp)}
+                                style={{
+                                  display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+                                  width: "100%", padding: "4px 8px", borderRadius: 7, flexShrink: 0,
+                                  border: `1.5px solid ${isActive ? "rgba(220,38,38,0.25)" : "rgba(46,125,50,0.3)"}`,
+                                  background: isActive ? "rgba(220,38,38,0.05)" : "rgba(46,125,50,0.06)",
+                                  color: isActive ? "#dc2626" : "#2E7D32",
+                                  cursor: isBusy ? "not-allowed" : "pointer",
+                                  fontSize: "11px", fontWeight: 700, whiteSpace: "nowrap",
+                                }}
+                              >
+                                {isBusy
+                                  ? <div style={{ width: 11, height: 11, border: "1.5px solid currentColor", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                                  : <>{isActive ? <UserX size={11} /> : <UserCheck size={11} />} {isActive ? "Deactivate" : "Activate"}</>
+                                }
+                              </button>
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: "11px", color: "#ddd", fontWeight: 600 }}>—</span>
+                          )}
+                        </td>
+                      )}
+                    </motion.tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
+          {filtered.length > 0 && (
+            <div style={{ padding: "10px 16px", borderTop: "1px solid #f0f0f0", fontSize: "11.5px", color: "#bbb", fontWeight: 600 }}>
+              Showing {filtered.length} of {total} accounts
+            </div>
+          )}
         </div>
       )}
-
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-6 right-6 font-body text-sm font-bold px-5 py-3 rounded-2xl shadow-lg z-50"
-            style={{
-              backgroundColor: toast.type === "error" ? "#dc2626" : toast.type === "warning" ? "#f59e0b" : "#16a34a",
-              color: "#fff",
-            }}
-          >
-            {toast.msg}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </motion.div>
   );
 }

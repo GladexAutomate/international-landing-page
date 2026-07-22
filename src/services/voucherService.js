@@ -1,69 +1,60 @@
 // @ts-nocheck
-/**
- * VOUCHER SERVICE
- * ─────────────────────────────────────────────────────────────────────────────
- * Manages travel voucher files uploaded by admin per GDX booking.
- *
- * Table: vouchers
- *   id            UUID PRIMARY KEY
- *   gdx           TEXT               -- not unique: a booking can have >1 voucher
- *   file_name     TEXT               -- original filename
- *   file_url      TEXT NOT NULL      -- public download URL
- *   storage_path  TEXT               -- path inside the "vouchers" bucket
- *   file_type     TEXT
- *   file_size     BIGINT
- *   uploaded_by   TEXT
- *   created_at    TIMESTAMPTZ
- *
- * This admin UI keeps a "one active voucher per GDX" convention (Replace =
- * delete old row(s) + insert new one) even though the table itself allows
- * multiple rows per gdx.
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
 import { supabase } from "@/lib/supabase";
 
 const BUCKET = "vouchers";
 const TABLE  = "vouchers";
 
-/**
- * Upload a file for a GDX booking and save the public URL to the DB.
- * Replaces any existing voucher(s) for the same GDX.
- */
-export async function uploadVoucher(gdx, file, uploadedBy = null) {
-  const storagePath = `${gdx}/${Date.now()}-${file.name}`;
+async function _deleteByGdx(gdx) {
+  const { data: rows } = await supabase
+    .from(TABLE)
+    .select("storage_path")
+    .eq("gdx", String(gdx));
+  await supabase.from(TABLE).delete().eq("gdx", String(gdx));
+  const paths = (rows ?? []).map(r => r.storage_path).filter(Boolean);
+  if (paths.length) {
+    await supabase.storage.from(BUCKET).remove(paths);
+  }
+}
+
+export async function uploadVoucher({ gdx, file, uploadedBy = null }) {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storagePath = `${gdx}/${Date.now()}-${safeName}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
     .upload(storagePath, file, { upsert: true, contentType: file.type });
-
-  if (uploadError) throw uploadError;
+  if (uploadError) throw new Error(uploadError.message);
 
   const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
 
   // Enforce "one active voucher per GDX" — remove old row(s) first.
-  await deleteVoucher(gdx);
+  await _deleteByGdx(gdx);
 
-  const { error: dbError } = await supabase
-    .from(TABLE)
-    .insert({
-      gdx:          String(gdx),
-      file_name:    file.name,
-      file_url:     urlData.publicUrl,
-      storage_path: storagePath,
-      file_type:    file.type || null,
-      file_size:    file.size ?? null,
-      uploaded_by:  uploadedBy,
-    });
+  const { error: dbError } = await supabase.from(TABLE).insert({
+    gdx:          String(gdx),
+    file_name:    file.name,
+    file_url:     urlData.publicUrl,
+    storage_path: storagePath,
+    file_type:    file.type || null,
+    file_size:    file.size ?? null,
+    uploaded_by:  uploadedBy,
+  });
+  if (dbError) throw new Error(dbError.message);
 
-  if (dbError) throw dbError;
-  return urlData.publicUrl;
+  return { publicUrl: urlData.publicUrl, path: storagePath };
 }
 
-/**
- * Get the most recent voucher for a single GDX.
- * Returns { voucher_url, file_name } or null.
- */
+export async function getVouchers(gdx) {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .eq("gdx", String(gdx))
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data || [];
+}
+
 export async function getVoucher(gdx) {
   if (!gdx) return null;
   const { data, error } = await supabase
@@ -77,9 +68,15 @@ export async function getVoucher(gdx) {
   return { voucher_url: data.file_url, file_name: data.file_name };
 }
 
-/**
- * Get all uploaded vouchers, one entry per GDX (the most recent), newest first.
- */
+export async function deleteVoucher(id, storagePath) {
+  if (!supabase) throw new Error("Supabase not configured.");
+  const { error } = await supabase.from(TABLE).delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  if (storagePath) {
+    await supabase.storage.from(BUCKET).remove([storagePath]);
+  }
+}
+
 export async function getAllVouchers() {
   const { data, error } = await supabase
     .from(TABLE)
@@ -87,7 +84,6 @@ export async function getAllVouchers() {
     .order("created_at", { ascending: true });
   if (error) throw error;
 
-  // Collapse to the latest row per gdx (ascending order → later entries overwrite earlier ones).
   const byGdx = new Map();
   for (const row of data ?? []) {
     byGdx.set(String(row.gdx), {
@@ -100,19 +96,13 @@ export async function getAllVouchers() {
   return [...byGdx.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 
-/**
- * Delete all voucher row(s) for a GDX from both Storage and the DB.
- */
-export async function deleteVoucher(gdx) {
-  const { data: rows } = await supabase
+export async function hasVoucher(gdx) {
+  if (!supabase || !gdx) return false;
+  const { data } = await supabase
     .from(TABLE)
-    .select("storage_path")
-    .eq("gdx", String(gdx));
-
-  await supabase.from(TABLE).delete().eq("gdx", String(gdx));
-
-  const paths = (rows ?? []).map(r => r.storage_path).filter(Boolean);
-  if (paths.length) {
-    await supabase.storage.from(BUCKET).remove(paths);
-  }
+    .select("id")
+    .eq("gdx", String(gdx))
+    .limit(1)
+    .maybeSingle();
+  return !!data;
 }

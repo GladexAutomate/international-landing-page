@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CheckCircle, XCircle, Loader, MapPin,
-  AlertTriangle, ExternalLink, Clock,
+  AlertTriangle, ExternalLink, Clock, Download,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "../lib/ThemeContext";
@@ -12,6 +12,7 @@ import { getFullBookingFromFusioo } from "../services/fusiooService";
 import { resolveDestinationSlug } from "../utils/destinationResolver";
 import { getCachedGdx, setCachedGdx } from "../services/gdxCacheService";
 import { READY_SLUGS } from "../config/readySlugs";
+import { getVoucher } from "../services/voucherService";
 
 const ORANGE              = "#FF9913";
 const LOGO_URL            = "https://media.base44.com/images/public/6a0d6ad01d34ead888ecdd6f/5ecc9b2cd_Untitled-design-75.png";
@@ -373,6 +374,8 @@ export default function GdxSearchSection() {
   const navigate   = useNavigate();
   const location   = useLocation();
 
+  const [voucher,       setVoucher]       = useState(null);
+
   const [gdxInput,      setGdxInput]      = useState(() => {
     const params = new URLSearchParams(location.search);
     return params.get("gdx") ?? "";
@@ -397,6 +400,11 @@ export default function GdxSearchSection() {
     ? ORANGE : isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
   const lastNameBorder = lastNameInput
     ? ORANGE : isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
+
+  useEffect(() => {
+    if (!booking?.gdx) { setVoucher(null); return; }
+    getVoucher(booking.gdx).then(setVoucher).catch(() => setVoucher(null));
+  }, [booking]);
 
   const resetStatus = () => {
     if (status !== STATUS.IDLE) { setStatus(STATUS.IDLE); setBooking(null); }
@@ -772,6 +780,33 @@ export default function GdxSearchSection() {
                 <MapPin className="w-5 h-5" />
                 View My Trip
               </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* Voucher download — shows when admin has uploaded a voucher for this GDX */}
+          <AnimatePresence>
+            {isReady && voucher && (
+              <motion.a
+                href={voucher.voucher_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full mt-3 inline-flex items-center justify-center gap-2 font-body font-bold text-sm py-3.5 rounded-2xl"
+                style={{
+                  backgroundColor: "transparent",
+                  border: `1.5px solid ${ORANGE}`,
+                  color: ORANGE,
+                  textDecoration: "none",
+                }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3, delay: 0.08 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <Download className="w-4 h-4" />
+                Download My Voucher
+              </motion.a>
             )}
           </AnimatePresence>
 

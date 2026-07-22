@@ -125,3 +125,12 @@ export async function getReviewStats() {
       .sort((a, b) => b.total - a.total),
   };
 }
+
+export async function getPendingReviewsCount() {
+  if (!supabase) return 0;
+  const { count } = await supabase.from("reviews").select("id", { count: "exact", head: true }).eq("needs_approval", true);
+  return count || 0;
+}
+
+export const hideReview = (id) => setReviewVisibility(id, { isHidden: true });
+export const unhideReview = (id) => setReviewVisibility(id, { isHidden: false, needsApproval: false });
