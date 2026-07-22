@@ -703,11 +703,11 @@ export default function GdxSearchSection() {
             </AnimatePresence>
           </motion.div>
 
-          {/* NOT_FOUND: "Wala pang GDX" briefing prompt */}
+          {/* NOT_FOUND: assurance that briefing is being prepared */}
           <AnimatePresence>
             {status === STATUS.NOT_FOUND && (
               <motion.div
-                className="w-full mt-4 rounded-2xl px-5 py-5 text-center"
+                className="w-full mt-4 rounded-2xl px-5 py-4"
                 style={{
                   backgroundColor: isDark ? "rgba(255,153,19,0.07)" : "rgba(255,153,19,0.06)",
                   border: "1px solid rgba(255,153,19,0.25)",
@@ -717,22 +717,13 @@ export default function GdxSearchSection() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <p className="font-body text-sm leading-relaxed mb-3" style={{ color: textSecondary }}>
-                  Wala pa kayong GDX number?{" "}
+                <p className="font-body text-sm leading-relaxed" style={{ color: textSecondary }}>
+                  🎬{" "}
                   <span style={{ color: textPrimary, fontWeight: 600 }}>
-                    Maaaring hindi pa kayo naka-book.
+                    Inihahanda pa namin ang inyong travel briefing!
                   </span>{" "}
-                  I-fill out ang aming travel briefing para makapagsimula.
+                  Kung kakabook mo lang, maaaring hindi pa ito available ngayon. Subukan ulit mamaya o makipag-ugnayan sa inyong travel coordinator para sa tulong.
                 </p>
-                <motion.a
-                  href="/"
-                  className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-6 py-3 rounded-xl"
-                  style={{ backgroundColor: ORANGE, color: "#080808", textDecoration: "none" }}
-                  whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(255,153,19,0.40)" }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  Mag-inquire Na
-                </motion.a>
               </motion.div>
             )}
           </AnimatePresence>
