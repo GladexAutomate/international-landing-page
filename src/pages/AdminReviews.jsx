@@ -103,7 +103,7 @@ const DMSTC_BLOCKING = [
     refPeak: "Nov – May",        blockBy: "March",       srp: "—",
   },
 ];
-import { getReviewStats, addReview, deleteReview, lookupLeadNameByGdx } from "../services/reviewsService";
+import { getReviewStats, addReview, deleteReview, lookupLeadNameByGdx, setReviewVisibility } from "../services/reviewsService";
 import { getBlockingIntelStats } from "../services/gdxCacheService";
 import { destinations } from "../data/destinations";
 
@@ -135,7 +135,7 @@ function StarPicker({ value, onChange }) {
   );
 }
 
-function AgentCard({ name, total, avgRating, reviews, onDelete, onDeleteAll }) {
+function AgentCard({ name, total, avgRating, reviews, onDelete, onDeleteAll, onToggleHidden }) {
   const [open, setOpen]           = useState(name === "Unassigned");
   const [confirmAll, setConfirmAll] = useState(false);
   const isUnassigned = name === "Unassigned";
@@ -201,7 +201,7 @@ function AgentCard({ name, total, avgRating, reviews, onDelete, onDeleteAll }) {
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} style={{ overflow: "hidden" }}>
             <div className="px-5 pb-5 pt-2 border-t border-gray-100 space-y-3">
               {reviews.map((r) => (
-                <ReviewCard key={r.id} review={r} onDelete={onDelete} />
+                <ReviewCard key={r.id} review={r} onDelete={onDelete} onToggleHidden={onToggleHidden} />
               ))}
             </div>
           </motion.div>
@@ -219,11 +219,19 @@ function clientInitials(name) {
     : parts[0].slice(0, 2).toUpperCase();
 }
 
-function ReviewCard({ review, onDelete }) {
+function ReviewCard({ review, onDelete, onToggleHidden }) {
   const [confirming, setConfirming] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const hasName = review.lead_name?.trim();
-  const hasText = review.review_text?.trim() && review.review_text !== "—";
+  const hasText = review.comment?.trim() && review.comment !== "—";
   const lowRating = review.rating && review.rating <= 3;
+  const isLive = review.is_hidden === false && review.needs_approval === false;
+
+  async function handleToggle() {
+    setToggling(true);
+    try { await onToggleHidden(review.id, !review.is_hidden); }
+    finally { setToggling(false); }
+  }
 
   return (
     <div className="rounded-xl p-4" style={{ backgroundColor: "#FAFAFA", border: `1px solid ${lowRating ? "#fca5a5" : "#eee"}` }}>
@@ -241,9 +249,9 @@ function ReviewCard({ review, onDelete }) {
             <span className="font-body font-black text-sm text-gray-900">
               {hasName ? review.lead_name : <span className="text-gray-400 font-normal italic">No name</span>}
             </span>
-            {review.gdx && (
+            {review.gdx_reference && (
               <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>
-                GDX-{review.gdx}
+                GDX-{review.gdx_reference}
               </span>
             )}
             {review.destination && (
@@ -256,6 +264,10 @@ function ReviewCard({ review, onDelete }) {
                 Admin only
               </span>
             )}
+            <span className="font-body text-xs px-1.5 py-0.5 rounded font-bold"
+              style={{ backgroundColor: isLive ? "#dcfce7" : "#f3f4f6", color: isLive ? "#15803d" : "#6b7280" }}>
+              {isLive ? "Live on site" : "Hidden"}
+            </span>
           </div>
 
           {/* Stars + date */}
@@ -268,17 +280,38 @@ function ReviewCard({ review, onDelete }) {
 
           {/* Review text */}
           {hasText && (
-            <p className="font-body text-sm text-gray-600 mt-2 leading-relaxed italic">"{review.review_text}"</p>
+            <p className="font-body text-sm text-gray-600 mt-2 leading-relaxed italic">"{review.comment}"</p>
           )}
           {!hasText && (
             <p className="font-body text-xs text-gray-300 mt-1 italic">No review text</p>
           )}
+
+          {/* Photos */}
+          {Array.isArray(review.photos) && review.photos.length > 0 && (
+            <div className="flex gap-1.5 mt-2">
+              {review.photos.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                  <img src={url} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Delete */}
-        {onDelete && (
-          <div className="shrink-0 ml-auto">
-            {!confirming ? (
+        {/* Actions */}
+        <div className="shrink-0 ml-auto flex items-center gap-1">
+          {onToggleHidden && (
+            <button
+              onClick={handleToggle}
+              disabled={toggling}
+              className="font-body text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              style={{ backgroundColor: isLive ? "#fef2f2" : "#dcfce7", color: isLive ? "#dc2626" : "#15803d" }}
+            >
+              {isLive ? "Hide" : "Approve"}
+            </button>
+          )}
+          {onDelete && (
+            !confirming ? (
               <button onClick={() => setConfirming(true)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors">
                 <Trash2 size={14} />
               </button>
@@ -287,9 +320,9 @@ function ReviewCard({ review, onDelete }) {
                 <button onClick={() => { onDelete(review.id); setConfirming(false); }} className="font-body text-xs px-2 py-1 rounded bg-red-500 text-white">Delete</button>
                 <button onClick={() => setConfirming(false)} className="font-body text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">Cancel</button>
               </div>
-            )}
-          </div>
-        )}
+            )
+          )}
+        </div>
       </div>
     </div>
   );
@@ -341,12 +374,15 @@ export default function AdminReviews() {
     setSaving(true);
     try {
       await addReview({
-        gdx:         form.gdx.trim()        || null,
-        lead_name:   form.lead_name.trim()   || null,
-        destination: form.destination.trim() || null,
-        agent_name:  form.agent_name.trim(),
-        review_text: form.review_text.trim(),
-        rating:      form.rating || null,
+        gdx_reference: form.gdx.trim()        || null,
+        lead_name:     form.lead_name.trim()   || null,
+        destination:   form.destination.trim() || null,
+        agent_name:    form.agent_name.trim(),
+        comment:       form.review_text.trim(),
+        rating:        form.rating || null,
+        // Manually-logged reviews (verbal/emailed) are approved by the admin entering them.
+        is_hidden:      false,
+        needs_approval: false,
       });
       setForm(EMPTY_FORM);
       setErrors({});
@@ -362,6 +398,13 @@ export default function AdminReviews() {
   async function handleDelete(id) {
     try {
       await deleteReview(id);
+      await load();
+    } catch (err) { console.error(err); }
+  }
+
+  async function handleToggleHidden(id, isHidden) {
+    try {
+      await setReviewVisibility(id, { isHidden, needsApproval: false });
       await load();
     } catch (err) { console.error(err); }
   }
@@ -462,7 +505,7 @@ export default function AdminReviews() {
               </div>
             )
             : stats.byAgent.map(agent => (
-                <AgentCard key={agent.name} {...agent} onDelete={handleDelete} onDeleteAll={handleDeleteAll} />
+                <AgentCard key={agent.name} {...agent} onDelete={handleDelete} onDeleteAll={handleDeleteAll} onToggleHidden={handleToggleHidden} />
               ))
       )}
 

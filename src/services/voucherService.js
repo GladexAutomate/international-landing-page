@@ -4,45 +4,34 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Manages travel voucher files uploaded by admin per GDX booking.
  *
- * Table: gdx_vouchers
- *   gdx           TEXT PRIMARY KEY
- *   lead_name     TEXT
- *   voucher_url   TEXT NOT NULL       -- public download URL
- *   file_name     TEXT               -- original filename (e.g. "voucher-9384.pdf")
+ * Table: vouchers
+ *   id            UUID PRIMARY KEY
+ *   gdx           TEXT               -- not unique: a booking can have >1 voucher
+ *   file_name     TEXT               -- original filename
+ *   file_url      TEXT NOT NULL      -- public download URL
  *   storage_path  TEXT               -- path inside the "vouchers" bucket
- *   uploaded_at   TIMESTAMPTZ
+ *   file_type     TEXT
+ *   file_size     BIGINT
+ *   uploaded_by   TEXT
+ *   created_at    TIMESTAMPTZ
  *
- * ── Run once in Supabase → SQL Editor ──────────────────────────────────────
- *   CREATE TABLE gdx_vouchers (
- *     gdx          TEXT PRIMARY KEY,
- *     lead_name    TEXT,
- *     voucher_url  TEXT NOT NULL,
- *     file_name    TEXT,
- *     storage_path TEXT,
- *     uploaded_at  TIMESTAMPTZ DEFAULT NOW()
- *   );
- *   ALTER TABLE gdx_vouchers ENABLE ROW LEVEL SECURITY;
- *   CREATE POLICY "Public read"  ON gdx_vouchers FOR SELECT USING (true);
- *   CREATE POLICY "Anon insert"  ON gdx_vouchers FOR INSERT WITH CHECK (true);
- *   CREATE POLICY "Anon update"  ON gdx_vouchers FOR UPDATE USING (true);
- *   CREATE POLICY "Anon delete"  ON gdx_vouchers FOR DELETE  USING (true);
- *
- * Storage bucket: create "vouchers" bucket in Supabase Storage with Public access ON.
+ * This admin UI keeps a "one active voucher per GDX" convention (Replace =
+ * delete old row(s) + insert new one) even though the table itself allows
+ * multiple rows per gdx.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { supabase } from "@/lib/supabase";
 
 const BUCKET = "vouchers";
-const TABLE  = "gdx_vouchers";
+const TABLE  = "vouchers";
 
 /**
  * Upload a file for a GDX booking and save the public URL to the DB.
- * Overwrites any existing voucher for the same GDX (upsert).
+ * Replaces any existing voucher(s) for the same GDX.
  */
-export async function uploadVoucher(gdx, leadName, file) {
-  const ext         = file.name.split(".").pop().toLowerCase();
-  const storagePath = `${gdx}.${ext}`;
+export async function uploadVoucher(gdx, file, uploadedBy = null) {
+  const storagePath = `${gdx}/${Date.now()}-${file.name}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
@@ -52,64 +41,78 @@ export async function uploadVoucher(gdx, leadName, file) {
 
   const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
 
+  // Enforce "one active voucher per GDX" — remove old row(s) first.
+  await deleteVoucher(gdx);
+
   const { error: dbError } = await supabase
     .from(TABLE)
-    .upsert(
-      {
-        gdx:          String(gdx),
-        lead_name:    leadName ?? null,
-        voucher_url:  urlData.publicUrl,
-        file_name:    file.name,
-        storage_path: storagePath,
-        uploaded_at:  new Date().toISOString(),
-      },
-      { onConflict: "gdx" }
-    );
+    .insert({
+      gdx:          String(gdx),
+      file_name:    file.name,
+      file_url:     urlData.publicUrl,
+      storage_path: storagePath,
+      file_type:    file.type || null,
+      file_size:    file.size ?? null,
+      uploaded_by:  uploadedBy,
+    });
 
   if (dbError) throw dbError;
   return urlData.publicUrl;
 }
 
 /**
- * Get voucher info for a single GDX.
+ * Get the most recent voucher for a single GDX.
  * Returns { voucher_url, file_name } or null.
  */
 export async function getVoucher(gdx) {
   if (!gdx) return null;
   const { data, error } = await supabase
     .from(TABLE)
-    .select("voucher_url, file_name")
+    .select("file_url, file_name")
     .eq("gdx", String(gdx))
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
   if (error || !data) return null;
-  return data;
+  return { voucher_url: data.file_url, file_name: data.file_name };
 }
 
 /**
- * Get all uploaded vouchers, newest first.
+ * Get all uploaded vouchers, one entry per GDX (the most recent), newest first.
  */
 export async function getAllVouchers() {
   const { data, error } = await supabase
     .from(TABLE)
     .select("*")
-    .order("uploaded_at", { ascending: false });
+    .order("created_at", { ascending: true });
   if (error) throw error;
-  return data ?? [];
+
+  // Collapse to the latest row per gdx (ascending order → later entries overwrite earlier ones).
+  const byGdx = new Map();
+  for (const row of data ?? []) {
+    byGdx.set(String(row.gdx), {
+      gdx:         String(row.gdx),
+      voucher_url: row.file_url,
+      file_name:   row.file_name,
+      created_at:  row.created_at,
+    });
+  }
+  return [...byGdx.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 
 /**
- * Delete a voucher from both Storage and the DB.
+ * Delete all voucher row(s) for a GDX from both Storage and the DB.
  */
 export async function deleteVoucher(gdx) {
-  const { data: row } = await supabase
+  const { data: rows } = await supabase
     .from(TABLE)
     .select("storage_path")
-    .eq("gdx", String(gdx))
-    .maybeSingle();
+    .eq("gdx", String(gdx));
 
   await supabase.from(TABLE).delete().eq("gdx", String(gdx));
 
-  if (row?.storage_path) {
-    await supabase.storage.from(BUCKET).remove([row.storage_path]);
+  const paths = (rows ?? []).map(r => r.storage_path).filter(Boolean);
+  if (paths.length) {
+    await supabase.storage.from(BUCKET).remove(paths);
   }
 }

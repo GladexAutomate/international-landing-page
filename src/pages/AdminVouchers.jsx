@@ -60,8 +60,8 @@ export default function AdminVouchers() {
       const map = {};
       voucherList.forEach(v => { map[String(v.gdx)] = v; });
       setVouchers(map);
-    } catch {
-      // gdx_vouchers table not created yet — vouchers stay empty
+    } catch (err) {
+      showToast("Failed to load vouchers: " + err.message, false);
     }
   }
 
@@ -80,18 +80,17 @@ export default function AdminVouchers() {
   async function handleFileChange(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const gdx   = pendingGdxRef.current;
-    const entry = entries.find(en => String(en.gdx) === String(gdx));
+    const gdx = pendingGdxRef.current;
     setUploading(String(gdx));
     try {
-      const url = await uploadVoucher(gdx, entry?.lead_name, file);
+      const uploadedBy = sessionStorage.getItem("gdx_admin_auth");
+      const url = await uploadVoucher(gdx, file, uploadedBy);
       setVouchers(prev => ({
         ...prev,
         [String(gdx)]: {
           gdx:         String(gdx),
           voucher_url: url,
           file_name:   file.name,
-          lead_name:   entry?.lead_name,
         },
       }));
       showToast(`Voucher uploaded for GDX ${gdx}`);

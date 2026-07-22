@@ -3,8 +3,6 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogOut, Loader, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
-import bcrypt from "bcryptjs";
-import { createClient } from "@supabase/supabase-js";
 import AdminCache from "./AdminCache";
 import AdminBriefings from "./AdminBriefings";
 import AdminReviews from "./AdminReviews";
@@ -15,17 +13,35 @@ const ORANGE = "#FF9913";
 const SESSION_KEY  = "gdx_admin_auth";
 const SESSION_ROLE = "gdx_admin_role";
 
-const supabaseMain = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+const ACCOUNTS_URL = import.meta.env.VITE_ACCOUNTS_URL;
+const ACCOUNTS_KEY = import.meta.env.VITE_ACCOUNTS_SVC_KEY;
+
+function toTitleCase(str) {
+  if (!str) return "";
+  return str.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+}
+
+function resolveRole(account) {
+  const t = (account.job_title || "").toUpperCase();
+  if (["CEO","COO","CTO","CHIEF","PRESIDENT","OWNER","FOUNDER","GENERAL MANAGER","CORPORATE MANAGER"].some(x => t.includes(x))) return "super_admin";
+  if (["MANAGER","SUPERVISOR","DIRECTOR","OFFICER","AUDITOR","EXECUTIVE ASSISTANT","EXECUTIVE SECRETARY","CORPORATE TRAINOR","SUBJECT MATTER EXPERT","PARTNER ONBOARDING COACH","BUSINESS DEVELOPMENT COACH","BUSINESS DEVELOPMENT ACQUISITION","PARTNER SUCCESS ENABLEMENT","SALES HEAD","SALES SKILLS","ONBOARDING COACH"].some(x => t.includes(x))) return "admin";
+  if (t === "HR" || t.startsWith("HR ") || t.includes("HUMAN RESOURCE") || ["RECRUITER","RECRUITMENT","TALENT ACQUISITION","TALENT MANAGEMENT","PAYROLL","COMPENSATION AND BENEFITS","LEARNING AND DEVELOPMENT","TRAINING AND DEVELOPMENT"].some(x => t.includes(x))) return "admin";
+  if (["TEAM LEADER","TEAM LEAD","TL DOMESTIC","TL INTERNATIONAL","CHAT SUPPORT TEAM LEAD","CUSTOMER RESPONSE LEADER","PARTNER SUCCESS LEAD","ROB TEAM LEADER","ADMIN TEAM LEADER"].some(x => t.includes(x)) || t === "TL" || t.startsWith("TL ")) return "team_leader";
+  return "agent";
+}
+
+const ROLE_BADGE = {
+  super_admin: { label: "Super Admin", bg: `${ORANGE}22`, color: ORANGE },
+  admin:       { label: "Admin",       bg: "#ede9fe",     color: "#6d28d9" },
+  team_leader: { label: "Team Leader", bg: "#dbeafe",     color: "#1d4ed8" },
+};
 
 const ALL_MODULES = [
-  { id: "cache",      path: "/admin/cache",      icon: "🗄️",  label: "Admin"           },
-  { id: "briefings",  path: "/admin/briefings",  icon: "📋",  label: "Client Briefings"},
-  { id: "vouchers",   path: "/admin/vouchers",   icon: "📄",  label: "Travel Vouchers" },
-  { id: "reviews",    path: "/admin/reviews",    icon: "⭐",  label: "Client Reviews"  },
-  { id: "users",      path: "/admin/users",      icon: "👥",  label: "User Management", superAdminOnly: true },
+  { id: "cache",      path: "/admin/cache",      icon: "🗄️",  label: "Admin"            },
+  { id: "briefings",  path: "/admin/briefings",  icon: "📋",  label: "Client Briefings" },
+  { id: "vouchers",   path: "/admin/vouchers",   icon: "📄",  label: "Travel Vouchers"  },
+  { id: "reviews",    path: "/admin/reviews",    icon: "⭐",  label: "Client Reviews"   },
+  { id: "users",      path: "/admin/users",      icon: "👥",  label: "User Management", adminOrHigher: true },
 ];
 
 // ── Login Screen ──────────────────────────────────────────────────────────────
@@ -42,29 +58,33 @@ function LoginScreen({ onLogin }) {
     setLoading(true);
     setError("");
     try {
+      if (!ACCOUNTS_URL || !ACCOUNTS_KEY) throw new Error("Accounts API not configured.");
       const trimmed = username.trim();
-      const { data: rows, error: dbErr } = await supabaseMain
-        .from("admin_accounts")
-        .select("full_name, password_hash, role, is_active")
-        .or(`employee_code.ilike.${trimmed},email.ilike.${trimmed}`)
-        .limit(1);
-
-      if (dbErr) throw dbErr;
-
-      const record = rows?.[0];
-      if (!record) {
-        setError("Username not found.");
-      } else if (!record.is_active) {
-        setError("Account is inactive.");
+      const r = await fetch(
+        `${ACCOUNTS_URL}/rest/v1/employeeaccount?select=id,data&data->>employee_code=eq.${encodeURIComponent(trimmed)}&data->>status=eq.active&limit=1`,
+        {
+          headers: {
+            "apikey": ACCOUNTS_KEY,
+            "Authorization": `Bearer ${ACCOUNTS_KEY}`,
+            "Accept-Profile": "public",
+          },
+          signal: AbortSignal.timeout(12000),
+        }
+      );
+      if (!r.ok) throw new Error(`Accounts service error (${r.status})`);
+      const rows = await r.json();
+      if (!rows?.length) {
+        setError("Username not found or account is inactive.");
       } else {
-        const match = await bcrypt.compare(password, record.password_hash);
-        if (match) {
-          sessionStorage.setItem(SESSION_KEY, record.full_name);
-          sessionStorage.setItem(SESSION_ROLE, record.role ?? "agent");
-          onLogin(record.full_name, record.role ?? "agent");
-        } else {
+        const acct = rows[0].data;
+        if (acct.generated_password !== password.trim()) {
           setError("Incorrect password.");
           setPassword("");
+        } else {
+          const role = resolveRole(acct);
+          sessionStorage.setItem(SESSION_KEY, toTitleCase(acct.full_name));
+          sessionStorage.setItem(SESSION_ROLE, role);
+          onLogin(toTitleCase(acct.full_name), role);
         }
       }
     } catch (err) {
@@ -95,12 +115,11 @@ function LoginScreen({ onLogin }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Username */}
           <input
             type="text"
             value={username}
             onChange={e => { setUsername(e.target.value); clearError(); }}
-            placeholder="Employee ID (e.g. 367)"
+            placeholder="Employee ID (e.g. GDX2022-0001)"
             required
             autoFocus
             autoComplete="username"
@@ -112,7 +131,6 @@ function LoginScreen({ onLogin }) {
             }}
           />
 
-          {/* Password */}
           <div className="relative">
             <input
               type={show ? "text" : "password"}
@@ -186,9 +204,10 @@ export default function Admin() {
     );
   }
 
-  const isSuperAdmin = adminRole === "super_admin";
-  const MODULES = ALL_MODULES.filter(m => !m.superAdminOnly || isSuperAdmin);
-  const active = MODULES.find(m => location.pathname.startsWith(m.path))?.id ?? "cache";
+  const canManageUsers = adminRole === "super_admin" || adminRole === "admin";
+  const MODULES = ALL_MODULES.filter(m => !m.adminOrHigher || canManageUsers);
+  const active  = MODULES.find(m => location.pathname.startsWith(m.path))?.id ?? "cache";
+  const badge   = ROLE_BADGE[adminRole];
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#F5F5F5" }}>
@@ -200,11 +219,11 @@ export default function Admin() {
             <span className="font-condensed font-black text-xl" style={{ color: ORANGE }}>GLADEX</span>
             <span className="font-condensed font-black text-xl text-gray-800"> Admin</span>
             <p className="font-body text-xs text-gray-400 mt-1">👤 {adminUser}</p>
-            {isSuperAdmin && (
+            {badge && (
               <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
-                style={{ backgroundColor: `${ORANGE}22`, color: ORANGE }}>
+                style={{ backgroundColor: badge.bg, color: badge.color }}>
                 <ShieldCheck size={10} />
-                Super Admin
+                {badge.label}
               </div>
             )}
           </div>
@@ -247,7 +266,7 @@ export default function Admin() {
           {active === "briefings"  && <AdminBriefings />}
           {active === "vouchers"   && <AdminVouchers />}
           {active === "reviews"    && <AdminReviews />}
-          {active === "users"      && isSuperAdmin && <AdminUsers />}
+          {active === "users"      && canManageUsers && <AdminUsers />}
         </main>
       </div>
     </div>

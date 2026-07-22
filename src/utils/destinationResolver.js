@@ -12,6 +12,8 @@
  *  5. Returns null → caller should show "destination not found" state
  */
 
+import { READY_SLUGS } from "../config/readySlugs.js";
+
 // ─── 1. FUSIOO ID → SLUG MAP ─────────────────────────────────────────────────
 // Populate these entries once the schema audit identifies the actual IDs.
 // Key   = value stored in bookings_6fbdd6b2.destination (the Fusioo record ID)
@@ -152,14 +154,27 @@ export function resolveDestinationSlug(booking) {
   }
 
   // ── Strategy 1: direct Fusioo ID lookup ──────────────────────────────────
-  // Works when booking.destination is a plain string ID (not an array)
-  const destId = Array.isArray(booking.destination)
-    ? booking.destination[0]
-    : booking.destination;
-  if (destId && destId in FUSIOO_ID_MAP) {
-    const mapped = FUSIOO_ID_MAP[destId];
-    if (mapped) console.log("[GDX Resolver] Matched via FUSIOO_ID_MAP:", mapped);
-    return mapped; // null for known domestic/unslug'd destinations
+  // booking.destination may hold more than one ID for multi-city packages.
+  // Check every ID, preferring one that resolves to a READY_SLUGS slug, then
+  // any other mapped (non-null) slug. Only return null here if every ID is
+  // recognized (in FUSIOO_ID_MAP) and all map to null — an unrecognized ID
+  // falls through to the keyword-based strategies below instead.
+  const destIds = Array.isArray(booking.destination)
+    ? booking.destination
+    : booking.destination ? [booking.destination] : [];
+  const knownIds = destIds.filter((id) => id in FUSIOO_ID_MAP);
+  if (knownIds.length > 0) {
+    const mappedSlugs = knownIds.map((id) => FUSIOO_ID_MAP[id]).filter(Boolean);
+    const readyMatch = mappedSlugs.find((slug) => READY_SLUGS.has(slug));
+    if (readyMatch) {
+      console.log("[GDX Resolver] Matched via FUSIOO_ID_MAP (ready):", readyMatch);
+      return readyMatch;
+    }
+    if (mappedSlugs.length > 0) {
+      console.log("[GDX Resolver] Matched via FUSIOO_ID_MAP:", mappedSlugs[0]);
+      return mappedSlugs[0];
+    }
+    if (knownIds.length === destIds.length) return null; // all IDs are known domestic/unslug'd
   }
 
   // ── Strategy 2: domestic_voucher_ destination text field ─────────────────

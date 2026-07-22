@@ -47,7 +47,13 @@ function fmtValue(val) {
 
 function stripHtml(html) {
   if (!html || typeof html !== "string") return null;
-  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || null;
+  const stripped = html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<[^>]*>/g, "");
+  return stripped.replace(/\n+/g, "\n").trim() || null;
 }
 
 // ── Trip Highlights ───────────────────────────────────────────────────────────

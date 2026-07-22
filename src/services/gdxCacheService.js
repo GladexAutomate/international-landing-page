@@ -532,14 +532,14 @@ export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), o
   log("🔍 Fetching international bookings from Supabase + master list...");
 
   const [
-    { data: allBookings, error: bookErr },
+    { data: rawRows, error: bookErr },
     { data: cacheEntries, error: cacheErr },
     masterGdxSet,
   ] = await Promise.all([
     supabase
-      .from("bookings_6fbdd6b2")
-      .select("gdx, record_id, lead_name, destination, transaction_type, last_modified, date_created")
-      .not("destination", "is", null),   // domestic bookings use domestic_voucher_destination, not this field
+      .from("fusioo_booking_transactions")
+      .select("data")
+      .not("data->destination", "is", null),   // domestic bookings use domestic_voucher_destination, not this field
     supabase
       .from(TABLE)
       .select("gdx, cached_at"),
@@ -548,6 +548,19 @@ export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), o
 
   if (bookErr) throw bookErr;
   if (cacheErr) throw cacheErr;
+
+  // Flatten the JSONB `data` column to the flat shape the rest of this function expects.
+  const arrToStr = (v) =>
+    Array.isArray(v) ? v.filter((x) => typeof x === "string").join(" ") : v;
+  const allBookings = (rawRows ?? []).map((row) => ({
+    gdx:              row.data.gdx,
+    record_id:        row.data.id,
+    lead_name:        row.data.lead_name,
+    destination:      row.data.destination,
+    transaction_type: arrToStr(row.data.transaction_type),
+    last_modified:    row.data.last_modified,
+    date_created:     row.data.date_created,
+  }));
 
   // Secondary client-side guard: skip any row explicitly tagged as domestic/local
   const DOMESTIC_TERMS = ["domestic", "local voucher", "local package", "provincial"];

@@ -171,9 +171,11 @@ export default function RateMyService({ theme, gdxReference, destination, review
     const isUpdate  = existingReview?.id != null;
 
     let fields = { rating: selected, comment: comment.trim() || null };
-    if (destination)      fields.destination   = destination;
-    if (firstName)        fields.reviewer_name = firstName;
-    if (allPhotos.length) fields.photos        = allPhotos;
+    if (destination)      fields.destination = destination;
+    if (firstName)        fields.lead_name   = firstName;
+    if (allPhotos.length) fields.photos      = allPhotos;
+    // New reviews are unmoderated by default — is_hidden/needs_approval default TRUE
+    // at the DB level, so they never go live until an admin approves them.
 
     async function doWrite(f) {
       if (isUpdate) return supabase.from("reviews").update(f).eq("id", existingReview.id).select("*").maybeSingle();
@@ -182,9 +184,8 @@ export default function RateMyService({ theme, gdxReference, destination, review
 
     let { data: savedRecord, error: writeError } = await doWrite(fields);
     const isColErr = (e, col) => (e?.code === "42703" || e?.code === "PGRST204") && e?.message?.includes(col);
-    if (isColErr(writeError, "reviewer_name")) { delete fields.reviewer_name; ({ data: savedRecord, error: writeError } = await doWrite(fields)); }
-    if (isColErr(writeError, "photos"))        { delete fields.photos;        ({ data: savedRecord, error: writeError } = await doWrite(fields)); }
-    if (isColErr(writeError, "destination"))   { delete fields.destination;   ({ data: savedRecord, error: writeError } = await doWrite(fields)); }
+    if (isColErr(writeError, "photos"))      { delete fields.photos;      ({ data: savedRecord, error: writeError } = await doWrite(fields)); }
+    if (isColErr(writeError, "destination")) { delete fields.destination; ({ data: savedRecord, error: writeError } = await doWrite(fields)); }
     if (writeError?.code === "42703" || writeError?.code === "PGRST204") { fields = { rating: selected, comment: comment.trim() || null }; ({ data: savedRecord, error: writeError } = await doWrite(fields)); }
 
     if (writeError) {
@@ -203,7 +204,7 @@ export default function RateMyService({ theme, gdxReference, destination, review
       id: existingReview?.id ?? null, gdx_reference: gdxReference,
       rating: selected, comment: comment.trim() || null,
       photos: allPhotos.length ? allPhotos : null,
-      destination: destination || null, reviewer_name: firstName || null,
+      destination: destination || null, lead_name: firstName || null,
     };
 
     setExistingReview(record);

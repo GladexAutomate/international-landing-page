@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CheckCircle, XCircle, Loader, MapPin,
-  AlertTriangle, ExternalLink,
+  AlertTriangle, ExternalLink, Clock,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "../lib/ThemeContext";
@@ -29,6 +29,7 @@ const STATUS = {
   CACHED:             "cached",
   READY:              "ready",
   NOT_FOUND:          "not_found",
+  FORMAT_ERROR:       "format_error",
   LAST_NAME_MISMATCH: "last_name_mismatch",
   WRONG_PORTAL:       "wrong_portal",
   ERROR:              "error",
@@ -310,8 +311,15 @@ function StatusMessage({ status, gdxInput, isDark }) {
       border: "rgba(34,197,94,0.3)",
     },
     [STATUS.NOT_FOUND]: {
+      icon:   <Clock className="w-5 h-5" style={{ color: ORANGE }} />,
+      text:   "We're still creating your booking in our system! Recent bookings can take a little while to appear — please double-check your GDX number, or try again in a few minutes.",
+      color:  ORANGE,
+      bg:     isDark ? "rgba(255,153,19,0.08)" : "rgba(255,153,19,0.07)",
+      border: "rgba(255,153,19,0.3)",
+    },
+    [STATUS.FORMAT_ERROR]: {
       icon:   <XCircle className="w-5 h-5" style={{ color: "#EF4444" }} />,
-      text:   "Booking not found. Please check your GDX number and Last Name, then try again.",
+      text:   "Last name should contain letters. Did you accidentally swap the two fields?",
       color:  "#EF4444",
       bg:     isDark ? "rgba(239,68,68,0.08)" : "#FFF5F5",
       border: isDark ? "rgba(127,29,29,0.6)" : "#FECACA",
@@ -403,6 +411,10 @@ export default function GdxSearchSection() {
       setStatus(STATUS.NOT_FOUND);
       return;
     }
+    if (!/[a-zA-Z]/.test(lastName)) {
+      setStatus(STATUS.FORMAT_ERROR);
+      return;
+    }
 
     setStatus(STATUS.SEARCHING);
     setBooking(null);
@@ -438,7 +450,9 @@ export default function GdxSearchSection() {
       const { data, error: supaError } = await supabase
         .from("fusioo_booking_transactions")
         .select("*")
-        .eq("data->>gdx", query);
+        .eq("data->>gdx", query)
+        .order("synced_at", { ascending: false })
+        .limit(1);
 
       if (supaError || !data || data.length === 0) {
         setStatus(STATUS.NOT_FOUND);
@@ -448,8 +462,13 @@ export default function GdxSearchSection() {
       // Fusioo "select" fields (type_of_package, transaction_type, etc.) sync as
       // arrays — flatten them to strings so keyword-matching (isDomesticBooking,
       // resolveDestinationSlug) keeps working unchanged.
-      const arrToStr = (v) =>
-        Array.isArray(v) ? v.filter((x) => typeof x === "string").join(" ") : v;
+      const arrToStr = (v) => {
+        if (!Array.isArray(v)) return v;
+        return v
+          .map((x) => (typeof x === "string" ? x : x?.value ?? null))
+          .filter(Boolean)
+          .join(" ");
+      };
 
       const row = data[0].data;
       const rawBooking = {
@@ -683,6 +702,40 @@ export default function GdxSearchSection() {
               )}
             </AnimatePresence>
           </motion.div>
+
+          {/* NOT_FOUND: "Wala pang GDX" briefing prompt */}
+          <AnimatePresence>
+            {status === STATUS.NOT_FOUND && (
+              <motion.div
+                className="w-full mt-4 rounded-2xl px-5 py-5 text-center"
+                style={{
+                  backgroundColor: isDark ? "rgba(255,153,19,0.07)" : "rgba(255,153,19,0.06)",
+                  border: "1px solid rgba(255,153,19,0.25)",
+                }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <p className="font-body text-sm leading-relaxed mb-3" style={{ color: textSecondary }}>
+                  Wala pa kayong GDX number?{" "}
+                  <span style={{ color: textPrimary, fontWeight: 600 }}>
+                    Maaaring hindi pa kayo naka-book.
+                  </span>{" "}
+                  I-fill out ang aming travel briefing para makapagsimula.
+                </p>
+                <motion.a
+                  href="/"
+                  className="inline-flex items-center justify-center gap-2 font-body font-bold text-sm px-6 py-3 rounded-xl"
+                  style={{ backgroundColor: ORANGE, color: "#080808", textDecoration: "none" }}
+                  whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(255,153,19,0.40)" }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Mag-inquire Na
+                </motion.a>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* View My Trip button — shows on READY or CACHED */}
           <AnimatePresence>

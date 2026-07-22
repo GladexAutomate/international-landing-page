@@ -3,27 +3,43 @@ import { supabase } from "@/lib/supabase";
 
 const TABLE = "reviews";
 
+// Fusioo "select" fields sometimes sync as a stringified array, e.g. '["Kams Valenzuela"]'.
+// Unwrap that to plain text; leave already-plain strings untouched.
+function unwrapAgentName(raw) {
+  if (!raw) return raw;
+  const s = String(raw).trim();
+  if (s.startsWith("[") && s.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean).join(", ") || s;
+    } catch {
+      // not valid JSON — fall through to raw string
+    }
+  }
+  return s;
+}
+
 export async function getReviews() {
   const { data, error } = await supabase
     .from(TABLE)
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  const reviews = data ?? [];
+  const reviews = (data ?? []).map(r => ({ ...r, agent_name: unwrapAgentName(r.agent_name) }));
 
-  // Enrich: batch-fetch lead_name from bookings for any review that has GDX but no name
-  const needsName = reviews.filter(r => r.gdx && !r.lead_name?.trim());
+  // Enrich: batch-fetch lead_name from bookings for any review that has a GDX but no name
+  const needsName = reviews.filter(r => r.gdx_reference && !r.lead_name?.trim());
   if (needsName.length > 0) {
-    const gdxList = [...new Set(needsName.map(r => String(r.gdx)))];
-    const { data: names } = await supabase
-      .from("bookings_6fbdd6b2")
-      .select("gdx, lead_name")
-      .in("gdx", gdxList);
-    if (names?.length) {
-      const nameMap = new Map(names.map(n => [String(n.gdx), n.lead_name]));
+    const gdxList = [...new Set(needsName.map(r => String(r.gdx_reference)))];
+    const { data: rows } = await supabase
+      .from("fusioo_booking_transactions")
+      .select("data")
+      .in("data->>gdx", gdxList);
+    if (rows?.length) {
+      const nameMap = new Map(rows.map(row => [String(row.data.gdx), row.data.lead_name]));
       return reviews.map(r =>
-        !r.lead_name?.trim() && r.gdx
-          ? { ...r, lead_name: nameMap.get(String(r.gdx)) ?? r.lead_name }
+        !r.lead_name?.trim() && r.gdx_reference
+          ? { ...r, lead_name: nameMap.get(String(r.gdx_reference)) ?? r.lead_name }
           : r
       );
     }
@@ -31,36 +47,52 @@ export async function getReviews() {
   return reviews;
 }
 
-// Public display: rating >= 4 only. Optionally filtered by destination name.
+// Public display: rating >= 4, approved, and not hidden. Optionally filtered by destination name.
 export async function getPublicReviews(destinationName = null) {
   let query = supabase
     .from(TABLE)
     .select("*")
     .gte("rating", 4)
+    .eq("is_hidden", false)
+    .eq("needs_approval", false)
     .order("created_at", { ascending: false });
   if (destinationName) {
     query = query.eq("destination", destinationName);
   }
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map(r => ({ ...r, agent_name: unwrapAgentName(r.agent_name) }));
 }
 
 // Look up a traveler's name from the bookings index table by GDX number.
 export async function lookupLeadNameByGdx(gdx) {
   if (!gdx) return null;
   const { data } = await supabase
-    .from("bookings_6fbdd6b2")
-    .select("lead_name")
-    .eq("gdx", String(gdx).trim())
+    .from("fusioo_booking_transactions")
+    .select("data")
+    .eq("data->>gdx", String(gdx).trim())
     .maybeSingle();
-  return data?.lead_name ?? null;
+  return data?.data?.lead_name ?? null;
 }
 
 export async function addReview(review) {
   const { data, error } = await supabase
     .from(TABLE)
     .insert([review])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function setReviewVisibility(id, { isHidden, needsApproval }) {
+  const patch = {};
+  if (isHidden !== undefined) patch.is_hidden = isHidden;
+  if (needsApproval !== undefined) patch.needs_approval = needsApproval;
+  const { data, error } = await supabase
+    .from(TABLE)
+    .update(patch)
+    .eq("id", id)
     .select()
     .single();
   if (error) throw error;
