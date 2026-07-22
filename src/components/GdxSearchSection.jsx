@@ -786,16 +786,28 @@ export default function GdxSearchSection() {
           {/* Voucher download — shows when admin has uploaded a voucher for this GDX */}
           <AnimatePresence>
             {isReady && voucher && (
-              <motion.a
-                href={voucher.voucher_url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <motion.button
+                onClick={async () => {
+                  try {
+                    const res = await fetch(voucher.voucher_url);
+                    const blob = await res.blob();
+                    const objUrl = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = objUrl;
+                    a.download = voucher.file_name || "gladex-voucher.pdf";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(objUrl);
+                  } catch {
+                    window.open(voucher.voucher_url, "_blank");
+                  }
+                }}
                 className="w-full mt-3 inline-flex items-center justify-center gap-2 font-body font-bold text-sm py-3.5 rounded-2xl"
                 style={{
                   backgroundColor: "transparent",
                   border: `1.5px solid ${ORANGE}`,
                   color: ORANGE,
-                  textDecoration: "none",
                 }}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -806,7 +818,7 @@ export default function GdxSearchSection() {
               >
                 <Download className="w-4 h-4" />
                 Download My Voucher
-              </motion.a>
+              </motion.button>
             )}
           </AnimatePresence>
 

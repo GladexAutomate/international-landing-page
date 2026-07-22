@@ -2633,7 +2633,7 @@ function PreviewContent() {
     if (!booking?.gdx) return;
     // Check our own Supabase vouchers table first (admin-uploaded files take priority)
     getVoucher(booking.gdx).then(v => {
-      if (v?.voucher_url) setVoucherDoc({ status: "url", url: v.voucher_url });
+      if (v?.voucher_url) setVoucherDoc({ status: "url", url: v.voucher_url, fileName: v.file_name || "gladex-voucher.pdf" });
     }).catch(() => {});
   }, [booking?.gdx]);
 
@@ -3568,15 +3568,39 @@ function PreviewContent() {
                   {/* Action buttons */}
                   <div className="flex flex-wrap gap-2.5">
                     {voucherDoc?.status === "url" && voucherDoc.url && (
-                      <a
-                        href={voucherDoc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
-                        style={{ backgroundColor: isDark ? ORANGE : "#FFFFFF", color: isDark ? "#080808" : ORANGE }}
-                      >
-                        <Download className="w-4 h-4" /> View Your Voucher
-                      </a>
+                      <>
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(voucherDoc.url);
+                              const blob = await res.blob();
+                              const objUrl = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = objUrl;
+                              a.download = voucherDoc.fileName || "gladex-voucher.pdf";
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                              URL.revokeObjectURL(objUrl);
+                            } catch {
+                              window.open(voucherDoc.url, "_blank");
+                            }
+                          }}
+                          className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
+                          style={{ backgroundColor: isDark ? ORANGE : "#FFFFFF", color: isDark ? "#080808" : ORANGE }}
+                        >
+                          <Download className="w-4 h-4" /> Download Voucher
+                        </button>
+                        <a
+                          href={voucherDoc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 font-body font-bold text-sm px-4 py-2.5 rounded-xl transition-all hover:opacity-90 active:scale-95"
+                          style={{ backgroundColor: "transparent", border: `1.5px solid ${isDark ? ORANGE : ORANGE}`, color: ORANGE }}
+                        >
+                          View Voucher
+                        </a>
+                      </>
                     )}
                   </div>
                 </div>
