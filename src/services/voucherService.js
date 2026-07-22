@@ -27,9 +27,15 @@ export async function uploadVoucher({ gdx, file, uploadedBy = null }) {
 
   const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(storagePath);
 
-  // Enforce "one active voucher per GDX" — remove old row(s) first.
-  await _deleteByGdx(gdx);
+  // Fetch old rows BEFORE inserting so we know exactly what to delete after.
+  const { data: oldRows } = await supabase
+    .from(TABLE)
+    .select("id, storage_path")
+    .eq("gdx", String(gdx));
+  const oldIds   = (oldRows ?? []).map(r => r.id).filter(Boolean);
+  const oldPaths = (oldRows ?? []).map(r => r.storage_path).filter(Boolean);
 
+  // Insert new row first — so a DB failure here leaves old voucher intact.
   const { error: dbError } = await supabase.from(TABLE).insert({
     gdx:          String(gdx),
     file_name:    file.name,
@@ -40,6 +46,14 @@ export async function uploadVoucher({ gdx, file, uploadedBy = null }) {
     uploaded_by:  uploadedBy,
   });
   if (dbError) throw new Error(dbError.message);
+
+  // New row confirmed — now safely remove old rows and old storage files.
+  if (oldIds.length) {
+    await supabase.from(TABLE).delete().in("id", oldIds);
+  }
+  if (oldPaths.length) {
+    await supabase.storage.from(BUCKET).remove(oldPaths);
+  }
 
   return { publicUrl: urlData.publicUrl, path: storagePath };
 }

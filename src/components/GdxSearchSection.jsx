@@ -135,7 +135,10 @@ function isDomesticBooking(booking) {
     .join(" ")
     .toLowerCase();
 
-  return PHILIPPINE_DOMESTIC_KEYWORDS.some((kw) => destText.includes(kw));
+  // Strip airline name mentions before keyword check so "Cebu Pacific" doesn't
+  // trigger the "cebu" domestic keyword for international flight bookings.
+  const cleanedText = destText.replace(/cebu\s+pacific/gi, "").replace(/\bmactan[-\s]cebu\s+intl/gi, "");
+  return PHILIPPINE_DOMESTIC_KEYWORDS.some((kw) => cleanedText.includes(kw));
 }
 
 // ── Background orbs ────────────────────────────────────────────────────────────
@@ -416,7 +419,7 @@ export default function GdxSearchSection() {
     if (!query || !lastName) return;
 
     if (!GDX_PATTERN.test(query)) {
-      setStatus(STATUS.NOT_FOUND);
+      setStatus(STATUS.FORMAT_ERROR);
       return;
     }
     if (!/[a-zA-Z]/.test(lastName)) {
@@ -790,6 +793,7 @@ export default function GdxSearchSection() {
                 onClick={async () => {
                   try {
                     const res = await fetch(voucher.voucher_url);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const blob = await res.blob();
                     const objUrl = URL.createObjectURL(blob);
                     const a = document.createElement("a");

@@ -2610,14 +2610,12 @@ function PreviewContent() {
   // Scroll to top whenever the slug changes (mobile browser may preserve prior scroll)
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [slug]);
 
-  // Guard: /destination/ routes are client-facing — block unready slugs.
-  // /preview/ routes bypass this check so admins can preview drafts.
+  // Guard flag — evaluated before hooks, applied AFTER all hooks so React never
+  // sees a different hook count between renders (Rules of Hooks).
   const isAdminPreview = location.pathname.startsWith("/preview/");
-  if (!isAdminPreview && !READY_SLUGS.has(slug)) {
-    return <Navigate to="/briefing-pending" replace />;
-  }
+  const shouldRedirectToWaiting = !isAdminPreview && !READY_SLUGS.has(slug);
 
-  // ── Read enriched booking passed from GDX search (or sessionStorage fallback) ─
+  // ── Read enriched booking (hoisted above all hooks so effects can reference it) ─
   const booking = location.state?.booking ?? (() => {
     try { return JSON.parse(sessionStorage.getItem("gdx_booking")); } catch { return null; }
   })();
@@ -2974,6 +2972,11 @@ function PreviewContent() {
     setCart((prev) => ({ ...prev, insurance: null, ..._updateTotals(prev.tours, null) }));
 
   const cartTotal = cart.total;
+
+  // Apply the unready-slug guard here — AFTER all hooks — so hook count never changes.
+  if (shouldRedirectToWaiting) {
+    return <Navigate to="/briefing-pending" replace />;
+  }
 
   // Hard error only when there is no booking either — a customer with a booking
   // should always reach their booking dashboard even if the destination slug is unknown.
@@ -3573,6 +3576,7 @@ function PreviewContent() {
                           onClick={async () => {
                             try {
                               const res = await fetch(voucherDoc.url);
+                              if (!res.ok) throw new Error(`HTTP ${res.status}`);
                               const blob = await res.blob();
                               const objUrl = URL.createObjectURL(blob);
                               const a = document.createElement("a");
