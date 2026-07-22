@@ -97,7 +97,7 @@ export default function AdminAbout() {
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <Step num="1" text="Browse or search the list by GDX number, name, or destination." />
-            <Step num="2" text='Copy the client\'s briefing link using the "Copy" button.' />
+            <Step num="2" text={`Copy the client's briefing link using the "Copy" button.`} />
             <Step num="3" text="Send the link to the client so they can view their full itinerary." />
           </div>
           <Tip>Only destinations marked as <strong>Ready</strong> have an active briefing page. Others are listed but no link is generated yet.</Tip>
