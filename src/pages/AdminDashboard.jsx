@@ -72,7 +72,7 @@ export default function AdminDashboard() {
     Promise.all([
       supabase.from("vouchers").select("id, gdx, file_name, created_at, uploaded_by").order("created_at", { ascending: false }),
       supabase.from("reviews").select("id, lead_name, destination, rating, comment, is_hidden, created_at, agent_name").order("created_at", { ascending: false }),
-      supabase.from("gdx_cache").select("gdx, lead_name, destination_slug").not("destination_slug", "is", null).neq("destination_slug", "unresolved").order("cached_at", { ascending: false }).limit(300),
+      supabase.from("gdx_cache").select("gdx, lead_name, slug").not("slug", "is", null).neq("slug", "unresolved").order("cached_at", { ascending: false }).limit(300),
     ]).then(([vRes, rRes, cRes]) => {
       const vouchers  = vRes.data || [];
       const reviews   = rRes.data || [];
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: "12px", fontWeight: 700, color: "#111", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{b.lead_name || "—"}</p>
-                  <p style={{ fontSize: "11px", color: "#bbb", margin: 0 }}>GDX-{b.gdx} · {b.destination_slug}</p>
+                  <p style={{ fontSize: "11px", color: "#bbb", margin: 0 }}>GDX-{b.gdx} · {b.slug}</p>
                 </div>
                 <span style={{ fontSize: "10px", fontWeight: 800, color: "#f97316", background: "rgba(249,115,22,0.1)", padding: "3px 8px", borderRadius: 6, flexShrink: 0 }}>No voucher</span>
               </motion.div>

@@ -8,7 +8,7 @@
 CREATE TABLE IF NOT EXISTS gdx_cache (
   gdx              TEXT        PRIMARY KEY,
   enriched_data    JSONB,
-  destination_slug TEXT,
+  slug             TEXT,
   lead_name        TEXT,
   destination_name TEXT,
   package_name     TEXT,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS gdx_cache (
 );
 
 -- 1b. Add columns if the table already exists (safe to run multiple times)
-ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS destination_slug TEXT;
+ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS slug             TEXT;
 ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS lead_name        TEXT;
 ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS destination_name TEXT;
 ALTER TABLE gdx_cache ADD COLUMN IF NOT EXISTS package_name     TEXT;
@@ -26,8 +26,8 @@ CREATE INDEX IF NOT EXISTS gdx_cache_cached_at_idx
   ON gdx_cache (cached_at DESC);
 
 -- 3. Index on destination_slug for filtered queries
-CREATE INDEX IF NOT EXISTS gdx_cache_destination_slug_idx
-  ON gdx_cache (destination_slug);
+CREATE INDEX IF NOT EXISTS gdx_cache_slug_idx
+  ON gdx_cache (slug);
 
 -- 4. Enable Row Level Security
 ALTER TABLE gdx_cache ENABLE ROW LEVEL SECURITY;

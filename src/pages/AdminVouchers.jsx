@@ -204,9 +204,9 @@ export default function AdminVouchers() {
     Promise.all([
       supabase
         .from("gdx_cache")
-        .select("gdx, lead_name, destination_slug, cached_at")
-        .not("destination_slug", "is", null)
-        .neq("destination_slug", "unresolved")
+        .select("gdx, lead_name, slug, cached_at")
+        .not("slug", "is", null)
+        .neq("slug", "unresolved")
         .order("cached_at", { ascending: false })
         .limit(200),
       supabase.from("vouchers").select("gdx"),
@@ -217,7 +217,7 @@ export default function AdminVouchers() {
         .map(b => ({
           gdx:       b.gdx,
           lead_name: b.lead_name,
-          destSlug:  b.destination_slug,
+          destSlug:  b.slug,
           cached_at: b.cached_at,
         }));
       setPendingList(list);
