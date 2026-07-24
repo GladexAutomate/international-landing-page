@@ -62,10 +62,11 @@ export async function getCachedGdx(gdx) {
     // Smart check: if the Supabase booking row has a last_modified newer than
     // the cache entry, re-fetch to pick up booking updates.
     try {
+      const gdxForms = [String(gdx), `GDX-${gdx}`, `gdx-${gdx}`, `GDX${gdx}`, `gdx${gdx}`];
       const { data: rawRow } = await supabase
         .from("fusioo_booking_transactions")
         .select("last_modified:data->>last_modified")
-        .eq("data->>gdx", String(gdx))
+        .in("data->>gdx", gdxForms)
         .maybeSingle();
 
       if (rawRow?.last_modified && new Date(rawRow.last_modified) > cachedAt) {
@@ -464,12 +465,12 @@ async function upsertMasterListEntry(gdx, booking, slug, isReady) {
 export async function getCacheStats() {
   let { data: cacheRows, error: cacheErr } = await supabase
     .from(TABLE)
-    .select("gdx, slug, lead_name, cached_at");
+    .select("gdx, slug, lead_name, destination_name, package_name, cached_at");
 
   if (cacheErr) {
     ({ data: cacheRows, error: cacheErr } = await supabase
       .from(TABLE)
-      .select("gdx, slug, cached_at"));
+      .select("gdx, slug, destination_name, package_name, cached_at"));
   }
 
   if (cacheErr) throw cacheErr;
@@ -538,7 +539,7 @@ export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), o
   ] = await Promise.all([
     supabase
       .from("fusioo_booking_transactions")
-      .select("data")
+      .select("id, data")
       .not("data->destination", "is", null),   // domestic bookings use domestic_voucher_destination, not this field
     supabase
       .from(TABLE)
@@ -554,7 +555,7 @@ export async function bulkCacheAllBookings(onProgress, readySlugs = new Set(), o
     Array.isArray(v) ? v.filter((x) => typeof x === "string").join(" ") : v;
   const allBookings = (rawRows ?? []).map((row) => ({
     gdx:              row.data.gdx,
-    record_id:        row.data.id,
+    record_id:        row.id || row.data.id,
     lead_name:        row.data.lead_name,
     destination:      row.data.destination,
     transaction_type: arrToStr(row.data.transaction_type),

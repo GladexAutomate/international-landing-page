@@ -44,10 +44,11 @@ async function lookupBookingIntl(gdx) {
   if (!supabase) return null;
   const clean = String(gdx).trim();
 
+  const gdxForms = [clean, `GDX-${clean}`, `gdx-${clean}`, `GDX${clean}`, `gdx${clean}`];
   const { data: fusioo } = await supabase
     .from("fusioo_booking_transactions")
     .select("data")
-    .eq("data->>gdx", clean)
+    .in("data->>gdx", gdxForms)
     .order("synced_at", { ascending: false })
     .limit(1)
     .maybeSingle();
