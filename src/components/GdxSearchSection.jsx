@@ -457,11 +457,15 @@ export default function GdxSearchSection() {
       }
 
       // ── 2. Supabase lookup ────────────────────────────────────────────────
+      // Try all stored forms of the GDX: "22433", "GDX-22433", "GDX22433", etc.
+      // Newer Fusioo webhook payloads store the prefix form ("GDX-22433"); older
+      // records and the legacy table use the bare number. Use .in() to catch all.
+      const gdxForms = [query, `GDX-${query}`, `gdx-${query}`, `GDX${query}`, `gdx${query}`];
       console.log("[GDX] Cache miss — querying Supabase:", query);
       const { data, error: supaError } = await supabase
         .from("fusioo_booking_transactions")
         .select("*")
-        .eq("data->>gdx", query)
+        .in("data->>gdx", gdxForms)
         .order("synced_at", { ascending: false })
         .limit(1);
 
@@ -510,7 +514,9 @@ export default function GdxSearchSection() {
         const row = data[0].data;
         rawBooking = {
           ...row,
-          record_id:               row.id,
+          // data[0].id is the Supabase `id` column = Fusioo record ID (authoritative).
+          // row.id is the JSONB's own id field — same value but less reliable as a fallback.
+          record_id:               data[0].id || row.id,
           type_of_package:         arrToStr(row.type_of_package),
           transaction_type:        arrToStr(row.transaction_type),
           collective_package_name: arrToStr(row.collective_package_name),
