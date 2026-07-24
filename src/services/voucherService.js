@@ -1,5 +1,11 @@
 // @ts-nocheck
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
+// Vouchers live in the dedicated reviews/vouchers database (flight-emails Supabase project)
+const supabase = createClient(
+  "https://bhgmghwhwoltbbzbooxg.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoZ21naHdod29sdGJiemJvb3hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDAzMjgsImV4cCI6MjA5ODkxNjMyOH0.Zctvjd3d4MzdlkROKvxseIVnIUm1nj_6fPkm94GipTk"
+);
 
 const BUCKET = "vouchers";
 const TABLE  = "vouchers";
